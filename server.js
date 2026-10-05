@@ -900,11 +900,17 @@ app.delete('/api/teachers/:id', authenticateToken, requireRole(['admin']), async
 // -------------------------------------------------------------
 // Teacher Portal Specific Endpoint
 // -------------------------------------------------------------
-app.get('/api/teacher/my-class', authenticateToken, requireRole(['teacher']), async (req, res) => {
+app.get('/api/teacher/my-class', authenticateToken, requireRole(['teacher', 'admin']), async (req, res) => {
   try {
     // --- AWS DYNAMODB FLOW ---
     if (USE_AWS) {
-      const teacher = await dynamoService.getTeacherByUserId(req.user.id);
+      let teacher;
+      if (req.user.role === 'admin') {
+        const teachers = await dynamoService.getTeachers();
+        teacher = teachers[0] || { id: 'admin-preview', name: 'Dr. Ananya Nair (Admin Preview)', class: 10, subject: 'Physics' };
+      } else {
+        teacher = await dynamoService.getTeacherByUserId(req.user.id);
+      }
       if (!teacher) return res.status(404).json({ error: 'Teacher record not found' });
 
       const students = await dynamoService.getStudentsByClass(teacher.class);
@@ -921,7 +927,12 @@ app.get('/api/teacher/my-class', authenticateToken, requireRole(['teacher']), as
 
     // --- LOCAL SQLITE FLOW ---
     if (!db) return res.status(500).json({ error: 'Database not initialized' });
-    const teacher = db.prepare('SELECT * FROM teachers WHERE user_id = ?').get(req.user.id);
+    let teacher;
+    if (req.user.role === 'admin') {
+      teacher = db.prepare('SELECT * FROM teachers LIMIT 1').get() || { id: 1, name: 'Admin Faculty Preview', class: 10, subject: 'Physics' };
+    } else {
+      teacher = db.prepare('SELECT * FROM teachers WHERE user_id = ?').get(req.user.id);
+    }
     if (!teacher) {
       return res.status(404).json({ error: 'Teacher record not found' });
     }
@@ -952,11 +963,17 @@ app.get('/api/teacher/my-class', authenticateToken, requireRole(['teacher']), as
 // -------------------------------------------------------------
 // Student Portal Specific Endpoint
 // -------------------------------------------------------------
-app.get('/api/student/my-profile', authenticateToken, requireRole(['student']), async (req, res) => {
+app.get('/api/student/my-profile', authenticateToken, requireRole(['student', 'admin']), async (req, res) => {
   try {
     // --- AWS DYNAMODB FLOW ---
     if (USE_AWS) {
-      const student = await dynamoService.getStudentByUserId(req.user.id);
+      let student;
+      if (req.user.role === 'admin') {
+        const students = await dynamoService.getStudents();
+        student = students[0] || { id: 'admin-preview', name: 'Diya Pillai (Admin Preview)', class: 10, div: 'A', admission_no: 'ADM-1001', username: 'diya10a' };
+      } else {
+        student = await dynamoService.getStudentByUserId(req.user.id);
+      }
       if (!student) return res.status(404).json({ error: 'Student record not found' });
 
       const teachers = await dynamoService.getTeachersByClass(student.class);
@@ -972,12 +989,22 @@ app.get('/api/student/my-profile', authenticateToken, requireRole(['student']), 
 
     // --- LOCAL SQLITE FLOW ---
     if (!db) return res.status(500).json({ error: 'Database not initialized' });
-    const student = db.prepare(`
-      SELECT s.*, u.username 
-      FROM students s
-      JOIN users u ON s.user_id = u.id
-      WHERE s.user_id = ?
-    `).get(req.user.id);
+    let student;
+    if (req.user.role === 'admin') {
+      student = db.prepare(`
+        SELECT s.*, u.username 
+        FROM students s
+        JOIN users u ON s.user_id = u.id
+        LIMIT 1
+      `).get() || { id: 1, name: 'Admin Preview Student', class: 10, div: 'A', admission_no: 'ADM-1001', username: 'admin' };
+    } else {
+      student = db.prepare(`
+        SELECT s.*, u.username 
+        FROM students s
+        JOIN users u ON s.user_id = u.id
+        WHERE s.user_id = ?
+      `).get(req.user.id);
+    }
 
     if (!student) {
       return res.status(404).json({ error: 'Student record not found' });

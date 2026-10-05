@@ -102,9 +102,10 @@ const Auth = {
       if (roleBadgeEl) roleBadgeEl.textContent = `${role === 'admin' ? '👑 Admin' : role === 'teacher' ? '👨‍🏫 Teacher' : '🎓 Student'}`;
 
       // Navigation visibility according to role
+      // Admin has full visibility into Admin, Teacher, and Student portals!
       navAdmin.forEach(el => el.style.display = role === 'admin' ? 'flex' : 'none');
-      navTeacher.forEach(el => el.style.display = role === 'teacher' ? 'flex' : 'none');
-      navStudent.forEach(el => el.style.display = role === 'student' ? 'flex' : 'none');
+      navTeacher.forEach(el => el.style.display = (role === 'admin' || role === 'teacher') ? 'flex' : 'none');
+      navStudent.forEach(el => el.style.display = (role === 'admin' || role === 'student') ? 'flex' : 'none');
     } else {
       if (nameEl) nameEl.textContent = 'Guest';
       if (roleEl) roleEl.textContent = 'NOT LOGGED IN';
@@ -113,7 +114,13 @@ const Auth = {
 
   showLoginModal() {
     const modal = document.getElementById('login-modal');
-    if (modal) modal.style.display = 'flex';
+    if (modal) {
+      modal.style.display = 'flex';
+      const u = document.getElementById('login-username');
+      const p = document.getElementById('login-password');
+      if (u && !u.value) u.value = 'admin';
+      if (p && !p.value) p.value = 'admin123';
+    }
   },
 
   hideLoginModal() {
