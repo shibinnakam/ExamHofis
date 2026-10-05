@@ -1,0 +1,10 @@
+# ExamHofis Netlify Configuration
+
+[build]
+  publish = "public"
+
+# SPA fallback rule
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

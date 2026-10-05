@@ -1,0 +1,165 @@
+service: examhofis-api
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ${opt:region, 'ap-south-1'}
+  stage: ${opt:stage, 'dev'}
+  environment:
+    USE_AWS: 'true'
+    DYNAMODB_TABLE_USERS: ${self:custom.tables.users}
+    DYNAMODB_TABLE_STUDENTS: ${self:custom.tables.students}
+    DYNAMODB_TABLE_TEACHERS: ${self:custom.tables.teachers}
+    COGNITO_USER_POOL_ID: !Ref ExamHofisUserPool
+    COGNITO_CLIENT_ID: !Ref ExamHofisUserPoolClient
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:*
+          Resource:
+            - !GetAtt UsersTable.Arn
+            - !Sub "${UsersTable.Arn}/index/*"
+            - !GetAtt StudentsTable.Arn
+            - !Sub "${StudentsTable.Arn}/index/*"
+            - !GetAtt TeachersTable.Arn
+            - !Sub "${TeachersTable.Arn}/index/*"
+        - Effect: Allow
+          Action:
+            - cognito-idp:*
+          Resource: !GetAtt ExamHofisUserPool.Arn
+
+custom:
+  tables:
+    users: ExamHofis_Users_${self:provider.stage}
+    students: ExamHofis_Students_${self:provider.stage}
+    teachers: ExamHofis_Teachers_${self:provider.stage}
+
+functions:
+  api:
+    handler: lambda/handler.handler
+    events:
+      - httpApi: '*'
+
+resources:
+  Resources:
+    ExamHofisUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ExamHofis-Users-${self:provider.stage}
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 6
+            RequireLowercase: false
+            RequireNumbers: false
+            RequireSymbols: false
+            RequireUppercase: false
+
+    ExamHofisUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: ExamHofis-WebClient-${self:provider.stage}
+        UserPoolId: !Ref ExamHofisUserPool
+        GenerateSecret: false
+        ExplicitAuthFlows:
+          - ALLOW_ADMIN_USER_PASSWORD_AUTH
+          - ALLOW_USER_PASSWORD_AUTH
+          - ALLOW_REFRESH_TOKEN_AUTH
+
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tables.users}
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: username
+            AttributeType: S
+        GlobalSecondaryIndexes:
+          - IndexName: UsernameIndex
+            KeySchema:
+              - AttributeName: username
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    StudentsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tables.students}
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: class
+            AttributeType: N
+          - AttributeName: admission_no
+            AttributeType: S
+          - AttributeName: user_id
+            AttributeType: S
+        GlobalSecondaryIndexes:
+          - IndexName: ClassIndex
+            KeySchema:
+              - AttributeName: class
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: AdmissionNoIndex
+            KeySchema:
+              - AttributeName: admission_no
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: UserIdIndex
+            KeySchema:
+              - AttributeName: user_id
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    TeachersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tables.teachers}
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: class
+            AttributeType: N
+          - AttributeName: subject
+            AttributeType: S
+          - AttributeName: user_id
+            AttributeType: S
+        GlobalSecondaryIndexes:
+          - IndexName: ClassIndex
+            KeySchema:
+              - AttributeName: class
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: SubjectIndex
+            KeySchema:
+              - AttributeName: subject
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: UserIdIndex
+            KeySchema:
+              - AttributeName: user_id
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL

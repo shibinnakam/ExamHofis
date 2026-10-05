@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Holy Family International School - Official Portal & Examination System</title>
+  <meta name="description" content="Welcome to Holy Family International School (HFIS). Academic brilliance and character formation from Classes 1 to 10.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/homepage.css">
+  <link rel="stylesheet" href="css/id-card.css">
+</head>
+<body>
+
+  <!-- ===================================================================== -->
+  <!-- 1. HOLY FAMILY INTERNATIONAL SCHOOL - PUBLIC HOMEPAGE (DEFAULT VIEW) -->
+  <!-- ===================================================================== -->
+  <div id="view-homepage" class="school-home-view">
+    <!-- School Top Navigation Bar -->
+    <header class="hfis-navbar">
+      <a class="hfis-brand" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+        <img src="logo.svg" alt="Holy Family International School Crest" class="hfis-brand-logo">
+        <div class="hfis-brand-titles">
+          <h1>Holy Family International School</h1>
+          <span>Excellence in Education • Rooted in Values</span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <ul class="hfis-nav-links">
+        <li><a href="#about" class="hfis-nav-link">About Us</a></li>
+        <li><a href="#academics" class="hfis-nav-link">Academics (Class 1-10)</a></li>
+        <li><a href="#subjects" class="hfis-nav-link">Faculty & Subjects</a></li>
+        <li><a href="#campus" class="hfis-nav-link">Campus Life</a></li>
+        <li><a href="#exam-office" class="hfis-nav-link">Exam Office</a></li>
+        <li><a href="#contact" class="hfis-nav-link">Contact</a></li>
+      </ul>
+
+      <!-- Navbar Action: Portal Login Button -->
+      <div class="hfis-nav-actions">
+        <!-- Theme Toggle -->
+        <button class="icon-btn" onclick="App.toggleTheme()" title="Toggle Dark/Light Mode">🌙</button>
+
+        <!-- Login Button in Navbar -->
+        <button class="btn-portal-login" id="home-navbar-login-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+          Portal Login
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hfis-hero">
+      <div class="hfis-hero-grid">
+        <div class="hero-text-content">
+          <div class="hero-pill-badge">
+            <span>✨ Admissions Open 2026-2027</span>
+            <span>•</span>
+            <span>Classes 1 to 10</span>
+          </div>
+          
+          <h1 class="hero-headline">
+            Nurturing Excellence, Inspiring Tomorrow at <span>Holy Family International School</span>
+          </h1>
+          
+          <p class="hero-subtext">
+            Welcome to Holy Family International School (HFIS), where tradition meets innovation. We provide a world-class academic environment, state-of-the-art laboratories, and a values-driven education designed to empower students from Class 1 through Class 10.
+          </p>
+
+          <div class="hero-cta-group">
+            <button class="btn btn-primary" style="padding: 14px 28px; font-size: 1rem;" onclick="Auth.showLoginModal()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+              Access Academic Portal
+            </button>
+            <a href="#academics" class="btn btn-secondary" style="padding: 14px 24px; font-size: 1rem;">
+              Explore Curriculum
+            </a>
+          </div>
+
+          <div style="display:flex; gap:28px; margin-top:36px; padding-top:24px; border-top: 1px solid var(--border-color);">
+            <div>
+              <div style="font-size:1.6rem; font-weight:800; color:var(--primary);">100%</div>
+              <div style="font-size:0.78rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Academic Pass Rate</div>
+            </div>
+            <div>
+              <div style="font-size:1.6rem; font-weight:800; color:#06b6d4;">Classes 1-10</div>
+              <div style="font-size:0.78rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Standardized Roster</div>
+            </div>
+            <div>
+              <div style="font-size:1.6rem; font-weight:800; color:#10b981;">7+ Disciplines</div>
+              <div style="font-size:0.78rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Specialized Faculty</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-image-wrapper">
+          <img src="images/campus.jpg" alt="Holy Family International School Campus Building">
+          <div class="hero-floating-card">
+            <div style="width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,#1e3a8a,#2563eb); display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.2rem;">
+              🏛️
+            </div>
+            <div>
+              <div style="font-size:0.9rem; font-weight:800; color:var(--text-main);">Main Campus & Exam Office</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Smart Classrooms • Science Labs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Academics Section: Classes 1 to 10 -->
+    <section id="academics" class="home-section">
+      <div class="section-header">
+        <span class="badge badge-class" style="margin-bottom: 8px;">Academic Hierarchy</span>
+        <h2>Structured Education: Classes 1 to 10</h2>
+        <p>Our progressive academic roadmap fosters foundational literacy and numeracy in primary grades progressing to rigorous scientific inquiry and analytical prowess in senior school.</p>
+      </div>
+
+      <div class="classes-showcase">
+        <h3 style="text-align:center; font-size:1.15rem; font-weight:700; color:var(--text-main);">Select a Grade Level to Explore</h3>
+        <div class="classes-pills-row">
+          <div class="class-card-item" onclick="Auth.showLoginModal()">
+            <div class="num">01</div>
+            <div class="label">Class 1</div>
+          </div>
+          <div class="class-card-item" onclick="Auth.showLoginModal()">
+            <div class="num">02</div>
+            <div class="label">Class 2</div>
+          </div>
+          <div class="class-card-item" onclick="Auth.showLoginModal()">
+            <div class="num">03</div>
+            <div class="label">Class 3</div>
+          </div>
+          <div class="class-card-item" onclick="Auth.showLoginModal()">
+            <div class="num">04</div>
+            <div class="label">Class 4</div>
+          </div>
+          <div class="class-card-item" onclick="Auth.showLoginModal()">
+            <div class="num">05</div>
+            <div class="label">Class 5</div>
+          </div>
+          <div class="class-card-item" onclick="Auth.showLoginModal()">
+            <div class="num">06</div>
+            <div class="label">Class 6</div>
+          </div>
+          <div class="class-card-item" onclick="Auth.showLoginModal()">
+            <div class="num">07</div>
+            <div class="label">Class 7</div>
+          </div>
+          <div class="class-card-item" onclick="Auth.showLoginModal()">
+            <div class="num">08</div>
+            <div class="label">Class 8</div>
+          </div>
+          <div class="class-card-item" onclick="Auth.showLoginModal()">
+            <div class="num">09</div>
+            <div class="label">Class 9</div>
+          </div>
+          <div class="class-card-item" onclick="Auth.showLoginModal()" style="border-color:var(--primary); background:var(--primary-light);">
+            <div class="num" style="color:var(--primary);">10</div>
+            <div class="label" style="color:var(--primary); font-weight:800;">Class 10</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Subjects & Faculty Specializations -->
+    <section id="subjects" class="home-section" style="padding-top: 0;">
+      <div class="section-header">
+        <span class="badge badge-subject" style="margin-bottom: 8px;">Core Curriculum</span>
+        <h2>Specialized Academic Departments</h2>
+        <p>Expert subject educators guiding students with modern pedagogy, hands-on laboratory experiences, and bilingual linguistic development.</p>
+      </div>
+
+      <div class="subjects-showcase-grid">
+        <div class="subject-item-card">
+          <div class="subject-icon-box" style="background:#eef2ff; color:#4f46e5;">📖</div>
+          <div class="subject-info-box">
+            <h4>English Language & Literature</h4>
+            <p>Comprehensive communicative mastery, creative composition, global literature, and public speaking skills.</p>
+          </div>
+        </div>
+
+        <div class="subject-item-card">
+          <div class="subject-icon-box" style="background:#ecfeff; color:#0891b2;">🌴</div>
+          <div class="subject-info-box">
+            <h4>Malayalam (First Language)</h4>
+            <p>Rooted in cultural heritage, classical poetry, Kerala prose, linguistic syntax, and communicative fluency.</p>
+          </div>
+        </div>
+
+        <div class="subject-item-card">
+          <div class="subject-icon-box" style="background:#fef3c7; color:#d97706;">📐</div>
+          <div class="subject-info-box">
+            <h4>Mathematics</h4>
+            <p>Analytical problem solving, geometry, algebraic reasoning, and data interpretation with practical application.</p>
+          </div>
+        </div>
+
+        <div class="subject-item-card">
+          <div class="subject-icon-box" style="background:#ede9fe; color:#7c3aed;">⚛️</div>
+          <div class="subject-info-box">
+            <h4>Physics</h4>
+            <p>Classical mechanics, optics, thermodynamics, electricity, and experimental physics in dedicated laboratories.</p>
+          </div>
+        </div>
+
+        <div class="subject-item-card">
+          <div class="subject-icon-box" style="background:#fce7f3; color:#db2777;">🧪</div>
+          <div class="subject-info-box">
+            <h4>Chemistry</h4>
+            <p>Atomic theory, organic chemistry, reaction kinetics, and guided laboratory experiments with safety standards.</p>
+          </div>
+        </div>
+
+        <div class="subject-item-card">
+          <div class="subject-icon-box" style="background:#d1fae5; color:#059669;">🧬</div>
+          <div class="subject-info-box">
+            <h4>Biology</h4>
+            <p>Cellular biology, human physiology, genetics, ecology, botany, and interactive microscopy sessions.</p>
+          </div>
+        </div>
+
+        <div class="subject-item-card">
+          <div class="subject-icon-box" style="background:#e0f2fe; color:#0284c7;">🔬</div>
+          <div class="subject-info-box">
+            <h4>General Science</h4>
+            <p>Integrated foundations of discovery, empirical methodology, environmental studies, and scientific ethics.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Campus Pillars -->
+    <section id="campus" class="home-section" style="padding-top: 0;">
+      <div class="section-header">
+        <span class="badge badge-adm" style="margin-bottom: 8px;">The HFIS Advantage</span>
+        <h2>Why Holy Family International School?</h2>
+        <p>A holistic campus environment where academic curiosity, character, and lifelong values are nurtured simultaneously.</p>
+      </div>
+
+      <div class="pillars-grid">
+        <div class="pillar-card">
+          <div class="pillar-icon">🏫</div>
+          <h3>Modern Infrastructure</h3>
+          <p>Spacious, naturally illuminated smart classrooms equipped with interactive displays, ergonomic seating, and campus-wide safety.</p>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-icon" style="background:var(--secondary-light); color:var(--secondary);">🔬</div>
+          <h3>Advanced Science Labs</h3>
+          <p>Individual working stations for Physics, Chemistry, and Biology facilitating deep experiential understanding.</p>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-icon" style="background:var(--success-light); color:var(--success);">💻</div>
+          <h3>Digital Exam & Portal Office</h3>
+          <p>Instant student credential access, digital photo identity badges, and teacher class rosters managed in real-time.</p>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-icon" style="background:var(--accent-light); color:#b45309;">⚽</div>
+          <h3>Sports & Holistic Arts</h3>
+          <p>Expansive athletic tracks, football courts, badminton arenas, and vibrant cultural celebrations fostering team spirit.</p>
+        </div>
+      </div>
+
+      <!-- Principal's Address Banner -->
+      <div class="principal-banner">
+        <img src="/avatars/student1.svg" class="principal-avatar" alt="HFIS Principal">
+        <div class="principal-text">
+          <h3>"Educating the Mind without Educating the Heart is No Education at All"</h3>
+          <p>At Holy Family International School, our primary dedication is to shape empathetic, critical-thinking global citizens. Every child is known, celebrated, and guided toward the pinnacle of their potential through personal mentorship and academic discipline.</p>
+          <div class="sign">Fr. Principal, Holy Family International School</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Exam Office & Portal Announcement -->
+    <section id="exam-office" class="home-section" style="padding-top: 0;">
+      <div class="card" style="background: radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.1), transparent 50%), var(--bg-card); padding: 40px; border-color: var(--primary-glow);">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px;">
+          <div style="max-width: 650px;">
+            <span class="badge badge-class" style="margin-bottom: 12px;">ExamHofis Academic Portal</span>
+            <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 10px;">Official Examination & Student Portal</h2>
+            <p style="color: var(--text-muted); line-height: 1.6;">
+              Administrators, teachers, and enrolled students can sign in to manage enrollment rosters, view personal Student ID Cards, verify class schedules, and monitor student academic records.
+            </p>
+          </div>
+          <div>
+            <button class="btn btn-primary" style="padding: 14px 28px; font-size: 1rem;" onclick="Auth.showLoginModal()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+              Open Exam Office Portal
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact" class="hfis-footer">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+            <img src="logo.svg" alt="HFIS Crest" style="width:40px; height:40px;">
+            <h3 style="font-size:1.2rem; font-weight:800; color:#ffffff;">Holy Family International School</h3>
+          </div>
+          <p>
+            Nurturing academic excellence, moral integrity, and social commitment in students from Class 1 through Class 10.
+          </p>
+          <p style="margin-top: 12px; font-size: 0.85rem; color: #cbd5e1;">
+            📍 Holy Family Campus, Educational Boulevard<br>
+            📞 +91 484 2500 800 | 📧 contact@holyfamilyis.edu.in
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Academics</h4>
+          <ul>
+            <li><a href="#academics">Primary School (1 - 5)</a></li>
+            <li><a href="#academics">Middle School (6 - 8)</a></li>
+            <li><a href="#academics">Secondary School (9 - 10)</a></li>
+            <li><a href="#subjects">Subject Curriculum</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Portal Links</h4>
+          <ul>
+            <li><a onclick="Auth.showLoginModal()" style="cursor:pointer;">Admin Console</a></li>
+            <li><a onclick="Auth.showLoginModal()" style="cursor:pointer;">Teacher Classroom Hub</a></li>
+            <li><a onclick="Auth.showLoginModal()" style="cursor:pointer;">Student ID & Profile</a></li>
+            <li><a onclick="App.quickLogin('admin')" style="cursor:pointer; color:#60a5fa;">Quick Admin Demo</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Exam Office Hours</h4>
+          <p>Monday - Friday: 8:00 AM - 4:30 PM<br>Saturday: 8:30 AM - 1:00 PM</p>
+          <div style="margin-top: 16px;">
+            <button class="btn btn-sm btn-secondary" onclick="Auth.showLoginModal()">Login to Exam Office</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 Holy Family International School (HFIS). All Rights Reserved.</div>
+        <div>Motto: Excellence in Education, Rooted in Values</div>
+      </div>
+    </footer>
+  </div>
+
+
+  <!-- ===================================================================== -->
+  <!-- 2. PORTAL SYSTEM (ADMIN, TEACHER, STUDENT) - DISPLAYED ON LOGIN -->
+  <!-- ===================================================================== -->
+  <div id="view-portal" class="app-container" style="display: none;">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-badge">
+          <img src="logo.svg" alt="HFIS Crest">
+        </div>
+        <div class="brand-text">
+          <h1>Holy Family IS</h1>
+          <span>Academic Portal</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <!-- Switch Back to School Website Button -->
+        <button class="nav-link" onclick="App.showHomePage()" style="background:var(--bg-subtle); color:var(--primary); font-weight:700; margin-bottom:8px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+          🌐 School Website (Home)
+        </button>
+
+        <!-- Admin Links -->
+        <div class="nav-section-title nav-role-admin">Admin Portal</div>
+        <button class="nav-link active nav-role-admin" data-tab="dashboard" id="nav-btn-dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Dashboard
+        </button>
+        <button class="nav-link nav-role-admin" data-tab="students" id="nav-btn-students">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          Students Management
+        </button>
+        <button class="nav-link nav-role-admin" data-tab="teachers" id="nav-btn-teachers">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          Teachers Management
+        </button>
+
+        <!-- Teacher Portal Links -->
+        <div class="nav-section-title nav-role-teacher" style="display:none;">Teacher Faculty</div>
+        <button class="nav-link nav-role-teacher" data-tab="teacher-portal" id="nav-btn-teacher-portal" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          My Classroom & Roster
+        </button>
+
+        <!-- Student Portal Links -->
+        <div class="nav-section-title nav-role-student" style="display:none;">Student Space</div>
+        <button class="nav-link nav-role-student" data-tab="student-portal" id="nav-btn-student-portal" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><line x1="7" y1="8" x2="17" y2="8"></line><line x1="7" y1="12" x2="11" y2="12"></line><circle cx="15" cy="12" r="1"></circle></svg>
+          My Profile & ID Card
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-quick-profile">
+          <img src="/logo.svg" id="sidebar-user-avatar" class="user-avatar-sm" alt="User avatar">
+          <div class="user-info-text">
+            <div class="name" id="sidebar-user-name">Administrator</div>
+            <span class="role-badge" id="sidebar-user-role">ADMIN</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+      <!-- Top Navigation Bar inside Portal -->
+      <header class="top-navbar">
+        <div class="top-nav-left">
+          <button class="mobile-menu-btn" id="mobile-menu-toggle" aria-label="Toggle menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          <div class="top-nav-title">
+            <h2 id="top-page-title">Admin Overview & Metrics</h2>
+            <p id="top-page-desc">Holy Family International School Management</p>
+          </div>
+        </div>
+
+        <div class="top-nav-right">
+          <!-- AWS Cloud Architecture Indicator -->
+          <div id="aws-cloud-badge" class="badge" style="background: rgba(255, 153, 0, 0.12); color: #ff9900; border: 1px solid rgba(255, 153, 0, 0.35); font-size: 0.76rem; padding: 4px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; cursor: help;" title="AWS Serverless Stack: Cognito (Auth), Lambda (Handlers), DynamoDB (Data)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
+            <span id="aws-status-text">AWS Serverless</span>
+          </div>
+
+          <!-- Back to School Website Button -->
+          <button class="btn btn-sm btn-secondary" onclick="App.showHomePage()" title="View Public School Website">
+            🌐 School Home
+          </button>
+
+          <!-- Role Switcher Shortcuts for fast testing -->
+          <div class="demo-role-selector" title="Switch between Demo Accounts">
+            <button class="demo-pill" onclick="App.quickLogin('admin')" title="Switch to Admin">Admin</button>
+            <button class="demo-pill" onclick="App.quickLogin('teacher')" title="Switch to Teacher">Teacher</button>
+            <button class="demo-pill" onclick="App.quickLogin('student')" title="Switch to Student">Student</button>
+          </div>
+
+          <!-- Theme Toggle -->
+          <button class="icon-btn" id="theme-toggle-btn" title="Toggle theme">🌙</button>
+
+          <!-- Logout Button -->
+          <button class="btn-logout" id="logout-btn" onclick="Auth.logout()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            Logout
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <main class="content-area">
+        
+        <!-- ============================================================== -->
+        <!-- TAB 1: ADMIN DASHBOARD -->
+        <!-- ============================================================== -->
+        <section id="tab-dashboard" class="tab-content">
+          <!-- Top Stats Cards -->
+          <div class="stats-grid">
+            <div class="stat-card" style="--stat-accent: #4f46e5; --stat-bg: #eef2ff;">
+              <div class="stat-info">
+                <div class="title">Total Enrolled Students</div>
+                <div class="value" id="stat-total-students">0</div>
+                <div class="subtext">Across Classes 1 to 10</div>
+              </div>
+              <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              </div>
+            </div>
+
+            <div class="stat-card" style="--stat-accent: #06b6d4; --stat-bg: #ecfeff;">
+              <div class="stat-info">
+                <div class="title">Active Faculty / Teachers</div>
+                <div class="value" id="stat-total-teachers">0</div>
+                <div class="subtext">Specialized Subject Mentors</div>
+              </div>
+              <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              </div>
+            </div>
+
+            <div class="stat-card" style="--stat-accent: #10b981; --stat-bg: #d1fae5;">
+              <div class="stat-info">
+                <div class="title">Quick Add Student</div>
+                <div style="margin-top: 10px;">
+                  <button class="btn btn-sm btn-primary" onclick="Admin.openAddStudentModal()" id="btn-quick-add-student">+ New Student</button>
+                </div>
+              </div>
+              <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </div>
+            </div>
+
+            <div class="stat-card" style="--stat-accent: #f59e0b; --stat-bg: #fef3c7;">
+              <div class="stat-info">
+                <div class="title">Quick Add Teacher</div>
+                <div style="margin-top: 10px;">
+                  <button class="btn btn-sm btn-secondary" onclick="Admin.openAddTeacherModal()" id="btn-quick-add-teacher">+ New Teacher</button>
+                </div>
+              </div>
+              <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Class Distribution Section -->
+          <div class="card">
+            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 16px;">Enrollment by Class (Classes 1 - 10)</h3>
+            <div class="stats-grid" id="dashboard-class-dist" style="grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Subject Distribution Section -->
+          <div class="card">
+            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 16px;">Faculty Specialization by Subject</h3>
+            <div class="stats-grid" id="dashboard-subject-dist" style="grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Split Two Columns: Recent Students & Recent Teachers -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div class="card">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+                <h3 style="font-size: 1.1rem; font-weight: 700;">Recent Students</h3>
+                <button class="btn btn-sm btn-secondary" onclick="App.switchTab('students')">View All</button>
+              </div>
+              <div id="dashboard-recent-students">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+            <div class="card">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+                <h3 style="font-size: 1.1rem; font-weight: 700;">Recent Teachers</h3>
+                <button class="btn btn-sm btn-secondary" onclick="App.switchTab('teachers')">View All</button>
+              </div>
+              <div id="dashboard-recent-teachers">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- TAB 2: ADMIN STUDENT MANAGEMENT -->
+        <!-- ============================================================== -->
+        <section id="tab-students" class="tab-content" style="display: none;">
+          <!-- Controls Bar -->
+          <div class="controls-bar">
+            <div class="filters-group">
+              <!-- Search Input -->
+              <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="student-search-input" placeholder="Search by name, admission no, or username...">
+              </div>
+
+              <!-- Class Dropdown (1 to 10) -->
+              <select id="student-filter-class" class="custom-select" title="Filter by Class">
+                <option value="all">All Classes (1-10)</option>
+                <option value="1">Class 1</option>
+                <option value="2">Class 2</option>
+                <option value="3">Class 3</option>
+                <option value="4">Class 4</option>
+                <option value="5">Class 5</option>
+                <option value="6">Class 6</option>
+                <option value="7">Class 7</option>
+                <option value="8">Class 8</option>
+                <option value="9">Class 9</option>
+                <option value="10">Class 10</option>
+              </select>
+
+              <!-- Division Dropdown -->
+              <select id="student-filter-div" class="custom-select" title="Filter by Division">
+                <option value="all">All Divisions</option>
+                <option value="A">Division A</option>
+                <option value="B">Division B</option>
+                <option value="C">Division C</option>
+                <option value="D">Division D</option>
+                <option value="E">Division E</option>
+              </select>
+            </div>
+
+            <div class="actions-group">
+              <span class="badge badge-adm" id="students-count-badge">0 Students</span>
+
+              <!-- Table / Cards View Mode Switcher -->
+              <div class="view-mode-toggle">
+                <button class="view-btn active" id="students-view-table-btn" onclick="App.toggleViewMode('students', 'table')" title="Table View">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                </button>
+                <button class="view-btn" id="students-view-cards-btn" onclick="App.toggleViewMode('students', 'cards')" title="Cards View">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                </button>
+              </div>
+
+              <!-- Add Student Button -->
+              <button class="btn btn-primary" onclick="Admin.openAddStudentModal()" id="btn-add-student-main">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add Student
+              </button>
+            </div>
+          </div>
+
+          <!-- Students Table View -->
+          <div class="table-container" id="students-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Student Info & Photo</th>
+                  <th>Admission No</th>
+                  <th>Class</th>
+                  <th>Division</th>
+                  <th>Login Credentials</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="students-table-body">
+                <!-- Dynamically loaded rows -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Students Cards Grid View -->
+          <div class="cards-grid" id="students-cards-container" style="display: none;">
+            <!-- Dynamically loaded cards -->
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- TAB 3: ADMIN TEACHER MANAGEMENT -->
+        <!-- ============================================================== -->
+        <section id="tab-teachers" class="tab-content" style="display: none;">
+          <!-- Controls Bar -->
+          <div class="controls-bar">
+            <div class="filters-group">
+              <!-- Search Input -->
+              <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="teacher-search-input" placeholder="Search by teacher name or username...">
+              </div>
+
+              <!-- Class Dropdown (1 to 10) -->
+              <select id="teacher-filter-class" class="custom-select" title="Filter by Class">
+                <option value="all">All Classes (1-10)</option>
+                <option value="1">Class 1</option>
+                <option value="2">Class 2</option>
+                <option value="3">Class 3</option>
+                <option value="4">Class 4</option>
+                <option value="5">Class 5</option>
+                <option value="6">Class 6</option>
+                <option value="7">Class 7</option>
+                <option value="8">Class 8</option>
+                <option value="9">Class 9</option>
+                <option value="10">Class 10</option>
+              </select>
+
+              <!-- Subject Dropdown strictly as specified -->
+              <select id="teacher-filter-subject" class="custom-select" title="Filter by Subject">
+                <option value="all">All Subjects</option>
+                <option value="english">English</option>
+                <option value="malayalam">Malayalam</option>
+                <option value="chemistry">Chemistry</option>
+                <option value="physics">Physics</option>
+                <option value="biology">Biology</option>
+                <option value="science">Science</option>
+                <option value="maths">Maths</option>
+              </select>
+            </div>
+
+            <div class="actions-group">
+              <span class="badge badge-adm" id="teachers-count-badge">0 Teachers</span>
+
+              <!-- Table / Cards View Mode Switcher -->
+              <div class="view-mode-toggle">
+                <button class="view-btn active" id="teachers-view-table-btn" onclick="App.toggleViewMode('teachers', 'table')" title="Table View">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                </button>
+                <button class="view-btn" id="teachers-view-cards-btn" onclick="App.toggleViewMode('teachers', 'cards')" title="Cards View">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                </button>
+              </div>
+
+              <!-- Add Teacher Button -->
+              <button class="btn btn-primary" onclick="Admin.openAddTeacherModal()" id="btn-add-teacher-main">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add Teacher
+              </button>
+            </div>
+          </div>
+
+          <!-- Teachers Table View -->
+          <div class="table-container" id="teachers-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Teacher Name & Username</th>
+                  <th>Assigned Class</th>
+                  <th>Assigned Subject</th>
+                  <th>Credentials</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="teachers-table-body">
+                <!-- Dynamically loaded rows -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Teachers Cards Grid View -->
+          <div class="cards-grid" id="teachers-cards-container" style="display: none;">
+            <!-- Dynamically loaded cards -->
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- TAB 4: TEACHER PORTAL -->
+        <!-- ============================================================== -->
+        <section id="tab-teacher-portal" class="tab-content" style="display: none;">
+          <div class="card" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(6, 182, 212, 0.08)); border-color: var(--primary-glow);">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+              <div>
+                <span class="badge badge-class" style="margin-bottom: 8px;">Faculty Classroom Portal</span>
+                <h2 id="teacher-profile-name" style="font-size: 1.6rem; font-weight: 800;">Teacher Name</h2>
+                <div style="display: flex; gap: 10px; margin-top: 6px;">
+                  <span class="badge badge-class" id="teacher-assigned-class">Class 10</span>
+                  <span class="badge badge-subject" id="teacher-assigned-subject">Physics</span>
+                  <span class="badge badge-adm" id="teacher-student-count">0 Students</span>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <p style="font-size: 0.82rem; color: var(--text-muted);">Current Academic Term</p>
+                <h4 style="font-weight: 700;">2026-2027 Session</h4>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+            <!-- Class Students Roster -->
+            <div class="card">
+              <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 16px;">Students in Your Assigned Class</h3>
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Student</th>
+                      <th>Admission No</th>
+                      <th>Division</th>
+                    </tr>
+                  </thead>
+                  <tbody id="teacher-roster-body">
+                    <!-- Dynamically populated -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Colleague Teachers -->
+            <div class="card">
+              <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 16px;">Class Faculty Colleagues</h3>
+              <div id="teacher-colleagues-list">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- TAB 5: STUDENT PORTAL -->
+        <!-- ============================================================== -->
+        <section id="tab-student-portal" class="tab-content" style="display: none;">
+          <div class="card" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(79, 70, 229, 0.08));">
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <img src="/avatars/student1.svg" id="student-profile-avatar" style="width: 72px; height: 72px; border-radius: 50%; border: 3px solid var(--primary);" alt="Student Avatar">
+              <div>
+                <span class="badge badge-adm">Enrolled Student</span>
+                <h2 id="student-profile-name" style="font-size: 1.6rem; font-weight: 800; margin-top: 4px;">Student Name</h2>
+                <p id="student-profile-class" style="color: var(--text-muted); font-weight: 600;">Class 10 - Division A</p>
+                <p id="student-profile-adm" style="font-size: 0.8rem; font-family: monospace; color: var(--primary);">Admission No: ADM-2026-001</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <!-- Digital ID Card Preview -->
+            <div class="card">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+                <h3 style="font-size: 1.15rem; font-weight: 700;">My Digital Identity Card</h3>
+                <button class="btn btn-sm btn-secondary" onclick="window.print()">🖨️ Print ID</button>
+              </div>
+              
+              <div class="id-card-wrapper">
+                <div class="school-id-card">
+                  <div class="id-card-header">
+                    <h3>Holy Family International School</h3>
+                    <p>Official Student Pass</p>
+                  </div>
+                  <div class="id-card-body">
+                    <div class="id-photo-container">
+                      <img id="portal-idcard-photo" src="/avatars/student1.svg" alt="Photo">
+                    </div>
+                    <div class="id-student-name" id="portal-idcard-name">Aarav Krishnan</div>
+                    <span class="id-badge-role">STUDENT</span>
+                    
+                    <div class="id-details-table">
+                      <div class="id-detail-row">
+                        <span class="id-detail-label">Admission No:</span>
+                        <span class="id-detail-val" id="portal-idcard-adm">ADM-2026-001</span>
+                      </div>
+                      <div class="id-detail-row">
+                        <span class="id-detail-label">Class & Div:</span>
+                        <span class="id-detail-val" id="portal-idcard-class">Class 10 - A</span>
+                      </div>
+                      <div class="id-detail-row">
+                        <span class="id-detail-label">Portal User:</span>
+                        <span class="id-detail-val" id="portal-idcard-user">aarav10a</span>
+                      </div>
+                    </div>
+
+                    <div class="id-card-footer">
+                      <div class="id-barcode" id="portal-idcard-barcode">*ADM-2026-001*</div>
+                      <div class="id-sign-box">
+                        <div class="sign-line"></div>
+                        <span>Principal</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subject Teachers List -->
+            <div>
+              <div class="card">
+                <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 16px;">Subject Faculty for My Class</h3>
+                <div class="stats-grid" id="student-teachers-list" style="grid-template-columns: 1fr;">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+
+              <div class="card">
+                <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 16px;">Division Classmates</h3>
+                <div id="student-classmates-list">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 1: ADD / EDIT STUDENT -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="student-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="student-modal-title">Add New Student</h3>
+        <button class="modal-close-btn" onclick="App.closeModal('student-modal')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <form id="student-form">
+        <input type="hidden" id="student-id-field" name="student_id">
+        <div class="modal-body">
+          <div class="form-grid">
+            <!-- Student Photo Upload with Circular Live Preview -->
+            <div class="form-full">
+              <label class="form-label">Student Photo</label>
+              <div class="photo-upload-zone" onclick="document.getElementById('student-photo-input').click()">
+                <img id="student-preview-img" src="/avatars/student1.svg" class="photo-preview-box" alt="Preview">
+                <div class="photo-upload-instructions">
+                  <div class="title">Click to upload photo</div>
+                  <div class="hint">JPG, PNG, WEBP or SVG up to 5MB</div>
+                </div>
+                <input type="file" id="student-photo-input" name="photo" accept="image/*" style="display: none;">
+              </div>
+            </div>
+
+            <!-- Full Name -->
+            <div class="form-full form-group">
+              <label class="form-label">Full Name <span class="req">*</span></label>
+              <input type="text" id="student-name" name="name" class="form-input" placeholder="e.g. Diya Pillai" required>
+            </div>
+
+            <!-- Class (Dropdown: Class 1 to 10) -->
+            <div class="form-group">
+              <label class="form-label">Class (1 - 10) <span class="req">*</span></label>
+              <select id="student-class" name="class" class="custom-select" style="width: 100%;" required>
+                <option value="1">Class 1</option>
+                <option value="2">Class 2</option>
+                <option value="3">Class 3</option>
+                <option value="4">Class 4</option>
+                <option value="5">Class 5</option>
+                <option value="6">Class 6</option>
+                <option value="7">Class 7</option>
+                <option value="8">Class 8</option>
+                <option value="9">Class 9</option>
+                <option value="10" selected>Class 10</option>
+              </select>
+            </div>
+
+            <!-- Division / Section -->
+            <div class="form-group">
+              <label class="form-label">Division / Div <span class="req">*</span></label>
+              <select id="student-div" name="div" class="custom-select" style="width: 100%;" required>
+                <option value="A" selected>A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+                <option value="E">E</option>
+              </select>
+            </div>
+
+            <!-- Admission Number -->
+            <div class="form-full form-group">
+              <label class="form-label">Admission Number <span class="req">*</span></label>
+              <div class="input-with-button">
+                <input type="text" id="student-admission-no" name="admission_no" class="form-input" placeholder="e.g. ADM-2026-105" required>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('student-admission-no').value = 'ADM-2026-' + Math.floor(100 + Math.random() * 900)">Auto</button>
+              </div>
+            </div>
+
+            <!-- Student Username -->
+            <div class="form-group">
+              <label class="form-label">Username <span class="req">*</span></label>
+              <input type="text" id="student-username" name="username" class="form-input" placeholder="e.g. diya10a" required>
+            </div>
+
+            <!-- Student Password -->
+            <div class="form-group">
+              <label class="form-label">Password <span class="req">*</span></label>
+              <div class="input-with-button">
+                <input type="password" id="student-password" name="password" class="form-input" placeholder="Password">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="App.togglePasswordVisibility('student-password', this)">👁️</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="App.generateRandomPassword('student-password')">🎲</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="App.closeModal('student-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-student">Save Student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 2: ADD / EDIT TEACHER -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="teacher-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="teacher-modal-title">Add New Teacher</h3>
+        <button class="modal-close-btn" onclick="App.closeModal('teacher-modal')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <form id="teacher-form">
+        <input type="hidden" id="teacher-id-field" name="teacher_id">
+        <div class="modal-body">
+          <div class="form-grid">
+            <!-- Full Name -->
+            <div class="form-full form-group">
+              <label class="form-label">Teacher Name <span class="req">*</span></label>
+              <input type="text" id="teacher-name" name="name" class="form-input" placeholder="e.g. Dr. Ananya Nair" required>
+            </div>
+
+            <!-- Class (Dropdown: Class 1 to 10) -->
+            <div class="form-group">
+              <label class="form-label">Assigned Class (1 - 10) <span class="req">*</span></label>
+              <select id="teacher-class" name="class" class="custom-select" style="width: 100%;" required>
+                <option value="1">Class 1</option>
+                <option value="2">Class 2</option>
+                <option value="3">Class 3</option>
+                <option value="4">Class 4</option>
+                <option value="5">Class 5</option>
+                <option value="6">Class 6</option>
+                <option value="7">Class 7</option>
+                <option value="8">Class 8</option>
+                <option value="9">Class 9</option>
+                <option value="10" selected>Class 10</option>
+              </select>
+            </div>
+
+            <!-- Subject Dropdown strictly as specified -->
+            <div class="form-group">
+              <label class="form-label">Assigned Subject <span class="req">*</span></label>
+              <select id="teacher-subject" name="subject" class="custom-select" style="width: 100%;" required>
+                <option value="English">English</option>
+                <option value="Malayalam">Malayalam</option>
+                <option value="Chemistry">Chemistry</option>
+                <option value="Physics" selected>Physics</option>
+                <option value="Biology">Biology</option>
+                <option value="Science">Science</option>
+                <option value="Maths">Maths</option>
+              </select>
+            </div>
+
+            <!-- Teacher Username -->
+            <div class="form-group">
+              <label class="form-label">Username <span class="req">*</span></label>
+              <input type="text" id="teacher-username" name="username" class="form-input" placeholder="e.g. ananya.physics" required>
+            </div>
+
+            <!-- Teacher Password -->
+            <div class="form-group">
+              <label class="form-label">Password <span class="req">*</span></label>
+              <div class="input-with-button">
+                <input type="password" id="teacher-password" name="password" class="form-input" placeholder="Password">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="App.togglePasswordVisibility('teacher-password', this)">👁️</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="App.generateRandomPassword('teacher-password')">🎲</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="App.closeModal('teacher-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-teacher">Save Teacher</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 3: VIEW & PRINT STUDENT ID CARD -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="idcard-modal">
+    <div class="modal-dialog" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3>Student Identity Card</h3>
+        <button class="modal-close-btn" onclick="App.closeModal('idcard-modal')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="modal-body" style="padding: 28px;">
+        <div class="id-card-wrapper">
+          <div class="school-id-card">
+            <div class="id-card-header">
+              <h3>Holy Family International School</h3>
+              <p>Official Student Pass</p>
+            </div>
+            <div class="id-card-body">
+              <div class="id-photo-container">
+                <img id="idcard-photo" src="/avatars/student1.svg" alt="Student Photo">
+              </div>
+              <div class="id-student-name" id="idcard-name">Student Name</div>
+              <span class="id-badge-role">STUDENT</span>
+              
+              <div class="id-details-table">
+                <div class="id-detail-row">
+                  <span class="id-detail-label">Admission No:</span>
+                  <span class="id-detail-val" id="idcard-adm">ADM-2026-001</span>
+                </div>
+                <div class="id-detail-row">
+                  <span class="id-detail-label">Class & Div:</span>
+                  <span class="id-detail-val" id="idcard-class">Class 10 - A</span>
+                </div>
+                <div class="id-detail-row">
+                  <span class="id-detail-label">Username:</span>
+                  <span class="id-detail-val" id="idcard-user">aarav10a</span>
+                </div>
+              </div>
+
+              <div class="id-card-footer">
+                <div class="id-barcode" id="idcard-barcode">*ADM-2026-001*</div>
+                <div class="id-sign-box">
+                  <div class="sign-line"></div>
+                  <span>Principal</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="App.closeModal('idcard-modal')">Close</button>
+        <button type="button" class="btn btn-primary" onclick="window.print()">🖨️ Print ID Card</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 4: VIEW CREDENTIALS -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="credentials-modal">
+    <div class="modal-dialog" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3>User Credentials</h3>
+        <button class="modal-close-btn" onclick="App.closeModal('credentials-modal')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p style="margin-bottom: 16px; color:var(--text-muted);">
+          Login credentials for <strong id="cred-modal-name" style="color:var(--text-main);">User</strong>:
+        </p>
+
+        <div style="background:var(--bg-subtle); padding:16px; border-radius:var(--radius-md); border:1px solid var(--border-color); display:flex; flex-direction:column; gap:12px;">
+          <div>
+            <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">USERNAME</div>
+            <div id="cred-modal-username" style="font-size:1.1rem; font-weight:700; font-family:monospace; color:var(--primary); margin-top:2px;">username</div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">PASSWORD</div>
+            <div id="cred-modal-password" style="font-size:1.1rem; font-weight:700; font-family:monospace; color:var(--text-main); margin-top:2px;">password</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="App.closeModal('credentials-modal')">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- LOGIN MODAL / OVERLAY -->
+  <!-- ============================================================== -->
+  <div class="login-overlay" id="login-modal" style="display: none;">
+    <div class="login-card">
+      <div style="display:flex; justify-content:flex-end; margin-top:-16px; margin-right:-12px; margin-bottom:8px;">
+        <button class="modal-close-btn" onclick="Auth.hideLoginModal()" title="Close login">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="login-brand">
+        <img src="logo.svg" alt="HFIS Logo">
+        <div>
+          <h2 style="font-size:1.4rem;">Holy Family IS</h2>
+          <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Academic & Exam Portal</span>
+        </div>
+      </div>
+      <p class="login-desc">Sign in with your credentials to access the Administrator, Teacher, or Student portal.</p>
+
+      <form id="login-form">
+        <div class="form-group" style="text-align: left; margin-bottom: 14px;">
+          <label class="form-label">Username</label>
+          <input type="text" id="login-username" class="form-input" placeholder="e.g. admin" required autocomplete="username">
+        </div>
+
+        <div class="form-group" style="text-align: left; margin-bottom: 20px;">
+          <label class="form-label">Password</label>
+          <input type="password" id="login-password" class="form-input" placeholder="Enter password" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="login-submit-btn" style="width: 100%;">Sign In</button>
+      </form>
+
+      <!-- Quick Demo Access Pills for 1-Click Login Testing -->
+      <div class="demo-account-pills">
+        <div class="title">⚡ Quick 1-Click Demo Accounts</div>
+        <button type="button" class="quick-login-btn" onclick="App.quickLogin('admin')">
+          <span>👑 Admin Console</span>
+          <span style="color:var(--text-muted); font-family:monospace;">admin / admin123</span>
+        </button>
+        <button type="button" class="quick-login-btn" onclick="App.quickLogin('teacher')">
+          <span>👨‍🏫 Teacher (Class 10 Physics)</span>
+          <span style="color:var(--text-muted); font-family:monospace;">ananya.physics / teacher123</span>
+        </button>
+        <button type="button" class="quick-login-btn" onclick="App.quickLogin('student')">
+          <span>🎓 Student (Class 10-A)</span>
+          <span style="color:var(--text-muted); font-family:monospace;">aarav10a / student123</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/teacher.js"></script>
+  <script src="js/student.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

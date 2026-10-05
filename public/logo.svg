@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="shield-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="50%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <filter id="badge-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Shield Outline -->
+  <path d="M 50 6 C 75 6, 88 16, 88 44 C 88 70, 50 94, 50 94 C 50 94, 12 70, 12 44 C 12 16, 25 6, 50 6 Z" 
+        fill="url(#shield-grad)" 
+        stroke="url(#gold-grad)" 
+        stroke-width="3"
+        filter="url(#badge-shadow)"/>
+
+  <!-- Inner Inset Shield -->
+  <path d="M 50 12 C 70 12, 82 20, 82 44 C 82 66, 50 86, 50 86 C 50 86, 18 66, 18 44 C 18 20, 30 12, 50 12 Z" 
+        fill="none" 
+        stroke="rgba(255,255,255,0.25)" 
+        stroke-width="1.5"/>
+
+  <!-- Golden Cross Symbol -->
+  <path d="M 47 22 L 53 22 L 53 30 L 61 30 L 61 35 L 53 35 L 53 52 L 47 52 L 47 35 L 39 35 L 39 30 L 47 30 Z" 
+        fill="url(#gold-grad)"/>
+
+  <!-- Open Book of Knowledge -->
+  <path d="M 28 58 Q 40 54, 50 59 Q 60 54, 72 58 L 72 70 Q 60 66, 50 71 Q 40 66, 28 70 Z" 
+        fill="#ffffff" 
+        stroke="url(#gold-grad)" 
+        stroke-width="1.5"/>
+  <line x1="50" y1="59" x2="50" y2="71" stroke="#2563eb" stroke-width="1.5"/>
+
+  <!-- Banner Ribbons / Star -->
+  <polygon points="50,15 52,19 56,19 53,22 54,26 50,23 46,26 47,22 44,19 48,19" fill="#fbbf24"/>
+  
+  <!-- HFIS Letters -->
+  <text x="50" y="80" text-anchor="middle" fill="#ffffff" font-family="'Outfit', 'Segoe UI', sans-serif" font-weight="800" font-size="7.5" letter-spacing="1.2">HFIS</text>
+</svg>
