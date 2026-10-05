@@ -102,30 +102,30 @@ const Auth = {
       if (avatarEl) avatarEl.src = avatarUrl;
       if (roleBadgeEl) roleBadgeEl.textContent = `${role === 'admin' ? '👑 Admin' : role === 'teacher' ? '👨‍🏫 Teacher' : '🎓 Student'}`;
 
-      // Navigation visibility according to role:
-      // - Student ONLY sees Student space
+      // Strict Navigation visibility according to role:
+      // - Admin ONLY sees Admin window (Dashboard, Students, Teachers management)
       // - Teacher ONLY sees Teacher hub
-      // - Admin has master access
-      if (role === 'student') {
-        navAdmin.forEach(el => el.style.setProperty('display', 'none', 'important'));
+      // - Student ONLY sees Student space
+      if (role === 'admin') {
+        navAdmin.forEach(el => el.style.setProperty('display', 'flex', 'important'));
         navTeacher.forEach(el => el.style.setProperty('display', 'none', 'important'));
-        navStudent.forEach(el => el.style.setProperty('display', 'flex', 'important'));
+        navStudent.forEach(el => el.style.setProperty('display', 'none', 'important'));
         if (demoRoleSelector) demoRoleSelector.style.display = 'none';
       } else if (role === 'teacher') {
         navAdmin.forEach(el => el.style.setProperty('display', 'none', 'important'));
         navTeacher.forEach(el => el.style.setProperty('display', 'flex', 'important'));
         navStudent.forEach(el => el.style.setProperty('display', 'none', 'important'));
         if (demoRoleSelector) demoRoleSelector.style.display = 'none';
-      } else if (role === 'admin') {
-        navAdmin.forEach(el => el.style.setProperty('display', 'flex', 'important'));
-        navTeacher.forEach(el => el.style.setProperty('display', 'flex', 'important'));
+      } else if (role === 'student') {
+        navAdmin.forEach(el => el.style.setProperty('display', 'none', 'important'));
+        navTeacher.forEach(el => el.style.setProperty('display', 'none', 'important'));
         navStudent.forEach(el => el.style.setProperty('display', 'flex', 'important'));
-        if (demoRoleSelector) demoRoleSelector.style.display = 'flex';
+        if (demoRoleSelector) demoRoleSelector.style.display = 'none';
       }
     } else {
       if (nameEl) nameEl.textContent = 'Guest';
       if (roleEl) roleEl.textContent = 'NOT LOGGED IN';
-      if (demoRoleSelector) demoRoleSelector.style.display = 'flex';
+      if (demoRoleSelector) demoRoleSelector.style.display = 'none';
     }
   },
 

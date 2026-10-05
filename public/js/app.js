@@ -203,9 +203,14 @@ const App = {
   },
 
   switchTab(tabId) {
-    // Role isolation guard: Students only view student-portal, Teachers only view teacher-portal
+    // Strict Role isolation guard:
+    // - Admin only views Admin tabs
+    // - Teacher only views Teacher portal
+    // - Student only views Student portal
     if (Auth.currentUser) {
-      if (Auth.currentUser.role === 'student' && tabId !== 'student-portal') {
+      if (Auth.currentUser.role === 'admin' && (tabId === 'teacher-portal' || tabId === 'student-portal')) {
+        tabId = 'dashboard';
+      } else if (Auth.currentUser.role === 'student' && tabId !== 'student-portal') {
         tabId = 'student-portal';
       } else if (Auth.currentUser.role === 'teacher' && tabId !== 'teacher-portal') {
         tabId = 'teacher-portal';
