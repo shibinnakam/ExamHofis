@@ -4,10 +4,10 @@ version = 0.1
 stack_name = "examhofis"
 resolve_s3 = true
 s3_prefix = "examhofis"
-region = "ap-south-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 image_repositories = []
+parameter_overrides = "CognitoUserPoolId=\"ap-south-1_SyTllnO2Y\" CognitoClientId=\"297qnv5q845tqqafqa60slgf2i\" UsersTableName=\"ExamHofis_Users\" StudentsTableName=\"ExamHofis_Students\" TeachersTableName=\"ExamHofis_Teachers\""
 
 [default.global.parameters]
 region = "ap-south-1"

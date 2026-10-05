@@ -3,7 +3,14 @@
 [build]
   publish = "public"
 
-# SPA fallback rule
+# Proxy all /api/* requests to your live AWS API Gateway
+[[redirects]]
+  from = "/api/*"
+  to = "https://0cx2oh9cc0.execute-api.ap-south-1.amazonaws.com/api/:splat"
+  status = 200
+  force = true
+
+# SPA fallback rule for client-side pages
 [[redirects]]
   from = "/*"
   to = "/index.html"
