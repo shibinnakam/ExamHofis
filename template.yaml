@@ -4,6 +4,28 @@ Description: >
   ExamHofis Portal & Examination System
   Serverless backend with AWS Cognito, Lambda handlers, and DynamoDB multi-table architecture.
 
+Parameters:
+  CognitoUserPoolId:
+    Type: String
+    Default: ap-south-1_SyTllnO2Y
+    Description: Existing Cognito User Pool ID
+  CognitoClientId:
+    Type: String
+    Default: 297qnv5q845tqqafqa60slgf2i
+    Description: Existing Cognito App Client ID
+  UsersTableName:
+    Type: String
+    Default: ExamHofis_Users
+    Description: Existing DynamoDB Users Table Name
+  StudentsTableName:
+    Type: String
+    Default: ExamHofis_Students
+    Description: Existing DynamoDB Students Table Name
+  TeachersTableName:
+    Type: String
+    Default: ExamHofis_Teachers
+    Description: Existing DynamoDB Teachers Table Name
+
 Globals:
   Function:
     Timeout: 30
@@ -14,171 +36,15 @@ Globals:
       Variables:
         USE_AWS: 'true'
         NODE_ENV: production
-        DYNAMODB_TABLE_USERS: !Ref UsersTable
-        DYNAMODB_TABLE_STUDENTS: !Ref StudentsTable
-        DYNAMODB_TABLE_TEACHERS: !Ref TeachersTable
-        COGNITO_USER_POOL_ID: !Ref ExamHofisUserPool
-        COGNITO_CLIENT_ID: !Ref ExamHofisUserPoolClient
+        DYNAMODB_TABLE_USERS: !Ref UsersTableName
+        DYNAMODB_TABLE_STUDENTS: !Ref StudentsTableName
+        DYNAMODB_TABLE_TEACHERS: !Ref TeachersTableName
+        COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+        COGNITO_CLIENT_ID: !Ref CognitoClientId
 
 Resources:
   # ============================================================
-  # 1. AWS COGNITO USER POOL & CLIENT
-  # ============================================================
-  ExamHofisUserPool:
-    Type: AWS::Cognito::UserPool
-    Properties:
-      UserPoolName: ExamHofis-Users
-      UsernameAttributes: []
-      AutoVerifiedAttributes:
-        - email
-      Policies:
-        PasswordPolicy:
-          MinimumLength: 6
-          RequireLowercase: false
-          RequireNumbers: false
-          RequireSymbols: false
-          RequireUppercase: false
-      Schema:
-        - Name: email
-          AttributeDataType: String
-          Required: true
-          Mutable: true
-        - Name: name
-          AttributeDataType: String
-          Mutable: true
-
-  ExamHofisUserPoolClient:
-    Type: AWS::Cognito::UserPoolClient
-    Properties:
-      ClientName: ExamHofis-WebClient
-      UserPoolId: !Ref ExamHofisUserPool
-      GenerateSecret: false
-      ExplicitAuthFlows:
-        - ALLOW_ADMIN_USER_PASSWORD_AUTH
-        - ALLOW_USER_PASSWORD_AUTH
-        - ALLOW_REFRESH_TOKEN_AUTH
-
-  AdminUserGroup:
-    Type: AWS::Cognito::UserPoolGroup
-    Properties:
-      GroupName: admin
-      Description: ExamHofis System Administrators
-      UserPoolId: !Ref ExamHofisUserPool
-
-  TeacherUserGroup:
-    Type: AWS::Cognito::UserPoolGroup
-    Properties:
-      GroupName: teacher
-      Description: ExamHofis Faculty Members
-      UserPoolId: !Ref ExamHofisUserPool
-
-  StudentUserGroup:
-    Type: AWS::Cognito::UserPoolGroup
-    Properties:
-      GroupName: student
-      Description: ExamHofis Enrolled Students
-      UserPoolId: !Ref ExamHofisUserPool
-
-  # ============================================================
-  # 2. AWS DYNAMODB MULTI-TABLE ARCHITECTURE
-  # ============================================================
-  UsersTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: ExamHofis_Users
-      BillingMode: PAY_PER_REQUEST
-      AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
-        - AttributeName: username
-          AttributeType: S
-      KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-      GlobalSecondaryIndexes:
-        - IndexName: UsernameIndex
-          KeySchema:
-            - AttributeName: username
-              KeyType: HASH
-          Projection:
-            ProjectionType: ALL
-
-  StudentsTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: ExamHofis_Students
-      BillingMode: PAY_PER_REQUEST
-      AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
-        - AttributeName: class
-          AttributeType: N
-        - AttributeName: admission_no
-          AttributeType: S
-        - AttributeName: user_id
-          AttributeType: S
-      KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-      GlobalSecondaryIndexes:
-        - IndexName: ClassIndex
-          KeySchema:
-            - AttributeName: class
-              KeyType: HASH
-          Projection:
-            ProjectionType: ALL
-        - IndexName: AdmissionNoIndex
-          KeySchema:
-            - AttributeName: admission_no
-              KeyType: HASH
-          Projection:
-            ProjectionType: ALL
-        - IndexName: UserIdIndex
-          KeySchema:
-            - AttributeName: user_id
-              KeyType: HASH
-          Projection:
-            ProjectionType: ALL
-
-  TeachersTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: ExamHofis_Teachers
-      BillingMode: PAY_PER_REQUEST
-      AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
-        - AttributeName: class
-          AttributeType: N
-        - AttributeName: subject
-          AttributeType: S
-        - AttributeName: user_id
-          AttributeType: S
-      KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-      GlobalSecondaryIndexes:
-        - IndexName: ClassIndex
-          KeySchema:
-            - AttributeName: class
-              KeyType: HASH
-          Projection:
-            ProjectionType: ALL
-        - IndexName: SubjectIndex
-          KeySchema:
-            - AttributeName: subject
-              KeyType: HASH
-          Projection:
-            ProjectionType: ALL
-        - IndexName: UserIdIndex
-          KeySchema:
-            - AttributeName: user_id
-              KeyType: HASH
-          Projection:
-            ProjectionType: ALL
-
-  # ============================================================
-  # 3. AWS LAMBDA API & ROUTER FUNCTION
+  # AWS LAMBDA API & ROUTER FUNCTION
   # ============================================================
   ExamHofisApiFunction:
     Type: AWS::Serverless::Function
@@ -187,11 +53,11 @@ Resources:
       Handler: lambda/handler.handler
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref UsersTable
+            TableName: !Ref UsersTableName
         - DynamoDBCrudPolicy:
-            TableName: !Ref StudentsTable
+            TableName: !Ref StudentsTableName
         - DynamoDBCrudPolicy:
-            TableName: !Ref TeachersTable
+            TableName: !Ref TeachersTableName
         - Statement:
             - Effect: Allow
               Action:
@@ -203,7 +69,7 @@ Resources:
                 - cognito-idp:AdminAddUserToGroup
                 - cognito-idp:AdminRemoveUserFromGroup
                 - cognito-idp:ListUsersInGroup
-              Resource: !GetAtt ExamHofisUserPool.Arn
+              Resource: !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${CognitoUserPoolId}"
       Events:
         HttpApiProxy:
           Type: HttpApi
@@ -223,20 +89,20 @@ Outputs:
 
   CognitoUserPoolId:
     Description: Cognito User Pool ID
-    Value: !Ref ExamHofisUserPool
+    Value: !Ref CognitoUserPoolId
 
   CognitoClientId:
     Description: Cognito App Client ID
-    Value: !Ref ExamHofisUserPoolClient
+    Value: !Ref CognitoClientId
 
   UsersTableName:
     Description: DynamoDB Users Table Name
-    Value: !Ref UsersTable
+    Value: !Ref UsersTableName
 
   StudentsTableName:
     Description: DynamoDB Students Table Name
-    Value: !Ref StudentsTable
+    Value: !Ref StudentsTableName
 
   TeachersTableName:
     Description: DynamoDB Teachers Table Name
-    Value: !Ref TeachersTable
+    Value: !Ref TeachersTableName
