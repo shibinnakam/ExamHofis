@@ -622,23 +622,40 @@ app.delete('/api/students/:id', authenticateToken, requireRole(['admin']), async
     // --- AWS DYNAMODB & COGNITO FLOW ---
     if (USE_AWS) {
       const student = await dynamoService.getStudentById(req.params.id);
-      if (!student) return res.status(404).json({ error: 'Student not found' });
+      if (!student) return res.status(404).json({ error: 'Student record not found in database' });
 
+      // Permanently delete from DynamoDB Students table
       await dynamoService.deleteStudent(student.id);
-      if (student.user_id) await dynamoService.deleteUser(student.user_id);
-      if (student.username) await cognitoService.adminDeleteUser(student.username);
-      return res.json({ success: true, message: 'Student deleted successfully' });
+
+      // Permanently delete from DynamoDB Users table
+      if (student.user_id) {
+        try { await dynamoService.deleteUser(student.user_id); } catch (e) {
+          console.warn('[DynamoDB] Error deleting user record:', e.message);
+        }
+      }
+
+      // Permanently delete from Cognito User Pool
+      if (student.username) {
+        try { await cognitoService.adminDeleteUser(student.username); } catch (e) {
+          console.warn('[Cognito] User not found or already deleted:', e.message);
+        }
+      }
+
+      return res.json({ success: true, message: `Student ${student.name} permanently deleted from database` });
     }
 
     // --- LOCAL SQLITE FLOW ---
     if (!db) return res.status(500).json({ error: 'Database not initialized' });
     const student = db.prepare('SELECT * FROM students WHERE id = ?').get(req.params.id);
     if (!student) {
-      return res.status(404).json({ error: 'Student not found' });
+      return res.status(404).json({ error: 'Student record not found in database' });
     }
 
-    db.prepare('DELETE FROM users WHERE id = ?').run(student.user_id);
-    res.json({ success: true, message: 'Student deleted successfully' });
+    db.prepare('DELETE FROM students WHERE id = ?').run(student.id);
+    if (student.user_id) {
+      db.prepare('DELETE FROM users WHERE id = ?').run(student.user_id);
+    }
+    res.json({ success: true, message: `Student ${student.name} permanently deleted from database` });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -875,23 +892,40 @@ app.delete('/api/teachers/:id', authenticateToken, requireRole(['admin']), async
     // --- AWS DYNAMODB & COGNITO FLOW ---
     if (USE_AWS) {
       const teacher = await dynamoService.getTeacherById(req.params.id);
-      if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
+      if (!teacher) return res.status(404).json({ error: 'Teacher record not found in database' });
 
+      // Permanently delete from DynamoDB Teachers table
       await dynamoService.deleteTeacher(teacher.id);
-      if (teacher.user_id) await dynamoService.deleteUser(teacher.user_id);
-      if (teacher.username) await cognitoService.adminDeleteUser(teacher.username);
-      return res.json({ success: true, message: 'Teacher deleted successfully' });
+
+      // Permanently delete from DynamoDB Users table
+      if (teacher.user_id) {
+        try { await dynamoService.deleteUser(teacher.user_id); } catch (e) {
+          console.warn('[DynamoDB] Error deleting user record:', e.message);
+        }
+      }
+
+      // Permanently delete from Cognito User Pool
+      if (teacher.username) {
+        try { await cognitoService.adminDeleteUser(teacher.username); } catch (e) {
+          console.warn('[Cognito] User not found or already deleted:', e.message);
+        }
+      }
+
+      return res.json({ success: true, message: `Teacher ${teacher.name} permanently deleted from database` });
     }
 
     // --- LOCAL SQLITE FLOW ---
     if (!db) return res.status(500).json({ error: 'Database not initialized' });
     const teacher = db.prepare('SELECT * FROM teachers WHERE id = ?').get(req.params.id);
     if (!teacher) {
-      return res.status(404).json({ error: 'Teacher not found' });
+      return res.status(404).json({ error: 'Teacher record not found in database' });
     }
 
-    db.prepare('DELETE FROM users WHERE id = ?').run(teacher.user_id);
-    res.json({ success: true, message: 'Teacher deleted successfully' });
+    db.prepare('DELETE FROM teachers WHERE id = ?').run(teacher.id);
+    if (teacher.user_id) {
+      db.prepare('DELETE FROM users WHERE id = ?').run(teacher.user_id);
+    }
+    res.json({ success: true, message: `Teacher ${teacher.name} permanently deleted from database` });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

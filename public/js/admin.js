@@ -5,6 +5,11 @@ const Admin = {
   currentStudentView: 'table',
   currentTeacherView: 'table',
 
+  escapeStr(str) {
+    if (!str) return '';
+    return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  },
+
   async loadDashboard() {
     try {
       const stats = await API.getStats();
@@ -59,7 +64,7 @@ const Admin = {
                 <div class="sub">Class ${s.class}-${s.div} • ${s.admission_no}</div>
               </div>
             </div>
-            <button class="btn btn-sm btn-secondary" onclick="Admin.viewIdCard(${s.id})">ID Card</button>
+            <button class="btn btn-sm btn-secondary" onclick="Admin.viewIdCard('${s.id}')">ID Card</button>
           </div>
         `).join('');
       }
@@ -129,14 +134,18 @@ const Admin = {
 
     // Render Table Rows
     if (tableBody) {
-      tableBody.innerHTML = this.students.map(s => `
-        <tr>
+      tableBody.innerHTML = this.students.map(s => {
+        const safeName = Admin.escapeStr(s.name);
+        const safeUser = Admin.escapeStr(s.username);
+        const safePass = Admin.escapeStr(s.plain_password || '••••••••');
+        return `
+        <tr style="cursor: pointer;" onclick="if (!event.target.closest('button')) Admin.openEditStudentModal('${s.id}')" title="Click to edit or delete">
           <td>
             <div class="entity-cell">
-              <img src="${s.photo_url || '/avatars/student1.svg'}" class="entity-avatar" alt="${s.name}">
+              <img src="${s.photo_url || '/avatars/student1.svg'}" class="entity-avatar" alt="${safeName}">
               <div class="entity-info">
-                <div class="name">${s.name}</div>
-                <div class="sub">@${s.username}</div>
+                <div class="name">${safeName}</div>
+                <div class="sub">@${safeUser}</div>
               </div>
             </div>
           </td>
@@ -144,45 +153,47 @@ const Admin = {
           <td><span class="badge badge-class">Class ${s.class}</span></td>
           <td><span class="badge badge-div">Div ${s.div}</span></td>
           <td>
-            <button class="btn btn-sm btn-secondary" onclick="Admin.viewCredentials('${s.username}', '${s.plain_password || '••••••••'}', '${s.name}')" title="View Credentials">
+            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); Admin.viewCredentials('${safeUser}', '${safePass}', '${safeName}')" title="View Credentials">
               🔑 Show
             </button>
           </td>
           <td>
             <div class="row-actions">
-              <button class="action-btn" onclick="Admin.viewIdCard(${s.id})" title="Print / View ID Card">
+              <button class="action-btn" onclick="event.stopPropagation(); Admin.viewIdCard('${s.id}')" title="Print / View ID Card">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><line x1="7" y1="8" x2="17" y2="8"></line><line x1="7" y1="12" x2="11" y2="12"></line><circle cx="15" cy="12" r="1"></circle></svg>
               </button>
-              <button class="action-btn" onclick="Admin.openEditStudentModal(${s.id})" title="Edit Student">
+              <button class="action-btn" onclick="event.stopPropagation(); Admin.openEditStudentModal('${s.id}')" title="Edit Student">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
               </button>
-              <button class="action-btn delete" onclick="Admin.deleteStudent(${s.id}, '${s.name}')" title="Delete Student">
+              <button class="action-btn delete" onclick="event.stopPropagation(); Admin.deleteStudent('${s.id}', '${safeName}')" title="Delete Student Permanently">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
               </button>
             </div>
           </td>
-        </tr>
-      `).join('');
+        </tr>`;
+      }).join('');
     }
 
     // Render Cards
     if (cardsContainer) {
-      cardsContainer.innerHTML = this.students.map(s => `
-        <div class="profile-card">
-          <img src="${s.photo_url || '/avatars/student1.svg'}" class="profile-card-avatar" alt="${s.name}">
-          <div class="profile-card-name">${s.name}</div>
+      cardsContainer.innerHTML = this.students.map(s => {
+        const safeName = Admin.escapeStr(s.name);
+        return `
+        <div class="profile-card" style="cursor: pointer;" onclick="if (!event.target.closest('button')) Admin.openEditStudentModal('${s.id}')" title="Click to edit or delete">
+          <img src="${s.photo_url || '/avatars/student1.svg'}" class="profile-card-avatar" alt="${safeName}">
+          <div class="profile-card-name">${safeName}</div>
           <div class="profile-card-sub">@${s.username} • Adm: ${s.admission_no}</div>
           <div class="profile-card-badges">
             <span class="badge badge-class">Class ${s.class}</span>
             <span class="badge badge-div">Division ${s.div}</span>
           </div>
           <div class="profile-card-actions">
-            <button class="btn btn-sm btn-secondary" onclick="Admin.viewIdCard(${s.id})">🆔 ID Card</button>
-            <button class="btn btn-sm btn-secondary" onclick="Admin.openEditStudentModal(${s.id})">✏️ Edit</button>
-            <button class="btn btn-sm btn-danger" onclick="Admin.deleteStudent(${s.id}, '${s.name}')">🗑️</button>
+            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); Admin.viewIdCard('${s.id}')">🆔 ID Card</button>
+            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); Admin.openEditStudentModal('${s.id}')">✏️ Edit</button>
+            <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); Admin.deleteStudent('${s.id}', '${safeName}')" title="Permanently Delete">🗑️ Delete</button>
           </div>
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
     }
   },
 
@@ -245,15 +256,25 @@ const Admin = {
   },
 
   async deleteStudent(id, name) {
-    if (confirm(`Are you sure you want to delete student "${name}"? This action cannot be undone.`)) {
-      try {
-        await API.deleteStudent(id);
-        App.showToast(`Student "${name}" deleted`, 'success');
-        this.loadStudents();
-        this.loadDashboard();
-      } catch (err) {
-        App.showToast('Failed to delete student: ' + err.message, 'error');
-      }
+    const confirmed = confirm(
+      `⚠️ PERMANENT DATABASE DELETION\n\n` +
+      `Are you sure you want to PERMANENTLY delete student "${name}"?\n\n` +
+      `• Removes student profile from database\n` +
+      `• Removes login credentials from Cognito/Users\n` +
+      `• Deletes digital student ID card\n\n` +
+      `This action CANNOT be undone.`
+    );
+    if (!confirmed) return;
+
+    try {
+      App.showToast(`Deleting student "${name}"...`, 'info');
+      await API.deleteStudent(id);
+      App.showToast(`✅ Student "${name}" permanently deleted from database`, 'success');
+      await this.loadStudents();
+      await this.loadDashboard();
+    } catch (err) {
+      console.error('Delete student error:', err);
+      App.showToast('Failed to delete student: ' + err.message, 'error');
     }
   },
 
@@ -314,59 +335,65 @@ const Admin = {
 
     // Render Table Rows
     if (tableBody) {
-      tableBody.innerHTML = this.teachers.map(t => `
-        <tr>
+      tableBody.innerHTML = this.teachers.map(t => {
+        const safeName = Admin.escapeStr(t.name);
+        const safeUser = Admin.escapeStr(t.username);
+        const safePass = Admin.escapeStr(t.plain_password || '••••••••');
+        return `
+        <tr style="cursor: pointer;" onclick="if (!event.target.closest('button')) Admin.openEditTeacherModal('${t.id}')" title="Click to edit or delete">
           <td>
             <div class="entity-cell">
               <div class="entity-avatar" style="display:flex;align-items:center;justify-content:center;background:var(--secondary-light);color:var(--secondary);font-weight:700;">
                 ${t.name.split(' ').map(n=>n[0]).slice(0,2).join('')}
               </div>
               <div class="entity-info">
-                <div class="name">${t.name}</div>
-                <div class="sub">@${t.username}</div>
+                <div class="name">${safeName}</div>
+                <div class="sub">@${safeUser}</div>
               </div>
             </div>
           </td>
           <td><span class="badge badge-class">Class ${t.class}</span></td>
           <td><span class="badge badge-subject">${t.subject}</span></td>
           <td>
-            <button class="btn btn-sm btn-secondary" onclick="Admin.viewCredentials('${t.username}', '${t.plain_password || '••••••••'}', '${t.name}')" title="View Credentials">
+            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); Admin.viewCredentials('${safeUser}', '${safePass}', '${safeName}')" title="View Credentials">
               🔑 Show
             </button>
           </td>
           <td>
             <div class="row-actions">
-              <button class="action-btn" onclick="Admin.openEditTeacherModal(${t.id})" title="Edit Teacher">
+              <button class="action-btn" onclick="event.stopPropagation(); Admin.openEditTeacherModal('${t.id}')" title="Edit Teacher">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
               </button>
-              <button class="action-btn delete" onclick="Admin.deleteTeacher(${t.id}, '${t.name}')" title="Delete Teacher">
+              <button class="action-btn delete" onclick="event.stopPropagation(); Admin.deleteTeacher('${t.id}', '${safeName}')" title="Delete Teacher Permanently">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
               </button>
             </div>
           </td>
-        </tr>
-      `).join('');
+        </tr>`;
+      }).join('');
     }
 
     // Render Cards
     if (cardsContainer) {
-      cardsContainer.innerHTML = this.teachers.map(t => `
-        <div class="profile-card">
+      cardsContainer.innerHTML = this.teachers.map(t => {
+        const safeName = Admin.escapeStr(t.name);
+        return `
+        <div class="profile-card" style="cursor: pointer;" onclick="if (!event.target.closest('button')) Admin.openEditTeacherModal('${t.id}')" title="Click to edit or delete">
           <div class="profile-card-avatar" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--secondary),var(--primary));color:#fff;font-size:1.6rem;font-weight:800;">
             ${t.name.split(' ').map(n=>n[0]).slice(0,2).join('')}
           </div>
-          <div class="profile-card-name">${t.name}</div>
+          <div class="profile-card-name">${safeName}</div>
           <div class="profile-card-sub">@${t.username}</div>
           <div class="profile-card-badges">
             <span class="badge badge-class">Class ${t.class}</span>
             <span class="badge badge-subject">${t.subject}</span>
           </div>
           <div class="profile-card-actions">
-            <button class="btn btn-sm btn-secondary" onclick="Admin.openEditTeacherModal(${t.id})">✏️ Edit</button>
-            <button class="btn btn-sm btn-danger" onclick="Admin.deleteTeacher(${t.id}, '${t.name}')">🗑️ Delete</button>
+            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); Admin.openEditTeacherModal('${t.id}')">✏️ Edit</button>
+            <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); Admin.deleteTeacher('${t.id}', '${safeName}')" title="Permanently Delete">🗑️ Delete</button>
           </div>
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
     }
   },
 
@@ -430,15 +457,25 @@ const Admin = {
   },
 
   async deleteTeacher(id, name) {
-    if (confirm(`Are you sure you want to delete teacher "${name}"? This action cannot be undone.`)) {
-      try {
-        await API.deleteTeacher(id);
-        App.showToast(`Teacher "${name}" deleted`, 'success');
-        this.loadTeachers();
-        this.loadDashboard();
-      } catch (err) {
-        App.showToast('Failed to delete teacher: ' + err.message, 'error');
-      }
+    const confirmed = confirm(
+      `⚠️ PERMANENT DATABASE DELETION\n\n` +
+      `Are you sure you want to PERMANENTLY delete teacher "${name}"?\n\n` +
+      `• Removes faculty profile from database\n` +
+      `• Removes class assignments and subjects\n` +
+      `• Deletes login credentials from Cognito/Users\n\n` +
+      `This action CANNOT be undone.`
+    );
+    if (!confirmed) return;
+
+    try {
+      App.showToast(`Deleting teacher "${name}"...`, 'info');
+      await API.deleteTeacher(id);
+      App.showToast(`✅ Teacher "${name}" permanently deleted from database`, 'success');
+      await this.loadTeachers();
+      await this.loadDashboard();
+    } catch (err) {
+      console.error('Delete teacher error:', err);
+      App.showToast('Failed to delete teacher: ' + err.message, 'error');
     }
   },
 
