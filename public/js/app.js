@@ -53,6 +53,9 @@ const App = {
     const portalView = document.getElementById('view-portal');
     if (homeView) homeView.style.display = 'none';
     if (portalView) portalView.style.display = 'flex';
+    if (Auth.currentUser) {
+      this.switchPortalView(Auth.currentUser.role);
+    }
   },
 
   setupEventListeners() {
@@ -200,6 +203,15 @@ const App = {
   },
 
   switchTab(tabId) {
+    // Role isolation guard: Students only view student-portal, Teachers only view teacher-portal
+    if (Auth.currentUser) {
+      if (Auth.currentUser.role === 'student' && tabId !== 'student-portal') {
+        tabId = 'student-portal';
+      } else if (Auth.currentUser.role === 'teacher' && tabId !== 'teacher-portal') {
+        tabId = 'teacher-portal';
+      }
+    }
+
     this.activeTab = tabId;
 
     // Update nav links active state
