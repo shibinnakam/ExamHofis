@@ -1135,6 +1135,415 @@ app.get('/api/student/my-profile', authenticateToken, requireRole(['student', 'a
   }
 });
 
+// =============================================================
+// MCQ EXAM & SCHEDULING MANAGEMENT ENDPOINTS
+// =============================================================
+
+// 1. GET /api/exams - List exams according to role and filters
+app.get('/api/exams', authenticateToken, async (req, res) => {
+  const user = req.user;
+  const { class: classFilter, division, status } = req.query;
+
+  try {
+    if (USE_AWS) {
+      let exams = await dynamoService.getExams({ classFilter, division, status });
+      if (user.role === 'student') {
+        const student = await dynamoService.getStudentByUserId(user.id);
+        if (student) {
+          const sId = student.id;
+          const subs = await dynamoService.getStudentSubmissions(sId);
+          const subMap = {};
+          subs.forEach(s => { subMap[String(s.exam_id)] = s; });
+
+          exams = exams.filter(e => 
+            e.class === student.class && 
+            (e.division === 'All' || e.division === student.div) &&
+            e.status !== 'draft'
+          ).map(e => ({
+            ...e,
+            submitted: !!subMap[String(e.id)],
+            submission: subMap[String(e.id)] || null
+          }));
+        }
+      }
+      return res.json(exams);
+    }
+
+    if (!db) return res.status(500).json({ error: 'Database not initialized' });
+    let query = `SELECT * FROM exams WHERE 1=1`;
+    const params = [];
+    let currentStudent = null;
+
+    if (user.role === 'student') {
+      currentStudent = db.prepare('SELECT * FROM students WHERE user_id = ?').get(user.id);
+      if (currentStudent) {
+        query += ` AND class = ? AND (division = 'All' OR division = ?) AND status != 'draft'`;
+        params.push(currentStudent.class, currentStudent.div);
+      }
+    } else {
+      if (classFilter && classFilter !== 'all') {
+        query += ` AND class = ?`;
+        params.push(parseInt(classFilter, 10));
+      }
+      if (division && division !== 'All' && division !== 'all') {
+        query += ` AND (division = 'All' OR division = ?)`;
+        params.push(division);
+      }
+      if (status && status !== 'all') {
+        query += ` AND status = ?`;
+        params.push(status);
+      }
+    }
+
+    query += ` ORDER BY created_at DESC`;
+    let exams = db.prepare(query).all(...params).map(e => ({
+      ...e,
+      questions: JSON.parse(e.questions || '[]')
+    }));
+
+    if (user.role === 'student' && currentStudent) {
+      const submissions = db.prepare('SELECT * FROM exam_submissions WHERE student_id = ?').all(currentStudent.id);
+      const subMap = {};
+      submissions.forEach(s => { subMap[String(s.exam_id)] = s; });
+
+      exams = exams.map(e => ({
+        ...e,
+        submitted: !!subMap[String(e.id)],
+        submission: subMap[String(e.id)] || null
+      }));
+    }
+
+    res.json(exams);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. POST /api/exams - Teacher creates a new exam with MCQs
+app.post('/api/exams', authenticateToken, requireRole(['teacher', 'admin']), async (req, res) => {
+  const { title, subject, class: examClass, division, duration_minutes, questions } = req.body;
+
+  try {
+    if (!title || !title.trim()) throw new Error('Exam title is required');
+    if (!subject || !subject.trim()) throw new Error('Subject is required');
+    const classNum = parseInt(examClass, 10);
+    if (isNaN(classNum) || classNum < 1 || classNum > 10) throw new Error('Class must be between 1 and 10');
+    const div = division || 'All';
+    const duration = parseInt(duration_minutes, 10) || 30;
+
+    if (!Array.isArray(questions)) throw new Error('Questions must be an array');
+    if (questions.length < 1) throw new Error('Exam must have at least 1 question');
+    if (questions.length > 150) throw new Error('Exam can have maximum 150 questions');
+
+    // Validate each question
+    const sanitizedQuestions = questions.map((q, idx) => {
+      if (!q.question || !q.question.trim()) throw new Error(`Question ${idx + 1} text is required`);
+      if (!Array.isArray(q.options) || q.options.length < 2) {
+        throw new Error(`Question ${idx + 1} must have at least 2 options`);
+      }
+      const cleanOptions = q.options.map(opt => String(opt || '').trim());
+      if (cleanOptions.some(opt => !opt)) {
+        throw new Error(`Question ${idx + 1} has blank options. All options must have text`);
+      }
+      const correctIdx = parseInt(q.correct_index, 10);
+      if (isNaN(correctIdx) || correctIdx < 0 || correctIdx >= cleanOptions.length) {
+        throw new Error(`Question ${idx + 1} must designate a valid correct option`);
+      }
+      return {
+        id: q.id || `q_${idx + 1}`,
+        question: q.question.trim(),
+        options: cleanOptions,
+        correct_index: correctIdx,
+        marks: parseInt(q.marks, 10) || 1
+      };
+    });
+
+    const totalMarks = sanitizedQuestions.reduce((acc, q) => acc + (q.marks || 1), 0);
+
+    const examData = {
+      title: title.trim(),
+      subject: subject.trim(),
+      class: classNum,
+      division: div,
+      duration_minutes: duration,
+      created_by: req.user.name || req.user.username || 'Faculty',
+      created_by_id: String(req.user.id),
+      status: 'draft',
+      questions: sanitizedQuestions,
+      total_marks: totalMarks,
+      total_questions: sanitizedQuestions.length,
+      created_at: new Date().toISOString()
+    };
+
+    if (USE_AWS) {
+      const created = await dynamoService.createExam(examData);
+      return res.status(201).json({ success: true, message: 'Exam created successfully', exam: created });
+    }
+
+    if (!db) return res.status(500).json({ error: 'Database not initialized' });
+    const insert = db.prepare(`
+      INSERT INTO exams (title, subject, class, division, duration_minutes, created_by, created_by_id, status, questions, total_marks, total_questions)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'draft', ?, ?, ?)
+    `).run(
+      examData.title,
+      examData.subject,
+      examData.class,
+      examData.division,
+      examData.duration_minutes,
+      examData.created_by,
+      examData.created_by_id,
+      JSON.stringify(sanitizedQuestions),
+      totalMarks,
+      sanitizedQuestions.length
+    );
+
+    const newExam = { id: insert.lastInsertRowid, ...examData };
+    res.status(201).json({ success: true, message: 'Exam created successfully', exam: newExam });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// 3. GET /api/exams/:id - View exam details
+app.get('/api/exams/:id', authenticateToken, async (req, res) => {
+  const examId = req.params.id;
+  const user = req.user;
+
+  try {
+    let exam;
+    if (USE_AWS) {
+      exam = await dynamoService.getExamById(examId);
+    } else {
+      if (!db) return res.status(500).json({ error: 'Database not initialized' });
+      exam = db.prepare('SELECT * FROM exams WHERE id = ?').get(examId);
+      if (exam && typeof exam.questions === 'string') {
+        exam.questions = JSON.parse(exam.questions);
+      }
+    }
+
+    if (!exam) return res.status(404).json({ error: 'Exam not found' });
+
+    // Check student submission
+    let studentSubmission = null;
+    if (user.role === 'student') {
+      let student = null;
+      if (USE_AWS) {
+        student = await dynamoService.getStudentByUserId(user.id);
+        const sId = student ? student.id : user.id;
+        const subs = await dynamoService.getStudentSubmissions(sId);
+        studentSubmission = subs.find(s => String(s.exam_id) === String(examId)) || null;
+      } else {
+        student = db.prepare('SELECT * FROM students WHERE user_id = ?').get(user.id);
+        const sId = student ? student.id : user.id;
+        studentSubmission = db.prepare('SELECT * FROM exam_submissions WHERE exam_id = ? AND student_id = ?').get(examId, sId);
+        if (studentSubmission && typeof studentSubmission.answers === 'string') {
+          studentSubmission.answers = JSON.parse(studentSubmission.answers);
+        }
+      }
+
+      // If student hasn't submitted and is taking exam, mask correct_index to prevent inspecting answers!
+      if (!studentSubmission && Array.isArray(exam.questions)) {
+        exam = {
+          ...exam,
+          questions: exam.questions.map(q => ({
+            id: q.id,
+            question: q.question,
+            options: q.options,
+            marks: q.marks
+          }))
+        };
+      }
+    }
+
+    res.json({ exam, studentSubmission });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 4. POST /api/exams/:id/schedule - Admin schedules exam date and time
+app.post('/api/exams/:id/schedule', authenticateToken, requireRole(['admin']), async (req, res) => {
+  const examId = req.params.id;
+  const { scheduled_start, scheduled_end, duration_minutes } = req.body;
+
+  try {
+    if (!scheduled_start) throw new Error('Scheduled start date and time is required');
+
+    const startDate = new Date(scheduled_start);
+    if (isNaN(startDate.getTime())) throw new Error('Invalid start date/time');
+
+    let endDate;
+    if (scheduled_end) {
+      endDate = new Date(scheduled_end);
+    } else {
+      const duration = parseInt(duration_minutes, 10) || 45;
+      endDate = new Date(startDate.getTime() + duration * 60000);
+    }
+
+    const updates = {
+      status: 'scheduled',
+      scheduled_start: startDate.toISOString(),
+      scheduled_end: endDate.toISOString(),
+      ...(duration_minutes ? { duration_minutes: parseInt(duration_minutes, 10) } : {})
+    };
+
+    if (USE_AWS) {
+      const updated = await dynamoService.updateExam(examId, updates);
+      return res.json({ success: true, message: 'Exam scheduled successfully in AWS', exam: updated });
+    }
+
+    if (!db) return res.status(500).json({ error: 'Database not initialized' });
+    db.prepare(`
+      UPDATE exams 
+      SET status = 'scheduled', scheduled_start = ?, scheduled_end = ?
+      WHERE id = ?
+    `).run(updates.scheduled_start, updates.scheduled_end, examId);
+
+    const updatedExam = db.prepare('SELECT * FROM exams WHERE id = ?').get(examId);
+    if (updatedExam) updatedExam.questions = JSON.parse(updatedExam.questions || '[]');
+
+    res.json({ success: true, message: 'Exam scheduled successfully', exam: updatedExam });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// 5. POST /api/exams/:id/submit - Student submits MCQ answers
+app.post('/api/exams/:id/submit', authenticateToken, requireRole(['student', 'admin']), async (req, res) => {
+  const examId = req.params.id;
+  const user = req.user;
+  const { answers } = req.body;
+
+  try {
+    let exam;
+    if (USE_AWS) {
+      exam = await dynamoService.getExamById(examId);
+    } else {
+      if (!db) return res.status(500).json({ error: 'Database not initialized' });
+      exam = db.prepare('SELECT * FROM exams WHERE id = ?').get(examId);
+      if (exam && typeof exam.questions === 'string') {
+        exam.questions = JSON.parse(exam.questions);
+      }
+    }
+
+    if (!exam) return res.status(404).json({ error: 'Exam not found' });
+
+    // Fetch student info
+    let student;
+    if (USE_AWS) {
+      student = await dynamoService.getStudentByUserId(user.id);
+    } else {
+      student = db.prepare('SELECT * FROM students WHERE user_id = ?').get(user.id);
+    }
+    if (!student && user.role === 'admin') {
+      student = { id: 'admin-preview', name: 'Admin Preview Student', admission_no: 'ADM-PREVIEW', class: exam.class, div: 'A' };
+    }
+    if (!student) return res.status(404).json({ error: 'Student record not found' });
+
+    // Calculate score
+    const questions = exam.questions || [];
+    let score = 0;
+    let totalMarks = 0;
+
+    questions.forEach((q, idx) => {
+      const qKey = q.id || `q_${idx + 1}`;
+      const qMarks = q.marks || 1;
+      totalMarks += qMarks;
+
+      const studentAns = answers ? answers[qKey] : undefined;
+      if (studentAns !== undefined && parseInt(studentAns, 10) === parseInt(q.correct_index, 10)) {
+        score += qMarks;
+      }
+    });
+
+    const percentage = totalMarks > 0 ? parseFloat(((score / totalMarks) * 100).toFixed(2)) : 0;
+
+    const submissionData = {
+      exam_id: String(examId),
+      student_id: String(student.id),
+      student_name: student.name,
+      admission_no: student.admission_no,
+      class: student.class,
+      div: student.div,
+      answers: answers || {},
+      score,
+      total_marks: totalMarks,
+      percentage,
+      submitted_at: new Date().toISOString()
+    };
+
+    if (USE_AWS) {
+      const created = await dynamoService.createExamSubmission(submissionData);
+      return res.status(201).json({ success: true, message: 'Exam submitted successfully', submission: created });
+    }
+
+    if (!db) return res.status(500).json({ error: 'Database not initialized' });
+    const insert = db.prepare(`
+      INSERT INTO exam_submissions (exam_id, student_id, student_name, admission_no, class, div, answers, score, total_marks, percentage)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      examId,
+      student.id,
+      student.name,
+      student.admission_no,
+      student.class,
+      student.div,
+      JSON.stringify(answers || {}),
+      score,
+      totalMarks,
+      percentage
+    );
+
+    const submission = { id: insert.lastInsertRowid, ...submissionData };
+    res.status(201).json({ success: true, message: 'Exam submitted successfully', submission });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// 6. GET /api/exams/:id/submissions - View all submissions for an exam
+app.get('/api/exams/:id/submissions', authenticateToken, requireRole(['teacher', 'admin']), async (req, res) => {
+  const examId = req.params.id;
+  try {
+    if (USE_AWS) {
+      const subs = await dynamoService.getExamSubmissions(examId);
+      return res.json(subs);
+    }
+
+    if (!db) return res.status(500).json({ error: 'Database not initialized' });
+    const subs = db.prepare(`
+      SELECT * FROM exam_submissions 
+      WHERE exam_id = ? 
+      ORDER BY score DESC, submitted_at ASC
+    `).all(examId).map(s => ({
+      ...s,
+      answers: JSON.parse(s.answers || '{}')
+    }));
+
+    res.json(subs);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 7. DELETE /api/exams/:id - Delete an exam
+app.delete('/api/exams/:id', authenticateToken, requireRole(['teacher', 'admin']), async (req, res) => {
+  const examId = req.params.id;
+  try {
+    if (USE_AWS) {
+      await dynamoService.deleteExam(examId);
+      return res.json({ success: true, message: 'Exam deleted successfully' });
+    }
+
+    if (!db) return res.status(500).json({ error: 'Database not initialized' });
+    db.prepare('DELETE FROM exams WHERE id = ?').run(examId);
+    db.prepare('DELETE FROM exam_submissions WHERE exam_id = ?').run(examId);
+    res.json({ success: true, message: 'Exam deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // -------------------------------------------------------------
 // SPA Catch-All Route (Compatible with Express 5)
 // -------------------------------------------------------------

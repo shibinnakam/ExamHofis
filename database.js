@@ -47,6 +47,45 @@ function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_students_adm ON students(admission_no);
     CREATE INDEX IF NOT EXISTS idx_teachers_class ON teachers(class);
     CREATE INDEX IF NOT EXISTS idx_teachers_subject ON teachers(subject);
+
+    CREATE TABLE IF NOT EXISTS exams (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      subject TEXT NOT NULL,
+      class INTEGER NOT NULL CHECK(class BETWEEN 1 AND 10),
+      division TEXT NOT NULL DEFAULT 'All',
+      duration_minutes INTEGER NOT NULL DEFAULT 30,
+      created_by TEXT NOT NULL,
+      created_by_id TEXT,
+      status TEXT NOT NULL DEFAULT 'draft',
+      scheduled_start DATETIME,
+      scheduled_end DATETIME,
+      questions TEXT NOT NULL,
+      total_marks INTEGER NOT NULL DEFAULT 0,
+      total_questions INTEGER NOT NULL DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS exam_submissions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      exam_id INTEGER NOT NULL,
+      student_id TEXT NOT NULL,
+      student_name TEXT NOT NULL,
+      admission_no TEXT NOT NULL,
+      class INTEGER NOT NULL,
+      div TEXT NOT NULL,
+      answers TEXT NOT NULL,
+      score INTEGER NOT NULL DEFAULT 0,
+      total_marks INTEGER NOT NULL DEFAULT 0,
+      percentage REAL NOT NULL DEFAULT 0.0,
+      submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (exam_id) REFERENCES exams(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_exams_class ON exams(class);
+    CREATE INDEX IF NOT EXISTS idx_exams_status ON exams(status);
+    CREATE INDEX IF NOT EXISTS idx_submissions_exam ON exam_submissions(exam_id);
+    CREATE INDEX IF NOT EXISTS idx_submissions_student ON exam_submissions(student_id);
   `);
 
   try {
@@ -115,6 +154,58 @@ function initDatabase() {
       insertStudent.run(res.lastInsertRowid, s.name, s.class, s.div, s.adm, s.photo);
     }
     console.log(`[Database] Seeded ${sampleStudents.length} sample students`);
+  }
+
+  // Seed sample exam if none exists
+  const examExists = db.prepare('SELECT id FROM exams LIMIT 1').get();
+  if (!examExists) {
+    const sampleQuestions = [
+      {
+        id: 'q_1',
+        question: 'What is the SI unit of force in classical physics?',
+        options: ['Joule', 'Newton', 'Watt', 'Pascal'],
+        correct_index: 1,
+        marks: 1
+      },
+      {
+        id: 'q_2',
+        question: 'The rate of change of momentum of a body is directly proportional to:',
+        options: ['Applied Force', 'Velocity', 'Kinetic Energy', 'Inertia'],
+        correct_index: 0,
+        marks: 1
+      },
+      {
+        id: 'q_3',
+        question: 'Which optical lens is prescribed to correct myopia (short-sightedness)?',
+        options: ['Convex lens', 'Concave lens', 'Cylindrical lens', 'Bifocal lens'],
+        correct_index: 1,
+        marks: 1
+      }
+    ];
+
+    const now = new Date();
+    const scheduledStart = new Date(now.getTime() - 5 * 60000).toISOString();
+    const scheduledEnd = new Date(now.getTime() + 45 * 60000).toISOString();
+
+    db.prepare(`
+      INSERT INTO exams (title, subject, class, division, duration_minutes, created_by, created_by_id, status, scheduled_start, scheduled_end, questions, total_marks, total_questions)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      'Class 10 Physics Assessment - Mechanics & Optics',
+      'Physics',
+      10,
+      'All',
+      45,
+      'Dr. Ananya Nair',
+      '1',
+      'scheduled',
+      scheduledStart,
+      scheduledEnd,
+      JSON.stringify(sampleQuestions),
+      3,
+      3
+    );
+    console.log('[Database] Seeded sample live MCQ exam for Class 10 Physics');
   }
 }
 

@@ -138,6 +138,47 @@ const API = {
     return this.request('/api/student/my-profile');
   },
 
+  // Examinations & MCQs
+  getExams(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return this.request(`/api/exams${query ? '?' + query : ''}`);
+  },
+
+  getExam(id) {
+    return this.request(`/api/exams/${id}`);
+  },
+
+  createExam(data) {
+    return this.request('/api/exams', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+
+  scheduleExam(id, data) {
+    return this.request(`/api/exams/${id}/schedule`, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+
+  submitExam(id, answers) {
+    return this.request(`/api/exams/${id}/submit`, {
+      method: 'POST',
+      body: JSON.stringify({ answers })
+    });
+  },
+
+  getExamSubmissions(id) {
+    return this.request(`/api/exams/${id}/submissions`);
+  },
+
+  deleteExam(id) {
+    return this.request(`/api/exams/${id}`, {
+      method: 'DELETE'
+    });
+  },
+
   // AWS Infrastructure Status
   getAwsStatus() {
     return this.request('/api/aws/status');

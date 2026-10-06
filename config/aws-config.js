@@ -46,7 +46,9 @@ const cognitoClient = new CognitoIdentityProviderClient({
 const TABLES = {
   USERS: process.env.DYNAMODB_TABLE_USERS || 'ExamHofis_Users',
   STUDENTS: process.env.DYNAMODB_TABLE_STUDENTS || 'ExamHofis_Students',
-  TEACHERS: process.env.DYNAMODB_TABLE_TEACHERS || 'ExamHofis_Teachers'
+  TEACHERS: process.env.DYNAMODB_TABLE_TEACHERS || 'ExamHofis_Teachers',
+  EXAMS: process.env.DYNAMODB_TABLE_EXAMS || 'ExamHofis_Exams',
+  SUBMISSIONS: process.env.DYNAMODB_TABLE_SUBMISSIONS || 'ExamHofis_Submissions'
 };
 
 // Cognito configuration

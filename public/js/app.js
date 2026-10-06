@@ -204,16 +204,21 @@ const App = {
 
   switchTab(tabId) {
     // Strict Role isolation guard:
-    // - Admin only views Admin tabs
-    // - Teacher only views Teacher portal
-    // - Student only views Student portal
+    // - Admin only views Admin tabs (dashboard, students, teachers, exams)
+    // - Teacher only views Teacher tabs (teacher-portal, teacher-exams)
+    // - Student only views Student tabs (student-portal, student-exams)
     if (Auth.currentUser) {
-      if (Auth.currentUser.role === 'admin' && (tabId === 'teacher-portal' || tabId === 'student-portal')) {
+      const role = Auth.currentUser.role;
+      const adminTabs = ['dashboard', 'students', 'teachers', 'exams'];
+      const teacherTabs = ['teacher-portal', 'teacher-exams'];
+      const studentTabs = ['student-portal', 'student-exams'];
+
+      if (role === 'admin' && !adminTabs.includes(tabId)) {
         tabId = 'dashboard';
-      } else if (Auth.currentUser.role === 'student' && tabId !== 'student-portal') {
-        tabId = 'student-portal';
-      } else if (Auth.currentUser.role === 'teacher' && tabId !== 'teacher-portal') {
+      } else if (role === 'teacher' && !teacherTabs.includes(tabId)) {
         tabId = 'teacher-portal';
+      } else if (role === 'student' && !studentTabs.includes(tabId)) {
+        tabId = 'student-portal';
       }
     }
 
@@ -251,14 +256,26 @@ const App = {
       if (titleEl) titleEl.textContent = 'Teacher Management';
       if (subEl) subEl.textContent = 'Manage teachers, assigned classes (1-10) and subjects';
       Admin.loadTeachers();
+    } else if (tabId === 'exams') {
+      if (titleEl) titleEl.textContent = 'Exam Scheduling & Management';
+      if (subEl) subEl.textContent = 'Set official date & time windows to open exams for enrolled students';
+      AdminExams.init();
     } else if (tabId === 'teacher-portal') {
       if (titleEl) titleEl.textContent = 'Teacher Classroom Hub';
       if (subEl) subEl.textContent = 'Class student roster and subject information';
       TeacherPortal.init();
+    } else if (tabId === 'teacher-exams') {
+      if (titleEl) titleEl.textContent = 'MCQ Question Papers & Exams';
+      if (subEl) subEl.textContent = 'Author and save multiple choice exams for Classes 1 to 10';
+      TeacherExams.init();
     } else if (tabId === 'student-portal') {
       if (titleEl) titleEl.textContent = 'Student Portal & ID';
       if (subEl) subEl.textContent = 'Personal digital ID badge and assigned teachers';
       StudentPortal.init();
+    } else if (tabId === 'student-exams') {
+      if (titleEl) titleEl.textContent = 'Online Examinations Hall';
+      if (subEl) subEl.textContent = 'Scheduled computer-based assessments for your class & division';
+      StudentExams.init();
     }
   },
 

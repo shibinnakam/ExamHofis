@@ -460,6 +460,189 @@ async function getDashboardStats() {
   };
 }
 
+// =========================================================================
+// 5. EXAM & MCQ OPERATIONS
+// =========================================================================
+
+// In-memory fallback cache if AWS table is not yet provisioned
+let fallbackExams = [];
+let fallbackSubmissions = [];
+
+async function getExams({ classFilter, division, teacherId, status } = {}) {
+  let items = [];
+  try {
+    const result = await dynamoDocClient.send(new ScanCommand({ TableName: TABLES.EXAMS }));
+    items = result.Items || [];
+  } catch (err) {
+    // If DynamoDB table is not yet created, use fallback cache
+    items = [...fallbackExams];
+  }
+
+  if (classFilter && classFilter !== 'all') {
+    const c = parseInt(classFilter, 10);
+    items = items.filter(e => e.class === c);
+  }
+
+  if (division && division !== 'All' && division !== 'all') {
+    items = items.filter(e => e.division === 'All' || e.division === division);
+  }
+
+  if (teacherId) {
+    items = items.filter(e => e.created_by_id === String(teacherId) || e.created_by === String(teacherId));
+  }
+
+  if (status && status !== 'all') {
+    items = items.filter(e => e.status === status);
+  }
+
+  items.sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
+  return items;
+}
+
+async function getExamById(id) {
+  try {
+    const result = await dynamoDocClient.send(
+      new GetCommand({
+        TableName: TABLES.EXAMS,
+        Key: { id: String(id) }
+      })
+    );
+    if (result.Item) return result.Item;
+  } catch (err) {}
+  return fallbackExams.find(e => String(e.id) === String(id)) || null;
+}
+
+async function createExam(data) {
+  const id = data.id || uuidv4();
+  const item = {
+    id: String(id),
+    title: data.title.trim(),
+    subject: data.subject.trim(),
+    class: parseInt(data.class, 10),
+    division: data.division || 'All',
+    duration_minutes: parseInt(data.duration_minutes || 30, 10),
+    created_by: data.created_by || 'Faculty',
+    created_by_id: String(data.created_by_id || ''),
+    status: data.status || 'draft',
+    scheduled_start: data.scheduled_start || null,
+    scheduled_end: data.scheduled_end || null,
+    questions: data.questions || [],
+    total_marks: parseInt(data.total_marks || (data.questions ? data.questions.length : 0), 10),
+    total_questions: data.questions ? data.questions.length : 0,
+    created_at: data.created_at || new Date().toISOString()
+  };
+
+  try {
+    await dynamoDocClient.send(
+      new PutCommand({
+        TableName: TABLES.EXAMS,
+        Item: item
+      })
+    );
+  } catch (err) {
+    fallbackExams.push(item);
+  }
+
+  // Also keep in fallback cache for instant sync
+  const idx = fallbackExams.findIndex(e => e.id === item.id);
+  if (idx >= 0) fallbackExams[idx] = item;
+  else fallbackExams.push(item);
+
+  return item;
+}
+
+async function updateExam(id, updates) {
+  const existing = await getExamById(id);
+  if (!existing) return null;
+
+  const updated = { ...existing, ...updates, id: String(id) };
+
+  try {
+    await dynamoDocClient.send(
+      new PutCommand({
+        TableName: TABLES.EXAMS,
+        Item: updated
+      })
+    );
+  } catch (err) {}
+
+  const idx = fallbackExams.findIndex(e => String(e.id) === String(id));
+  if (idx >= 0) fallbackExams[idx] = updated;
+  else fallbackExams.push(updated);
+
+  return updated;
+}
+
+async function deleteExam(id) {
+  try {
+    await dynamoDocClient.send(
+      new DeleteCommand({
+        TableName: TABLES.EXAMS,
+        Key: { id: String(id) }
+      })
+    );
+  } catch (err) {}
+  fallbackExams = fallbackExams.filter(e => String(e.id) !== String(id));
+  fallbackSubmissions = fallbackSubmissions.filter(s => String(s.exam_id) !== String(id));
+  return true;
+}
+
+async function createExamSubmission(data) {
+  const id = data.id || uuidv4();
+  const item = {
+    id: String(id),
+    exam_id: String(data.exam_id),
+    student_id: String(data.student_id),
+    student_name: data.student_name,
+    admission_no: data.admission_no,
+    class: parseInt(data.class, 10),
+    div: data.div,
+    answers: data.answers || {},
+    score: parseInt(data.score, 10) || 0,
+    total_marks: parseInt(data.total_marks, 10) || 0,
+    percentage: parseFloat(data.percentage) || 0.0,
+    submitted_at: data.submitted_at || new Date().toISOString()
+  };
+
+  try {
+    await dynamoDocClient.send(
+      new PutCommand({
+        TableName: TABLES.SUBMISSIONS,
+        Item: item
+      })
+    );
+  } catch (err) {}
+
+  fallbackSubmissions.push(item);
+  return item;
+}
+
+async function getExamSubmissions(examId) {
+  let items = [];
+  try {
+    const result = await dynamoDocClient.send(new ScanCommand({ TableName: TABLES.SUBMISSIONS }));
+    items = result.Items || [];
+  } catch (err) {
+    items = [...fallbackSubmissions];
+  }
+
+  return items
+    .filter(s => String(s.exam_id) === String(examId))
+    .sort((a, b) => b.score - a.score);
+}
+
+async function getStudentSubmissions(studentId) {
+  let items = [];
+  try {
+    const result = await dynamoDocClient.send(new ScanCommand({ TableName: TABLES.SUBMISSIONS }));
+    items = result.Items || [];
+  } catch (err) {
+    items = [...fallbackSubmissions];
+  }
+
+  return items.filter(s => String(s.student_id) === String(studentId));
+}
+
 module.exports = {
   // Users
   getUserById,
@@ -486,6 +669,16 @@ module.exports = {
   updateTeacher,
   deleteTeacher,
   getTeachersByClass,
+
+  // Exams & Submissions
+  getExams,
+  getExamById,
+  createExam,
+  updateExam,
+  deleteExam,
+  createExamSubmission,
+  getExamSubmissions,
+  getStudentSubmissions,
 
   // Stats
   getDashboardStats

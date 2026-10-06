@@ -393,6 +393,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           Teachers Management
         </button>
+        <button class="nav-link nav-role-admin" data-tab="exams" id="nav-btn-exams">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          Exam Scheduling
+        </button>
 
         <!-- Teacher Portal Links -->
         <div class="nav-section-title nav-role-teacher" style="display:none;">Teacher Faculty</div>
@@ -400,12 +404,20 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
           My Classroom & Roster
         </button>
+        <button class="nav-link nav-role-teacher" data-tab="teacher-exams" id="nav-btn-teacher-exams" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          MCQ Exam Creator
+        </button>
 
         <!-- Student Portal Links -->
         <div class="nav-section-title nav-role-student" style="display:none;">Student Space</div>
         <button class="nav-link nav-role-student" data-tab="student-portal" id="nav-btn-student-portal" style="display:none;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><line x1="7" y1="8" x2="17" y2="8"></line><line x1="7" y1="12" x2="11" y2="12"></line><circle cx="15" cy="12" r="1"></circle></svg>
           My Profile & ID Card
+        </button>
+        <button class="nav-link nav-role-student" data-tab="student-exams" id="nav-btn-student-exams" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Online Examinations
         </button>
       </nav>
 
@@ -725,6 +737,49 @@
         </section>
 
         <!-- ============================================================== -->
+        <!-- TAB 3B: ADMIN EXAM SCHEDULING & MANAGEMENT -->
+        <!-- ============================================================== -->
+        <section id="tab-exams" class="tab-content" style="display: none;">
+          <div class="controls-bar">
+            <div class="filters-group">
+              <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="admin-exam-search" placeholder="Search exams by title or subject...">
+              </div>
+
+              <select id="admin-exam-filter-class" class="custom-select" title="Filter by Class">
+                <option value="all">All Classes (1-10)</option>
+                <option value="1">Class 1</option>
+                <option value="2">Class 2</option>
+                <option value="3">Class 3</option>
+                <option value="4">Class 4</option>
+                <option value="5">Class 5</option>
+                <option value="6">Class 6</option>
+                <option value="7">Class 7</option>
+                <option value="8">Class 8</option>
+                <option value="9">Class 9</option>
+                <option value="10">Class 10</option>
+              </select>
+
+              <select id="admin-exam-filter-status" class="custom-select" title="Filter by Status">
+                <option value="all">All Statuses</option>
+                <option value="draft">Draft (Unscheduled)</option>
+                <option value="scheduled">Scheduled</option>
+              </select>
+            </div>
+
+            <div class="actions-group">
+              <span class="badge badge-adm" id="admin-exams-count-badge">0 Exams</span>
+              <button class="btn btn-secondary btn-sm" onclick="AdminExams.loadExams()" title="Refresh Exams">🔄 Refresh</button>
+            </div>
+          </div>
+
+          <div class="exams-grid" id="admin-exams-container">
+            <!-- Dynamically populated exam cards -->
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
         <!-- TAB 4: TEACHER PORTAL -->
         <!-- ============================================================== -->
         <section id="tab-teacher-portal" class="tab-content" style="display: none;">
@@ -739,9 +794,14 @@
                   <span class="badge badge-adm" id="teacher-student-count">0 Students</span>
                 </div>
               </div>
-              <div style="text-align: right;">
-                <p style="font-size: 0.82rem; color: var(--text-muted);">Current Academic Term</p>
-                <h4 style="font-weight: 700;">2026-2027 Session</h4>
+              <div style="text-align: right; display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+                <div>
+                  <p style="font-size: 0.82rem; color: var(--text-muted);">Current Academic Term</p>
+                  <h4 style="font-weight: 700;">2026-2027 Session</h4>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="App.switchTab('teacher-exams')">
+                  📝 Author / Manage MCQ Exams
+                </button>
               </div>
             </div>
           </div>
@@ -778,17 +838,60 @@
         </section>
 
         <!-- ============================================================== -->
+        <!-- TAB 4B: TEACHER MCQ EXAM CREATOR & SAVED PAPERS -->
+        <!-- ============================================================== -->
+        <section id="tab-teacher-exams" class="tab-content" style="display: none;">
+          <div class="card" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(16, 185, 129, 0.08)); border-color: var(--primary-glow); margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+              <div>
+                <span class="badge badge-class" style="margin-bottom: 8px;">Faculty Examination Hub</span>
+                <h2 style="font-size: 1.5rem; font-weight: 800;">MCQ Question Papers & Examination Manager</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Author multiple-choice question papers for Classes 1 to 10 with designated correct answers (1 to 150 questions per exam).</p>
+              </div>
+              <button class="btn btn-primary" onclick="TeacherExams.openCreateExamModal()" id="btn-create-exam-top">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                + Create New MCQ Exam
+              </button>
+            </div>
+          </div>
+
+          <div class="controls-bar" style="margin-bottom: 20px;">
+            <div class="filters-group">
+              <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="teacher-exam-search" placeholder="Search your exams...">
+              </div>
+            </div>
+            <div class="actions-group">
+              <span class="badge badge-class" id="teacher-exams-count-badge">0 Exams Saved</span>
+              <button class="btn btn-secondary btn-sm" onclick="TeacherExams.loadExams()">🔄 Refresh</button>
+            </div>
+          </div>
+
+          <div class="exams-grid" id="teacher-exams-container">
+            <!-- Dynamically populated teacher exams -->
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
         <!-- TAB 5: STUDENT PORTAL -->
         <!-- ============================================================== -->
         <section id="tab-student-portal" class="tab-content" style="display: none;">
           <div class="card" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(79, 70, 229, 0.08));">
             <div style="display: flex; align-items: center; gap: 20px;">
               <img src="/avatars/student1.svg" id="student-profile-avatar" style="width: 72px; height: 72px; border-radius: 50%; border: 3px solid var(--primary);" alt="Student Avatar">
-              <div>
-                <span class="badge badge-adm">Enrolled Student</span>
-                <h2 id="student-profile-name" style="font-size: 1.6rem; font-weight: 800; margin-top: 4px;">Student Name</h2>
-                <p id="student-profile-class" style="color: var(--text-muted); font-weight: 600;">Class 10 - Division A</p>
-                <p id="student-profile-adm" style="font-size: 0.8rem; font-family: monospace; color: var(--primary);">Admission No: ADM-2026-001</p>
+              <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 16px;">
+                <div>
+                  <span class="badge badge-adm">Enrolled Student</span>
+                  <h2 id="student-profile-name" style="font-size: 1.6rem; font-weight: 800; margin-top: 4px;">Student Name</h2>
+                  <p id="student-profile-class" style="color: var(--text-muted); font-weight: 600;">Class 10 - Division A</p>
+                  <p id="student-profile-adm" style="font-size: 0.8rem; font-family: monospace; color: var(--primary);">Admission No: ADM-2026-001</p>
+                </div>
+                <div>
+                  <button class="btn btn-primary" onclick="App.switchTab('student-exams')">
+                    📝 Go to Online Examinations
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -857,6 +960,28 @@
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- TAB 5B: STUDENT ONLINE EXAMINATIONS -->
+        <!-- ============================================================== -->
+        <section id="tab-student-exams" class="tab-content" style="display: none;">
+          <div class="card" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(16, 185, 129, 0.08)); border-color: rgba(6, 182, 212, 0.3); margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+              <div>
+                <span class="badge badge-adm" style="margin-bottom: 8px;">Online Assessment Postal</span>
+                <h2 style="font-size: 1.5rem; font-weight: 800;">Holy Family Online MCQ Examination Hall</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem;" id="student-exam-hall-info">Official computer-based assessments for your enrolled grade and division.</p>
+              </div>
+              <div>
+                <button class="btn btn-secondary btn-sm" onclick="StudentExams.loadExams()">🔄 Refresh Exam Schedule</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="exams-grid" id="student-exams-container">
+            <!-- Dynamically populated student exams with countdown timers, live taking buttons, or score results -->
           </div>
         </section>
 
@@ -1191,8 +1316,359 @@
         </div>
       </div>
 
+  <!-- ============================================================== -->
+  <!-- MODAL 5: CREATE / EDIT MCQ EXAM (TEACHER) -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="exam-create-modal">
+    <div class="modal-dialog" style="max-width: 860px;">
+      <div class="modal-header">
+        <div class="modal-header-info">
+          <div class="modal-icon-badge" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(16, 185, 129, 0.18)); color: var(--primary);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          </div>
+          <div>
+            <h3 id="exam-create-modal-title">Create MCQ Examination</h3>
+            <p class="modal-subtitle">Design multiple-choice questions (1 to 150), specify answer keys, and select target class & division</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="App.closeModal('exam-create-modal')" aria-label="Close modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <form id="exam-create-form" onsubmit="TeacherExams.handleSaveExam(event)">
+        <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
+          <!-- Exam Metadata Grid -->
+          <div class="form-grid">
+            <div class="form-full form-group">
+              <label class="form-label" for="exam-title-input">Exam Title <span class="req">*</span></label>
+              <input type="text" id="exam-title-input" class="form-input" placeholder="e.g. Physics Mid-Term Examination - Mechanics" required autocomplete="off">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="exam-subject-input">Subject <span class="req">*</span></label>
+              <select id="exam-subject-input" class="custom-select" style="width: 100%;" required>
+                <option value="Physics">Physics</option>
+                <option value="Chemistry">Chemistry</option>
+                <option value="Biology">Biology</option>
+                <option value="English">English</option>
+                <option value="Malayalam">Malayalam</option>
+                <option value="Maths">Maths</option>
+                <option value="Science">Science</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="exam-class-input">Target Class (1 - 10) <span class="req">*</span></label>
+              <select id="exam-class-input" class="custom-select" style="width: 100%;" required>
+                <option value="1">Class 1</option>
+                <option value="2">Class 2</option>
+                <option value="3">Class 3</option>
+                <option value="4">Class 4</option>
+                <option value="5">Class 5</option>
+                <option value="6">Class 6</option>
+                <option value="7">Class 7</option>
+                <option value="8">Class 8</option>
+                <option value="9">Class 9</option>
+                <option value="10" selected>Class 10</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="exam-div-input">Target Division <span class="req">*</span></label>
+              <select id="exam-div-input" class="custom-select" style="width: 100%;" required>
+                <option value="All">All Divisions (A, B, C, D, E)</option>
+                <option value="A">Division A</option>
+                <option value="B">Division B</option>
+                <option value="C">Division C</option>
+                <option value="D">Division D</option>
+                <option value="E">Division E</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="exam-duration-input">Duration (Minutes) <span class="req">*</span></label>
+              <input type="number" id="exam-duration-input" class="form-input" min="5" max="300" value="30" required>
+            </div>
+          </div>
+
+          <!-- Section Divider: Questions Builder -->
+          <div class="form-section-divider" style="margin-top: 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+              <span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                MCQ Questions & Designated Correct Answers
+              </span>
+              <span class="badge badge-class" id="exam-builder-count">1 Question / 150 Max</span>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="TeacherExams.addQuestion()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              + Add Question
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="TeacherExams.loadSampleQuestions()">
+              ⚡ Load 3 Sample Questions
+            </button>
+            <span style="font-size: 0.78rem; color: var(--text-muted); align-self: center; margin-left: auto;">
+              Required: Minimum 1 question, Maximum 150 questions. Mark one option as correct for each question.
+            </span>
+          </div>
+
+          <!-- Scrollable Questions Container -->
+          <div id="exam-questions-builder-list" class="question-builder-container">
+            <!-- Dynamically populated question cards -->
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="App.closeModal('exam-create-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-exam-submit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            Save Exam Paper (Draft)
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 6: ADMIN SCHEDULE EXAM DATE & TIME -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="exam-schedule-modal">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <div class="modal-header">
+        <div class="modal-header-info">
+          <div class="modal-icon-badge" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(79, 70, 229, 0.18)); color: #0891b2;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          </div>
+          <div>
+            <h3>Schedule Examination Date & Time</h3>
+            <p class="modal-subtitle">Set date & time window for student portal exam access</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="App.closeModal('exam-schedule-modal')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <form id="exam-schedule-form" onsubmit="AdminExams.handleScheduleSubmit(event)">
+        <input type="hidden" id="schedule-exam-id">
+        <div class="modal-body">
+          <div style="background: var(--bg-subtle); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 18px;">
+            <h4 id="schedule-modal-exam-title" style="font-size: 1.05rem; font-weight: 800; color: var(--text-main);">Exam Title</h4>
+            <div style="display: flex; gap: 8px; margin-top: 6px;">
+              <span class="badge badge-class" id="schedule-modal-class">Class 10</span>
+              <span class="badge badge-div" id="schedule-modal-div">Division All</span>
+              <span class="badge badge-subject" id="schedule-modal-subject">Physics</span>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label" for="schedule-start-datetime">Scheduled Start Date & Time <span class="req">*</span></label>
+            <input type="datetime-local" id="schedule-start-datetime" class="form-input" required>
+            <span class="form-hint">At this exact moment, the exam portal opens for enrolled students</span>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label" for="schedule-duration-minutes">Exam Window Duration (Minutes) <span class="req">*</span></label>
+            <input type="number" id="schedule-duration-minutes" class="form-input" min="5" max="360" value="45" required oninput="AdminExams.updateEndTimePreview()">
+            <span class="form-hint" id="schedule-end-time-preview">Calculated End: --</span>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="App.closeModal('exam-schedule-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-schedule-submit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Publish & Schedule Exam
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 7: VIEW SUBMISSIONS & RESULTS -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="exam-submissions-modal">
+    <div class="modal-dialog" style="max-width: 780px;">
+      <div class="modal-header">
+        <div class="modal-header-info">
+          <div class="modal-icon-badge" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 182, 212, 0.18)); color: #10b981;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          </div>
+          <div>
+            <h3 id="submissions-modal-title">Student Submissions & Score Report</h3>
+            <p class="modal-subtitle" id="submissions-modal-subtitle">Real-time marks scored by enrolled students</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="App.closeModal('exam-submissions-modal')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="modal-body" style="max-height: 65vh; overflow-y: auto;">
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Student</th>
+                <th>Admission No</th>
+                <th>Class & Div</th>
+                <th>Score</th>
+                <th>Percentage</th>
+                <th>Submitted At</th>
+              </tr>
+            </thead>
+            <tbody id="submissions-modal-table-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="App.closeModal('credentials-modal')">Got it</button>
+        <button type="button" class="btn btn-secondary" onclick="App.closeModal('exam-submissions-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- FULLSCREEN STUDENT EXAM TAKER INTERFACE -->
+  <!-- ============================================================== -->
+  <div class="student-exam-interface" id="student-exam-taker" style="display: none;">
+    <!-- Top Bar -->
+    <header class="exam-interface-topbar">
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <img src="logo.svg" alt="HFIS Crest" style="width: 38px; height: 38px;">
+        <div>
+          <h3 id="taker-exam-title" style="font-size: 1.15rem; font-weight: 800; color: var(--text-main);">Exam Title</h3>
+          <div style="display: flex; gap: 8px; margin-top: 2px;">
+            <span class="badge badge-subject" id="taker-exam-subject">Physics</span>
+            <span class="badge badge-class" id="taker-exam-class">Class 10</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Countdown Clock -->
+      <div class="exam-timer-display" id="taker-timer-container">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <span id="taker-timer-text">00:00</span>
+      </div>
+
+      <div>
+        <button class="btn btn-primary" onclick="StudentExams.confirmSubmitExam()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Submit Exam
+        </button>
+      </div>
+    </header>
+
+    <!-- Body Layout -->
+    <div class="exam-interface-body">
+      <!-- Main Content (Question & Options) -->
+      <main class="exam-interface-content">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <span class="question-num-pill" id="taker-question-badge">Question 1 of 10</span>
+            <span class="badge badge-adm" id="taker-marks-badge">1 Mark</span>
+          </div>
+
+          <h2 id="taker-question-text" style="font-size: 1.35rem; font-weight: 700; line-height: 1.4; color: var(--text-main);">
+            Question statement will load here...
+          </h2>
+
+          <div class="student-options-list" id="taker-options-list">
+            <!-- Dynamically populated options cards -->
+          </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-secondary" id="taker-btn-prev" onclick="StudentExams.navigateQuestion(-1)">
+            ← Previous Question
+          </button>
+          <div style="font-size: 0.88rem; color: var(--text-muted);" id="taker-nav-progress">
+            Question 1 / 10
+          </div>
+          <button class="btn btn-primary" id="taker-btn-next" onclick="StudentExams.navigateQuestion(1)">
+            Next Question →
+          </button>
+        </div>
+      </main>
+
+      <!-- Right Sidebar: Question Palette Grid -->
+      <aside class="exam-interface-palette">
+        <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-main);">Question Overview</h4>
+        <div style="display: flex; gap: 14px; margin-top: 10px; font-size: 0.78rem;">
+          <span style="display: flex; align-items: center; gap: 4px;">
+            <span style="width: 12px; height: 12px; border-radius: 3px; background: #10b981;"></span>
+            Answered
+          </span>
+          <span style="display: flex; align-items: center; gap: 4px;">
+            <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--bg-subtle); border: 1px solid var(--border-color);"></span>
+            Unanswered
+          </span>
+        </div>
+
+        <div class="palette-grid" id="taker-palette-grid">
+          <!-- Dynamically populated 1 to N question buttons -->
+        </div>
+
+        <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-color);">
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted);" id="taker-summary-answered">
+            0 of 10 Answered
+          </div>
+          <button class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 10px;" onclick="StudentExams.confirmSubmitExam()">
+            Review & Final Submit
+          </button>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 8: STUDENT EXAM SCORE CARD -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="exam-score-modal">
+    <div class="modal-dialog" style="max-width: 460px; text-align: center;">
+      <div class="modal-header">
+        <h3>Exam Result & Performance Card</h3>
+        <button class="modal-close-btn" onclick="App.closeModal('exam-score-modal')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="modal-body" style="padding: 28px 20px;">
+        <div class="score-badge-circle">
+          <div class="num" id="score-card-score">0</div>
+          <div class="denom" id="score-card-total">/ 10 Marks</div>
+        </div>
+
+        <h3 id="score-card-title" style="font-size: 1.25rem; font-weight: 800; margin-bottom: 6px;">Physics Midterm Examination</h3>
+        <span class="badge badge-class" id="score-card-class-badge">Class 10 - Division A</span>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; text-align: left;">
+          <div style="background: var(--bg-subtle); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700;">PERCENTAGE</div>
+            <div id="score-card-percent" style="font-size: 1.2rem; font-weight: 800; color: var(--primary);">0%</div>
+          </div>
+          <div style="background: var(--bg-subtle); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700;">STATUS</div>
+            <div id="score-card-status" style="font-size: 1.2rem; font-weight: 800; color: #10b981;">COMPLETED</div>
+          </div>
+        </div>
+
+        <p id="score-card-feedback" style="font-size: 0.88rem; color: var(--text-muted); margin-top: 16px;">
+          Your responses were successfully evaluated and recorded in the school system.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="App.closeModal('exam-score-modal'); StudentExams.loadExams();">Back to Examinations Hall</button>
       </div>
     </div>
   </div>
@@ -1259,6 +1735,7 @@
   <script src="js/admin.js"></script>
   <script src="js/teacher.js"></script>
   <script src="js/student.js"></script>
+  <script src="js/exams.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
