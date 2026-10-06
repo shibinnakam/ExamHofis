@@ -199,7 +199,8 @@ const Admin = {
 
   openAddStudentModal() {
     document.getElementById('student-modal-title').textContent = 'Add New Student';
-    document.getElementById('student-form').reset();
+    const form = document.getElementById('student-form');
+    if (form) form.reset();
     document.getElementById('student-id-field').value = '';
     document.getElementById('student-preview-img').src = '/avatars/student1.svg';
     
@@ -208,7 +209,22 @@ const Admin = {
     document.getElementById('student-admission-no').value = `ADM-2026-${randomNum}`;
     
     // Default password suggestion
-    document.getElementById('student-password').value = 'student123';
+    const passInput = document.getElementById('student-password');
+    if (passInput) {
+      passInput.value = 'student123';
+      passInput.type = 'password';
+      passInput.placeholder = 'Password';
+      const eyeBtn = passInput.parentElement?.querySelector('.icon-only');
+      if (eyeBtn) {
+        const eyeOpen = eyeBtn.querySelector('.eye-open-icon');
+        const eyeClosed = eyeBtn.querySelector('.eye-closed-icon');
+        if (eyeOpen && eyeClosed) {
+          eyeOpen.style.display = 'block';
+          eyeClosed.style.display = 'none';
+          eyeBtn.setAttribute('title', 'Show password');
+        }
+      }
+    }
     
     App.openModal('student-modal');
   },
@@ -223,8 +239,21 @@ const Admin = {
       document.getElementById('student-div').value = student.div;
       document.getElementById('student-admission-no').value = student.admission_no;
       document.getElementById('student-username').value = student.username;
-      document.getElementById('student-password').value = ''; // keep empty unless changing
-      document.getElementById('student-password').placeholder = 'Leave blank to keep current password';
+      const passInput = document.getElementById('student-password');
+      if (passInput) {
+        passInput.value = ''; // keep empty unless changing
+        passInput.type = 'password';
+        passInput.placeholder = 'Leave blank to keep current';
+        const eyeBtn = passInput.parentElement?.querySelector('.icon-only');
+        if (eyeBtn) {
+          const eyeOpen = eyeBtn.querySelector('.eye-open-icon');
+          const eyeClosed = eyeBtn.querySelector('.eye-closed-icon');
+          if (eyeOpen && eyeClosed) {
+            eyeOpen.style.display = 'block';
+            eyeClosed.style.display = 'none';
+          }
+        }
+      }
       document.getElementById('student-preview-img').src = student.photo_url || '/avatars/student1.svg';
 
       App.openModal('student-modal');
@@ -399,9 +428,25 @@ const Admin = {
 
   openAddTeacherModal() {
     document.getElementById('teacher-modal-title').textContent = 'Add New Teacher';
-    document.getElementById('teacher-form').reset();
+    const form = document.getElementById('teacher-form');
+    if (form) form.reset();
     document.getElementById('teacher-id-field').value = '';
-    document.getElementById('teacher-password').value = 'teacher123';
+    const passInput = document.getElementById('teacher-password');
+    if (passInput) {
+      passInput.value = 'teacher123';
+      passInput.type = 'password';
+      passInput.placeholder = 'Password';
+      const eyeBtn = passInput.parentElement?.querySelector('.icon-only');
+      if (eyeBtn) {
+        const eyeOpen = eyeBtn.querySelector('.eye-open-icon');
+        const eyeClosed = eyeBtn.querySelector('.eye-closed-icon');
+        if (eyeOpen && eyeClosed) {
+          eyeOpen.style.display = 'block';
+          eyeClosed.style.display = 'none';
+          eyeBtn.setAttribute('title', 'Show password');
+        }
+      }
+    }
     App.openModal('teacher-modal');
   },
 
@@ -414,8 +459,21 @@ const Admin = {
       document.getElementById('teacher-class').value = teacher.class;
       document.getElementById('teacher-subject').value = teacher.subject;
       document.getElementById('teacher-username').value = teacher.username;
-      document.getElementById('teacher-password').value = '';
-      document.getElementById('teacher-password').placeholder = 'Leave blank to keep current password';
+      const passInput = document.getElementById('teacher-password');
+      if (passInput) {
+        passInput.value = '';
+        passInput.type = 'password';
+        passInput.placeholder = 'Leave blank to keep current';
+        const eyeBtn = passInput.parentElement?.querySelector('.icon-only');
+        if (eyeBtn) {
+          const eyeOpen = eyeBtn.querySelector('.eye-open-icon');
+          const eyeClosed = eyeBtn.querySelector('.eye-closed-icon');
+          if (eyeOpen && eyeClosed) {
+            eyeOpen.style.display = 'block';
+            eyeClosed.style.display = 'none';
+          }
+        }
+      }
 
       App.openModal('teacher-modal');
     } catch (err) {

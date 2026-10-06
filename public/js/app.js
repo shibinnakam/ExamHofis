@@ -298,18 +298,41 @@ const App = {
     if (input) {
       input.value = pass;
       input.type = 'text'; // momentarily show it so admin sees it
+      const parent = input.parentElement;
+      if (parent) {
+        const eyeOpen = parent.querySelector('.eye-open-icon');
+        const eyeClosed = parent.querySelector('.eye-closed-icon');
+        if (eyeOpen && eyeClosed) {
+          eyeOpen.style.display = 'none';
+          eyeClosed.style.display = 'block';
+        }
+      }
       this.showToast('Generated secure random password: ' + pass, 'info');
     }
   },
 
   togglePasswordVisibility(targetInputId, btn) {
     const input = document.getElementById(targetInputId);
-    if (input) {
-      if (input.type === 'password') {
-        input.type = 'text';
-        btn.textContent = '🙈 Hide';
+    if (!input) return;
+    const eyeOpen = btn.querySelector('.eye-open-icon');
+    const eyeClosed = btn.querySelector('.eye-closed-icon');
+
+    if (input.type === 'password') {
+      input.type = 'text';
+      if (eyeOpen && eyeClosed) {
+        eyeOpen.style.display = 'none';
+        eyeClosed.style.display = 'block';
+        btn.setAttribute('title', 'Hide password');
       } else {
-        input.type = 'password';
+        btn.textContent = '🙈 Hide';
+      }
+    } else {
+      input.type = 'password';
+      if (eyeOpen && eyeClosed) {
+        eyeOpen.style.display = 'block';
+        eyeClosed.style.display = 'none';
+        btn.setAttribute('title', 'Show password');
+      } else {
         btn.textContent = '👁️ Show';
       }
     }
