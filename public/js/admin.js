@@ -684,3 +684,5 @@ const Admin = {
     App.openModal('credentials-modal');
   }
 };
+
+window.Admin = Admin;

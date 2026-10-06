@@ -184,3 +184,5 @@ const API = {
     return this.request('/api/aws/status');
   }
 };
+
+window.API = API;

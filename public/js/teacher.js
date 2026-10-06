@@ -74,3 +74,5 @@ const TeacherPortal = {
     }
   }
 };
+
+window.TeacherPortal = TeacherPortal;

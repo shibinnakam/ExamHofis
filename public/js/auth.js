@@ -60,7 +60,8 @@ const Auth = {
       const role = this.currentUser.role;
       const roleIcon = role === 'admin' ? '👑' : role === 'teacher' ? '👨‍🏫' : '🎓';
       navBtn.innerHTML = `${roleIcon} Open ${role.toUpperCase()} Portal`;
-      navBtn.onclick = () => {
+      navBtn.onclick = (e) => {
+        if (e) e.preventDefault();
         App.showPortal();
         App.switchPortalView(this.currentUser.role);
       };
@@ -69,7 +70,10 @@ const Auth = {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
         Portal Login
       `;
-      navBtn.onclick = () => this.showLoginModal();
+      navBtn.onclick = (e) => {
+        if (e) e.preventDefault();
+        this.showLoginModal();
+      };
     }
   },
 
@@ -102,10 +106,6 @@ const Auth = {
       if (avatarEl) avatarEl.src = avatarUrl;
       if (roleBadgeEl) roleBadgeEl.textContent = `${role === 'admin' ? '👑 Admin' : role === 'teacher' ? '👨‍🏫 Teacher' : '🎓 Student'}`;
 
-      // Strict Navigation visibility according to role:
-      // - Admin ONLY sees Admin window (Dashboard, Students, Teachers management)
-      // - Teacher ONLY sees Teacher hub
-      // - Student ONLY sees Student space
       if (role === 'admin') {
         navAdmin.forEach(el => el.style.setProperty('display', 'flex', 'important'));
         navTeacher.forEach(el => el.style.setProperty('display', 'none', 'important'));
@@ -130,18 +130,15 @@ const Auth = {
   },
 
   showLoginModal() {
-    if (this.currentUser) {
-      App.showPortal();
-      App.switchPortalView(this.currentUser.role);
-      return;
-    }
     const modal = document.getElementById('login-modal');
     if (modal) {
       modal.style.display = 'flex';
+      modal.style.zIndex = '99999';
       const u = document.getElementById('login-username');
       const p = document.getElementById('login-password');
       if (u && !u.value) u.value = 'admin';
       if (p && !p.value) p.value = 'admin123';
+      setTimeout(() => u?.focus(), 50);
     }
   },
 
@@ -150,3 +147,5 @@ const Auth = {
     if (modal) modal.style.display = 'none';
   }
 };
+
+window.Auth = Auth;

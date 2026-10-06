@@ -72,3 +72,5 @@ const StudentPortal = {
     }
   }
 };
+
+window.StudentPortal = StudentPortal;

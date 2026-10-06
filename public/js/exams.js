@@ -1184,3 +1184,7 @@ const StudentExams = {
     App.openModal('exam-score-modal');
   }
 };
+
+window.TeacherExams = TeacherExams;
+window.AdminExams = AdminExams;
+window.StudentExams = StudentExams;

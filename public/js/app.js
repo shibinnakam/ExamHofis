@@ -5,10 +5,19 @@ const App = {
   async init() {
     this.setupEventListeners();
     this.setupTheme();
-    this.checkAwsStatus();
+
+    try {
+      this.checkAwsStatus();
+    } catch (e) {
+      console.warn('AWS check skipped:', e);
+    }
 
     // Check user session
-    await Auth.init();
+    try {
+      await Auth.init();
+    } catch (e) {
+      console.warn('Auth session check error:', e);
+    }
     
     // Always show Holy Family International School Homepage first as requested
     this.showHomePage();
@@ -59,6 +68,12 @@ const App = {
   },
 
   setupEventListeners() {
+    // Homepage Navbar Login Button
+    document.getElementById('home-navbar-login-btn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      Auth.showLoginModal();
+    });
+
     // Navigation Links
     document.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', (e) => {
@@ -397,20 +412,36 @@ const App = {
 
   // Demo Login Quick Helper
   quickLogin(role) {
+    Auth.showLoginModal();
+    const u = document.getElementById('login-username');
+    const p = document.getElementById('login-password');
+    if (!u || !p) return;
+
     if (role === 'admin') {
-      document.getElementById('login-username').value = 'admin';
-      document.getElementById('login-password').value = 'admin123';
+      u.value = 'admin';
+      p.value = 'admin123';
     } else if (role === 'teacher') {
-      document.getElementById('login-username').value = 'ananya.physics';
-      document.getElementById('login-password').value = 'teacher123';
+      u.value = 'ananya.physics';
+      p.value = 'teacher123';
     } else if (role === 'student') {
-      document.getElementById('login-username').value = 'aarav10a';
-      document.getElementById('login-password').value = 'student123';
+      u.value = 'diya10a';
+      p.value = 'student123';
     }
-    document.getElementById('login-submit-btn')?.click();
+
+    const submitBtn = document.getElementById('login-submit-btn');
+    if (submitBtn) {
+      submitBtn.click();
+    } else {
+      Auth.login(u.value, p.value);
+    }
   }
 };
 
-window.addEventListener('DOMContentLoaded', () => {
+window.App = App;
+
+// Guarantee App.init runs whether document is still loading or already parsed
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', () => App.init());
+} else {
   App.init();
-});
+}
