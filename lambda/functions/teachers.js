@@ -60,19 +60,41 @@ exports.handler = async (event) => {
     // 3. POST /api/teachers
     if (method === 'POST') {
       const body = event.body ? (typeof event.body === 'string' ? JSON.parse(event.body) : event.body) : {};
-      const { name, class: teacherClass, subject, username, password } = body;
+      const { name, class: teacherClass, subject, assignments: reqAssignments, username, password } = body;
 
       if (!name || !name.trim()) return buildResponse(400, { error: 'Teacher name is required' });
-      const classNum = parseInt(teacherClass, 10);
-      if (isNaN(classNum) || classNum < 1 || classNum > 10) {
-        return buildResponse(400, { error: 'Class must be between 1 and 10' });
-      }
-      if (!subject || !VALID_SUBJECTS.includes(subject)) {
-        return buildResponse(400, { error: `Subject must be one of: ${VALID_SUBJECTS.join(', ')}` });
-      }
       if (!username || !username.trim()) return buildResponse(400, { error: 'Username is required' });
       if (!password || password.length < 4) return buildResponse(400, { error: 'Password must be at least 4 characters' });
 
+      let assignments = [];
+      if (Array.isArray(reqAssignments)) {
+        assignments = reqAssignments;
+      } else if (typeof reqAssignments === 'string') {
+        try { assignments = JSON.parse(reqAssignments); } catch (e) {}
+      }
+
+      if (assignments && assignments.length > 0) {
+        assignments = assignments.map(a => ({
+          class: parseInt(a.class, 10),
+          subject: String(a.subject).trim()
+        })).filter(a => !isNaN(a.class) && a.class >= 1 && a.class <= 10 && VALID_SUBJECTS.includes(a.subject));
+      }
+
+      if (!assignments || assignments.length === 0) {
+        const classNum = parseInt(teacherClass, 10);
+        if (isNaN(classNum) || classNum < 1 || classNum > 10) {
+          return buildResponse(400, { error: 'Class must be between 1 and 10' });
+        }
+        if (!subject || !VALID_SUBJECTS.includes(subject)) {
+          return buildResponse(400, { error: `Subject must be one of: ${VALID_SUBJECTS.join(', ')}` });
+        }
+        assignments = [{ class: classNum, subject: subject.trim() }];
+      }
+
+      const primaryClass = assignments[0].class;
+      const primarySubject = assignments[0].subject;
+      const classes = [...new Set(assignments.map(a => a.class))];
+      const subjects = [...new Set(assignments.map(a => a.subject))];
       const cleanUsername = username.trim().toLowerCase();
 
       // Check duplicate username
@@ -110,8 +132,11 @@ exports.handler = async (event) => {
         id: uuidv4(),
         user_id: userId,
         name: name.trim(),
-        class: classNum,
-        subject,
+        class: primaryClass,
+        subject: primarySubject,
+        classes: classes,
+        subjects: subjects,
+        assignments: assignments,
         username: cleanUsername,
         plain_password: password
       });
@@ -131,16 +156,38 @@ exports.handler = async (event) => {
       }
 
       const body = event.body ? (typeof event.body === 'string' ? JSON.parse(event.body) : event.body) : {};
-      const { name, class: teacherClass, subject, password } = body;
+      const { name, class: teacherClass, subject, assignments: reqAssignments, password } = body;
+
+      let assignments = null;
+      if (Array.isArray(reqAssignments)) {
+        assignments = reqAssignments;
+      } else if (typeof reqAssignments === 'string') {
+        try { assignments = JSON.parse(reqAssignments); } catch (e) {}
+      }
+
+      if (assignments && assignments.length > 0) {
+        assignments = assignments.map(a => ({
+          class: parseInt(a.class, 10),
+          subject: String(a.subject).trim()
+        })).filter(a => !isNaN(a.class) && a.class >= 1 && a.class <= 10 && VALID_SUBJECTS.includes(a.subject));
+      }
 
       const updates = {};
       if (name) updates.name = name.trim();
-      if (teacherClass) updates.class = parseInt(teacherClass, 10);
-      if (subject) {
-        if (!VALID_SUBJECTS.includes(subject)) {
-          return buildResponse(400, { error: `Subject must be one of: ${VALID_SUBJECTS.join(', ')}` });
+      if (assignments && assignments.length > 0) {
+        updates.assignments = assignments;
+        updates.classes = [...new Set(assignments.map(a => a.class))];
+        updates.subjects = [...new Set(assignments.map(a => a.subject))];
+        updates.class = assignments[0].class;
+        updates.subject = assignments[0].subject;
+      } else {
+        if (teacherClass) updates.class = parseInt(teacherClass, 10);
+        if (subject) {
+          if (!VALID_SUBJECTS.includes(subject)) {
+            return buildResponse(400, { error: `Subject must be one of: ${VALID_SUBJECTS.join(', ')}` });
+          }
+          updates.subject = subject;
         }
-        updates.subject = subject;
       }
 
       // Update password in Cognito if supplied

@@ -49,6 +49,12 @@ function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_teachers_subject ON teachers(subject);
   `);
 
+  try {
+    db.exec(`ALTER TABLE teachers ADD COLUMN assignments TEXT;`);
+  } catch (e) {
+    // Column already exists, safe to ignore
+  }
+
   // Seed default admin if none exists
   const adminExists = db.prepare('SELECT id FROM users WHERE username = ?').get('admin');
   if (!adminExists) {

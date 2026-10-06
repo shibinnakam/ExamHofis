@@ -262,39 +262,25 @@ async function getStudentsByClass(classNum) {
 // =========================================================================
 
 async function getTeachers({ search, classFilter, subject } = {}) {
-  let items = [];
+  const result = await dynamoDocClient.send(new ScanCommand({ TableName: TABLES.TEACHERS }));
+  let items = result.Items || [];
 
   if (classFilter && classFilter !== 'all') {
     const classNum = parseInt(classFilter, 10);
-    const queryParams = {
-      TableName: TABLES.TEACHERS,
-      IndexName: 'ClassIndex',
-      KeyConditionExpression: '#cls = :classVal',
-      ExpressionAttributeNames: { '#cls': 'class' },
-      ExpressionAttributeValues: { ':classVal': classNum }
-    };
-    const result = await dynamoDocClient.send(new QueryCommand(queryParams));
-    items = result.Items || [];
-  } else if (subject && subject !== 'all') {
-    const subStr = subject.trim();
-    const queryParams = {
-      TableName: TABLES.TEACHERS,
-      IndexName: 'SubjectIndex',
-      KeyConditionExpression: '#sub = :subVal',
-      ExpressionAttributeNames: { '#sub': 'subject' },
-      ExpressionAttributeValues: { ':subVal': subStr }
-    };
-    const result = await dynamoDocClient.send(new QueryCommand(queryParams));
-    items = result.Items || [];
-  } else {
-    const result = await dynamoDocClient.send(new ScanCommand({ TableName: TABLES.TEACHERS }));
-    items = result.Items || [];
+    items = items.filter(t =>
+      t.class === classNum ||
+      (t.classes && t.classes.includes(classNum)) ||
+      (t.assignments && t.assignments.some(a => a.class === classNum))
+    );
   }
 
-  // Filter in-memory for remaining conditions
   if (subject && subject !== 'all') {
     const subLower = subject.trim().toLowerCase();
-    items = items.filter(t => t.subject && t.subject.toLowerCase() === subLower);
+    items = items.filter(t =>
+      (t.subject && t.subject.toLowerCase() === subLower) ||
+      (t.subjects && t.subjects.some(s => s.toLowerCase() === subLower)) ||
+      (t.assignments && t.assignments.some(a => a.subject && a.subject.toLowerCase() === subLower))
+    );
   }
 
   if (search && search.trim()) {
@@ -308,7 +294,7 @@ async function getTeachers({ search, classFilter, subject } = {}) {
   // Sort by class ASC, subject ASC, name ASC
   items.sort((a, b) => {
     if (a.class !== b.class) return a.class - b.class;
-    if (a.subject !== b.subject) return a.subject.localeCompare(b.subject);
+    if (a.subject !== b.subject) return (a.subject || '').localeCompare(b.subject || '');
     return a.name.localeCompare(b.name);
   });
 
@@ -338,12 +324,28 @@ async function getTeacherByUserId(userId) {
 
 async function createTeacher(data) {
   const id = data.id || uuidv4();
+  const rawAssignments = Array.isArray(data.assignments) ? data.assignments : [
+    { class: parseInt(data.class, 10), subject: (data.subject || '').trim() }
+  ];
+  const assignments = rawAssignments.map(a => ({
+    class: parseInt(a.class, 10),
+    subject: String(a.subject).trim()
+  })).filter(a => !isNaN(a.class) && a.class >= 1 && a.class <= 10 && a.subject);
+
+  const primaryClass = assignments.length > 0 ? assignments[0].class : parseInt(data.class, 10);
+  const primarySubject = assignments.length > 0 ? assignments[0].subject : (data.subject || '').trim();
+  const classes = [...new Set(assignments.map(a => a.class))];
+  const subjects = [...new Set(assignments.map(a => a.subject))];
+
   const item = {
     id: String(id),
     user_id: String(data.user_id),
     name: data.name.trim(),
-    class: parseInt(data.class, 10),
-    subject: data.subject.trim(),
+    class: primaryClass,
+    subject: primarySubject,
+    classes: classes,
+    subjects: subjects,
+    assignments: assignments,
     username: data.username ? data.username.trim().toLowerCase() : '',
     plain_password: data.plain_password || '',
     created_at: data.created_at || new Date().toISOString()
@@ -398,15 +400,14 @@ async function deleteTeacher(id) {
 }
 
 async function getTeachersByClass(classNum) {
-  const params = {
-    TableName: TABLES.TEACHERS,
-    IndexName: 'ClassIndex',
-    KeyConditionExpression: '#cls = :c',
-    ExpressionAttributeNames: { '#cls': 'class' },
-    ExpressionAttributeValues: { ':c': parseInt(classNum, 10) }
-  };
-  const result = await dynamoDocClient.send(new QueryCommand(params));
-  return (result.Items || []).sort((a, b) => a.subject.localeCompare(b.subject));
+  const num = parseInt(classNum, 10);
+  const result = await dynamoDocClient.send(new ScanCommand({ TableName: TABLES.TEACHERS }));
+  const teachers = (result.Items || []).filter(t =>
+    t.class === num ||
+    (t.classes && t.classes.includes(num)) ||
+    (t.assignments && t.assignments.some(a => a.class === num))
+  );
+  return teachers.sort((a, b) => (a.subject || '').localeCompare(b.subject || ''));
 }
 
 // =========================================================================

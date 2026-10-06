@@ -677,7 +677,7 @@ app.get('/api/teachers', authenticateToken, async (req, res) => {
     // --- LOCAL SQLITE FLOW ---
     if (!db) return res.status(500).json({ error: 'Database not initialized' });
     let query = `
-      SELECT t.id, t.name, t.class, t.subject, t.created_at,
+      SELECT t.id, t.name, t.class, t.subject, t.assignments, t.created_at,
              u.id as user_id, u.username, u.plain_password
       FROM teachers t
       JOIN users u ON t.user_id = u.id
@@ -686,13 +686,15 @@ app.get('/api/teachers', authenticateToken, async (req, res) => {
     const params = [];
 
     if (classFilter && classFilter !== 'all') {
-      query += ` AND t.class = ?`;
-      params.push(parseInt(classFilter, 10));
+      const clsNum = parseInt(classFilter, 10);
+      query += ` AND (t.class = ? OR t.assignments LIKE ?)`;
+      params.push(clsNum, `%"class":${clsNum}%`);
     }
 
     if (subject && subject !== 'all') {
-      query += ` AND LOWER(t.subject) = ?`;
-      params.push(subject.trim().toLowerCase());
+      const subLower = subject.trim().toLowerCase();
+      query += ` AND (LOWER(t.subject) = ? OR LOWER(t.assignments) LIKE ?)`;
+      params.push(subLower, `%"subject":"${subLower}"%`);
     }
 
     if (search) {
@@ -737,18 +739,40 @@ app.get('/api/teachers/:id', authenticateToken, async (req, res) => {
 });
 
 app.post('/api/teachers', authenticateToken, requireRole(['admin']), async (req, res) => {
-  const { name, class: teacherClass, subject, username, password } = req.body;
+  const { name, class: teacherClass, subject, assignments: reqAssignments, username, password } = req.body;
 
   try {
     if (!name || !name.trim()) throw new Error('Teacher name is required');
-    const classNum = parseInt(teacherClass, 10);
-    if (isNaN(classNum) || classNum < 1 || classNum > 10) throw new Error('Class must be between 1 and 10');
-    if (!subject || !VALID_SUBJECTS.includes(subject)) {
-      throw new Error(`Subject must be one of: ${VALID_SUBJECTS.join(', ')}`);
-    }
     if (!username || !username.trim()) throw new Error('Username is required');
     if (!password || password.length < 4) throw new Error('Password must be at least 4 characters');
 
+    let assignments = [];
+    if (Array.isArray(reqAssignments)) {
+      assignments = reqAssignments;
+    } else if (typeof reqAssignments === 'string') {
+      try { assignments = JSON.parse(reqAssignments); } catch (e) {}
+    }
+
+    if (assignments && assignments.length > 0) {
+      assignments = assignments.map(a => ({
+        class: parseInt(a.class, 10),
+        subject: String(a.subject).trim()
+      })).filter(a => !isNaN(a.class) && a.class >= 1 && a.class <= 10 && VALID_SUBJECTS.includes(a.subject));
+    }
+
+    if (!assignments || assignments.length === 0) {
+      const classNum = parseInt(teacherClass, 10);
+      if (isNaN(classNum) || classNum < 1 || classNum > 10) throw new Error('Class must be between 1 and 10');
+      if (!subject || !VALID_SUBJECTS.includes(subject)) {
+        throw new Error(`Subject must be one of: ${VALID_SUBJECTS.join(', ')}`);
+      }
+      assignments = [{ class: classNum, subject: subject.trim() }];
+    }
+
+    const primaryClass = assignments[0].class;
+    const primarySubject = assignments[0].subject;
+    const classes = [...new Set(assignments.map(a => a.class))];
+    const subjects = [...new Set(assignments.map(a => a.subject))];
     const cleanUsername = username.trim().toLowerCase();
 
     // --- AWS COGNITO & DYNAMODB FLOW ---
@@ -776,8 +800,11 @@ app.post('/api/teachers', authenticateToken, requireRole(['admin']), async (req,
         id: uuidv4(),
         user_id: userId,
         name: name.trim(),
-        class: classNum,
-        subject,
+        class: primaryClass,
+        subject: primarySubject,
+        classes: classes,
+        subjects: subjects,
+        assignments: assignments,
         username: cleanUsername,
         plain_password: password
       });
@@ -800,16 +827,19 @@ app.post('/api/teachers', authenticateToken, requireRole(['admin']), async (req,
       `).run(cleanUsername, hash, password);
 
       const teacherRes = db.prepare(`
-        INSERT INTO teachers (user_id, name, class, subject)
-        VALUES (?, ?, ?, ?)
-      `).run(userRes.lastInsertRowid, name.trim(), classNum, subject);
+        INSERT INTO teachers (user_id, name, class, subject, assignments)
+        VALUES (?, ?, ?, ?, ?)
+      `).run(userRes.lastInsertRowid, name.trim(), primaryClass, primarySubject, JSON.stringify(assignments));
 
       return {
         id: teacherRes.lastInsertRowid,
         user_id: userRes.lastInsertRowid,
         name: name.trim(),
-        class: classNum,
-        subject,
+        class: primaryClass,
+        subject: primarySubject,
+        classes: classes,
+        subjects: subjects,
+        assignments: assignments,
         username: cleanUsername,
         plain_password: password
       };
@@ -824,9 +854,23 @@ app.post('/api/teachers', authenticateToken, requireRole(['admin']), async (req,
 
 app.put('/api/teachers/:id', authenticateToken, requireRole(['admin']), async (req, res) => {
   const teacherId = req.params.id;
-  const { name, class: teacherClass, subject, password } = req.body;
+  const { name, class: teacherClass, subject, assignments: reqAssignments, password } = req.body;
 
   try {
+    let assignments = null;
+    if (Array.isArray(reqAssignments)) {
+      assignments = reqAssignments;
+    } else if (typeof reqAssignments === 'string') {
+      try { assignments = JSON.parse(reqAssignments); } catch (e) {}
+    }
+
+    if (assignments && assignments.length > 0) {
+      assignments = assignments.map(a => ({
+        class: parseInt(a.class, 10),
+        subject: String(a.subject).trim()
+      })).filter(a => !isNaN(a.class) && a.class >= 1 && a.class <= 10 && VALID_SUBJECTS.includes(a.subject));
+    }
+
     // --- AWS DYNAMODB & COGNITO FLOW ---
     if (USE_AWS) {
       const existing = await dynamoService.getTeacherById(teacherId);
@@ -834,10 +878,18 @@ app.put('/api/teachers/:id', authenticateToken, requireRole(['admin']), async (r
 
       const updates = {};
       if (name) updates.name = name.trim();
-      if (teacherClass) updates.class = parseInt(teacherClass, 10);
-      if (subject) {
-        if (!VALID_SUBJECTS.includes(subject)) throw new Error(`Subject must be one of: ${VALID_SUBJECTS.join(', ')}`);
-        updates.subject = subject;
+      if (assignments && assignments.length > 0) {
+        updates.assignments = assignments;
+        updates.classes = [...new Set(assignments.map(a => a.class))];
+        updates.subjects = [...new Set(assignments.map(a => a.subject))];
+        updates.class = assignments[0].class;
+        updates.subject = assignments[0].subject;
+      } else {
+        if (teacherClass) updates.class = parseInt(teacherClass, 10);
+        if (subject) {
+          if (!VALID_SUBJECTS.includes(subject)) throw new Error(`Subject must be one of: ${VALID_SUBJECTS.join(', ')}`);
+          updates.subject = subject;
+        }
       }
 
       if (password && password.trim().length >= 4) {
@@ -857,10 +909,24 @@ app.put('/api/teachers/:id', authenticateToken, requireRole(['admin']), async (r
       if (!existing) throw new Error('Teacher not found');
 
       if (!name || !name.trim()) throw new Error('Teacher name is required');
-      const classNum = parseInt(teacherClass, 10);
-      if (isNaN(classNum) || classNum < 1 || classNum > 10) throw new Error('Class must be between 1 and 10');
-      if (!subject || !VALID_SUBJECTS.includes(subject)) {
-        throw new Error(`Subject must be one of: ${VALID_SUBJECTS.join(', ')}`);
+
+      let primaryClass = existing.class;
+      let primarySubject = existing.subject;
+      let assignmentsJson = existing.assignments;
+
+      if (assignments && assignments.length > 0) {
+        primaryClass = assignments[0].class;
+        primarySubject = assignments[0].subject;
+        assignmentsJson = JSON.stringify(assignments);
+      } else {
+        if (teacherClass) {
+          primaryClass = parseInt(teacherClass, 10);
+          if (isNaN(primaryClass) || primaryClass < 1 || primaryClass > 10) throw new Error('Class must be between 1 and 10');
+        }
+        if (subject) {
+          if (!VALID_SUBJECTS.includes(subject)) throw new Error(`Subject must be one of: ${VALID_SUBJECTS.join(', ')}`);
+          primarySubject = subject;
+        }
       }
 
       if (password && password.trim().length >= 4) {
@@ -869,13 +935,14 @@ app.put('/api/teachers/:id', authenticateToken, requireRole(['admin']), async (r
         db.prepare(`UPDATE users SET password_hash = ?, plain_password = ? WHERE id = ?`).run(hash, password.trim(), existing.user_id);
       }
 
-      db.prepare(`UPDATE teachers SET name = ?, class = ?, subject = ? WHERE id = ?`).run(name.trim(), classNum, subject, teacherId);
+      db.prepare(`UPDATE teachers SET name = ?, class = ?, subject = ?, assignments = ? WHERE id = ?`).run(name.trim(), primaryClass, primarySubject, assignmentsJson, teacherId);
 
       return {
         id: teacherId,
         name: name.trim(),
-        class: classNum,
-        subject,
+        class: primaryClass,
+        subject: primarySubject,
+        assignments: assignments || (existing.assignments ? JSON.parse(existing.assignments) : [{ class: primaryClass, subject: primarySubject }]),
         username: req.body.username || existing.username
       };
     });
@@ -1045,11 +1112,11 @@ app.get('/api/student/my-profile', authenticateToken, requireRole(['student', 'a
     }
 
     const teachers = db.prepare(`
-      SELECT t.id, t.name, t.subject, t.class
+      SELECT t.id, t.name, t.subject, t.class, t.assignments
       FROM teachers t
-      WHERE t.class = ?
+      WHERE t.class = ? OR t.assignments LIKE ?
       ORDER BY t.subject ASC
-    `).all(student.class);
+    `).all(student.class, `%"class":${student.class}%`);
 
     const classmates = db.prepare(`
       SELECT s.name, s.div, s.photo_url

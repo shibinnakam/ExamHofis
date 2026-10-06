@@ -368,6 +368,24 @@ const Admin = {
         const safeName = Admin.escapeStr(t.name);
         const safeUser = Admin.escapeStr(t.username);
         const safePass = Admin.escapeStr(t.plain_password || '••••••••');
+
+        let assignments = [];
+        if (Array.isArray(t.assignments)) {
+          assignments = t.assignments;
+        } else if (typeof t.assignments === 'string') {
+          try { assignments = JSON.parse(t.assignments); } catch (e) {}
+        }
+        if (!assignments || assignments.length === 0) {
+          assignments = [{ class: t.class, subject: t.subject }];
+        }
+
+        const uniqueClasses = [...new Set(assignments.map(a => a.class))].sort((a,b)=>a-b);
+        const classBadges = uniqueClasses.map(c => `<span class="badge badge-class">Class ${c}</span>`).join(' ');
+
+        const assignmentBadges = assignments.map(a => 
+          `<span class="badge badge-subject" title="Class ${a.class}: ${a.subject}">${a.subject} (Cl ${a.class})</span>`
+        ).join(' ');
+
         return `
         <tr style="cursor: pointer;" onclick="if (!event.target.closest('button')) Admin.openEditTeacherModal('${t.id}')" title="Click to edit or delete">
           <td>
@@ -381,8 +399,8 @@ const Admin = {
               </div>
             </div>
           </td>
-          <td><span class="badge badge-class">Class ${t.class}</span></td>
-          <td><span class="badge badge-subject">${t.subject}</span></td>
+          <td><div class="badges-wrap">${classBadges}</div></td>
+          <td><div class="badges-wrap">${assignmentBadges}</div></td>
           <td>
             <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); Admin.viewCredentials('${safeUser}', '${safePass}', '${safeName}')" title="View Credentials">
               🔑 Show
@@ -406,6 +424,20 @@ const Admin = {
     if (cardsContainer) {
       cardsContainer.innerHTML = this.teachers.map(t => {
         const safeName = Admin.escapeStr(t.name);
+        let assignments = [];
+        if (Array.isArray(t.assignments)) {
+          assignments = t.assignments;
+        } else if (typeof t.assignments === 'string') {
+          try { assignments = JSON.parse(t.assignments); } catch (e) {}
+        }
+        if (!assignments || assignments.length === 0) {
+          assignments = [{ class: t.class, subject: t.subject }];
+        }
+
+        const assignmentBadges = assignments.map(a => 
+          `<span class="badge badge-subject">Class ${a.class} • ${a.subject}</span>`
+        ).join(' ');
+
         return `
         <div class="profile-card" style="cursor: pointer;" onclick="if (!event.target.closest('button')) Admin.openEditTeacherModal('${t.id}')" title="Click to edit or delete">
           <div class="profile-card-avatar" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--secondary),var(--primary));color:#fff;font-size:1.6rem;font-weight:800;">
@@ -413,9 +445,8 @@ const Admin = {
           </div>
           <div class="profile-card-name">${safeName}</div>
           <div class="profile-card-sub">@${t.username}</div>
-          <div class="profile-card-badges">
-            <span class="badge badge-class">Class ${t.class}</span>
-            <span class="badge badge-subject">${t.subject}</span>
+          <div class="profile-card-badges badges-wrap">
+            ${assignmentBadges}
           </div>
           <div class="profile-card-actions">
             <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); Admin.openEditTeacherModal('${t.id}')">✏️ Edit</button>
@@ -426,11 +457,79 @@ const Admin = {
     }
   },
 
+  addTeacherAssignmentRow(selectedClass = 10, selectedSubject = 'Physics') {
+    const container = document.getElementById('teacher-assignments-container');
+    if (!container) return;
+
+    const row = document.createElement('div');
+    row.className = 'assignment-row';
+
+    const subjects = ['English', 'Malayalam', 'Chemistry', 'Physics', 'Biology', 'Science', 'Maths'];
+    const classOptions = Array.from({ length: 10 }, (_, i) => {
+      const c = i + 1;
+      return `<option value="${c}" ${c === Number(selectedClass) ? 'selected' : ''}>Class ${c}</option>`;
+    }).join('');
+
+    const subjectOptions = subjects.map(s => {
+      return `<option value="${s}" ${s === selectedSubject ? 'selected' : ''}>${s}</option>`;
+    }).join('');
+
+    row.innerHTML = `
+      <div class="assignment-field">
+        <label class="assignment-sublabel">Class (1 - 10)</label>
+        <select class="custom-select assignment-class-select" required>
+          ${classOptions}
+        </select>
+      </div>
+      <div class="assignment-field">
+        <label class="assignment-sublabel">Subject</label>
+        <select class="custom-select assignment-subject-select" required>
+          ${subjectOptions}
+        </select>
+      </div>
+      <button type="button" class="btn-remove-assignment" title="Remove assignment" onclick="Admin.removeTeacherAssignmentRow(this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+      </button>
+    `;
+
+    container.appendChild(row);
+    this.updateRemoveAssignmentButtons();
+  },
+
+  removeTeacherAssignmentRow(btn) {
+    const container = document.getElementById('teacher-assignments-container');
+    if (!container) return;
+    const rows = container.querySelectorAll('.assignment-row');
+    if (rows.length > 1) {
+      btn.closest('.assignment-row').remove();
+    }
+    this.updateRemoveAssignmentButtons();
+  },
+
+  updateRemoveAssignmentButtons() {
+    const container = document.getElementById('teacher-assignments-container');
+    if (!container) return;
+    const rows = container.querySelectorAll('.assignment-row');
+    rows.forEach(r => {
+      const btn = r.querySelector('.btn-remove-assignment');
+      if (btn) {
+        btn.disabled = rows.length <= 1;
+        btn.style.visibility = rows.length <= 1 ? 'hidden' : 'visible';
+      }
+    });
+  },
+
   openAddTeacherModal() {
     document.getElementById('teacher-modal-title').textContent = 'Add New Teacher';
     const form = document.getElementById('teacher-form');
     if (form) form.reset();
     document.getElementById('teacher-id-field').value = '';
+
+    // Clear and initialize with 1 assignment row
+    const container = document.getElementById('teacher-assignments-container');
+    if (container) container.innerHTML = '';
+    this.addTeacherAssignmentRow(10, 'Physics');
+
     const passInput = document.getElementById('teacher-password');
     if (passInput) {
       passInput.value = 'teacher123';
@@ -456,9 +555,26 @@ const Admin = {
       document.getElementById('teacher-modal-title').textContent = 'Edit Teacher';
       document.getElementById('teacher-id-field').value = teacher.id;
       document.getElementById('teacher-name').value = teacher.name;
-      document.getElementById('teacher-class').value = teacher.class;
-      document.getElementById('teacher-subject').value = teacher.subject;
       document.getElementById('teacher-username').value = teacher.username;
+
+      // Populate dynamic assignments
+      const container = document.getElementById('teacher-assignments-container');
+      if (container) container.innerHTML = '';
+
+      let assignments = [];
+      if (Array.isArray(teacher.assignments)) {
+        assignments = teacher.assignments;
+      } else if (typeof teacher.assignments === 'string') {
+        try { assignments = JSON.parse(teacher.assignments); } catch (e) {}
+      }
+      if (!assignments || assignments.length === 0) {
+        assignments = [{ class: teacher.class || 10, subject: teacher.subject || 'Physics' }];
+      }
+
+      assignments.forEach(a => {
+        this.addTeacherAssignmentRow(a.class, a.subject);
+      });
+
       const passInput = document.getElementById('teacher-password');
       if (passInput) {
         passInput.value = '';
@@ -485,15 +601,38 @@ const Admin = {
     e.preventDefault();
     const id = document.getElementById('teacher-id-field').value;
     const name = document.getElementById('teacher-name').value;
-    const teacherClass = document.getElementById('teacher-class').value;
-    const subject = document.getElementById('teacher-subject').value;
     const username = document.getElementById('teacher-username').value;
     const password = document.getElementById('teacher-password').value;
 
+    const rows = document.querySelectorAll('#teacher-assignments-container .assignment-row');
+    const assignments = [];
+    rows.forEach(r => {
+      const cls = parseInt(r.querySelector('.assignment-class-select').value, 10);
+      const sub = r.querySelector('.assignment-subject-select').value;
+      if (cls && sub) {
+        assignments.push({ class: cls, subject: sub });
+      }
+    });
+
+    if (assignments.length === 0) {
+      App.showToast('Please specify at least one class and subject assignment.', 'error');
+      return;
+    }
+
+    const primaryClass = assignments[0].class;
+    const primarySubject = assignments[0].subject;
+
+    // Update hidden fields for any dependent components
+    const classHidden = document.getElementById('teacher-class');
+    const subjectHidden = document.getElementById('teacher-subject');
+    if (classHidden) classHidden.value = primaryClass;
+    if (subjectHidden) subjectHidden.value = primarySubject;
+
     const payload = {
       name,
-      class: teacherClass,
-      subject,
+      class: primaryClass,
+      subject: primarySubject,
+      assignments,
       username,
       password
     };
