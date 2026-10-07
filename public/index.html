@@ -427,6 +427,10 @@
             <span class="role-badge" id="sidebar-user-role">ADMIN</span>
           </div>
         </div>
+        <button class="btn-sidebar-logout" id="logout-btn" onclick="Auth.logout()" title="Sign out from portal">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span>Logout</span>
+        </button>
       </div>
     </aside>
 
@@ -460,12 +464,6 @@
           <!-- Theme Toggle -->
           <button class="icon-btn" id="theme-toggle-btn" title="Toggle theme">
             <svg class="theme-icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-          </button>
-
-          <!-- Logout Button -->
-          <button class="btn-logout" id="logout-btn" onclick="Auth.logout()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-            Logout
           </button>
         </div>
       </header>
@@ -771,6 +769,10 @@
 
             <div class="actions-group">
               <span class="badge badge-adm" id="admin-exams-count-badge">0 Exams</span>
+              <button class="btn btn-primary btn-sm action-btn-premium" onclick="Reports.openClassDivisionModal()" title="Class & Division Performance Broadsheet (PDF)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                <span>Class Report Card (PDF)</span>
+              </button>
               <button class="btn btn-secondary btn-sm action-btn-premium" onclick="AdminExams.loadExams()" title="Refresh Exams">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
                 <span>Refresh</span>
@@ -868,6 +870,10 @@
             </div>
             <div class="actions-group">
               <span class="badge badge-class" id="teacher-exams-count-badge">0 Exams Saved</span>
+              <button class="btn btn-secondary btn-sm action-btn-premium" onclick="Reports.openClassDivisionModal()" title="Class & Division Performance Broadsheet (PDF)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                <span>Class Report Card (PDF)</span>
+              </button>
               <button class="btn btn-secondary btn-sm action-btn-premium" onclick="TeacherExams.loadExams()" title="Refresh Exams">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
                 <span>Refresh</span>
@@ -1557,6 +1563,7 @@
                 <th>Score</th>
                 <th>Percentage</th>
                 <th>Submitted At</th>
+                <th style="text-align: center;">Report Card</th>
               </tr>
             </thead>
             <tbody id="submissions-modal-table-body">
@@ -1712,6 +1719,418 @@
   </div>
 
   <!-- ============================================================== -->
+  <!-- MODAL 9: ADMIN & TEACHER EXAM QUESTIONS & ANSWERS (Q&A KEY) -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="exam-qa-modal">
+    <div class="modal-dialog" style="max-width: 820px; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <div class="modal-header-info">
+          <div class="modal-icon-badge" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(16, 185, 129, 0.18)); color: var(--primary);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </div>
+          <div>
+            <h3 id="qa-modal-exam-title">Examination Questions & Answer Key</h3>
+            <p class="modal-subtitle" id="qa-modal-exam-subtitle">Official question paper with faculty-designated correct answers</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="App.closeModal('exam-qa-modal')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="modal-body" style="max-height: 72vh; overflow-y: auto; padding: 20px;">
+        <!-- Meta details -->
+        <div style="background: var(--bg-subtle); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <span class="badge badge-class" id="qa-modal-badge-class">Class 10</span>
+            <span class="badge badge-div" id="qa-modal-badge-div">Division All</span>
+            <span class="badge badge-subject" id="qa-modal-badge-subject">Physics</span>
+            <span class="badge badge-adm" id="qa-modal-badge-duration">30 Mins</span>
+          </div>
+          <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-main);" id="qa-modal-badge-marks">
+            10 Questions • 10 Total Marks
+          </div>
+        </div>
+
+        <!-- Questions container -->
+        <div id="qa-modal-questions-list" class="qa-paper-container">
+          <!-- Dynamically populated with question statements and highlighted correct answers -->
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Holy Family International School • Examination Board</span>
+        <button type="button" class="btn btn-secondary" onclick="App.closeModal('exam-qa-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 10: OFFICIAL INDIVIDUAL STUDENT EXAM REPORT CARD (PDF READY) -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="student-report-card-modal">
+    <div class="modal-dialog" style="max-width: 860px; max-height: 94vh; display: flex; flex-direction: column;">
+      <div class="modal-header no-print">
+        <div class="modal-header-info">
+          <div class="modal-icon-badge" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 182, 212, 0.18)); color: #10b981;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          </div>
+          <div>
+            <h3>Official Student Examination Report Card</h3>
+            <p class="modal-subtitle">Comprehensive performance record ready for review and PDF download</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button type="button" class="btn btn-primary btn-sm action-btn-premium btn-print-report" onclick="Reports.printCurrentReport('student-report-printable-area')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            <span>Print / Save as PDF</span>
+          </button>
+          <button type="button" class="modal-close-btn" onclick="App.closeModal('student-report-card-modal')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-body" style="overflow-y: auto; padding: 20px;">
+        <!-- Printable Area -->
+        <div id="student-report-printable-area" class="printable-report-sheet">
+          <!-- School Official Letterhead -->
+          <div class="report-school-header">
+            <div class="report-header-logo-wrap">
+              <img src="holy-family-logo.png" alt="Holy Family International School Crest" class="report-header-logo">
+              <div class="report-school-info">
+                <h2>HOLY FAMILY INTERNATIONAL SCHOOL</h2>
+                <p>Affiliated to Central Board of Secondary Education • Excellence & Integrity</p>
+                <p style="font-size: 0.75rem; color: var(--text-muted);">Academic Session: 2026 - 2027 • Official Student Assessment Card</p>
+              </div>
+            </div>
+            <div class="report-title-badge-box">
+              <span class="report-type-badge">EXAM REPORT CARD</span>
+              <div class="report-date" id="rep-generated-date">Date: Oct 7, 2026</div>
+            </div>
+          </div>
+
+          <!-- Student & Exam Details 4-Column Grid -->
+          <div class="report-info-grid">
+            <div class="report-info-cell">
+              <span class="report-info-label">Student Name</span>
+              <span class="report-info-val" id="rep-student-name">--</span>
+            </div>
+            <div class="report-info-cell">
+              <span class="report-info-label">Admission Number</span>
+              <span class="report-info-val" id="rep-student-adm" style="font-family: monospace; color: var(--primary);">--</span>
+            </div>
+            <div class="report-info-cell">
+              <span class="report-info-label">Class & Division</span>
+              <span class="report-info-val" id="rep-student-class-div">--</span>
+            </div>
+            <div class="report-info-cell">
+              <span class="report-info-label">Exam Slot</span>
+              <span class="report-info-val" id="rep-exam-slot" style="color: #0891b2; font-weight: 800;">Slot 1</span>
+            </div>
+            <div class="report-info-cell">
+              <span class="report-info-label">Examination Title</span>
+              <span class="report-info-val" id="rep-exam-title">--</span>
+            </div>
+            <div class="report-info-cell">
+              <span class="report-info-label">Subject</span>
+              <span class="report-info-val" id="rep-exam-subject">--</span>
+            </div>
+            <div class="report-info-cell">
+              <span class="report-info-label">Submission Date & Time</span>
+              <span class="report-info-val" id="rep-submitted-at">--</span>
+            </div>
+            <div class="report-info-cell">
+              <span class="report-info-label">Evaluation Status</span>
+              <span class="report-info-val" id="rep-eval-status" style="color: #10b981;">VERIFIED & RECORDED</span>
+            </div>
+          </div>
+
+          <!-- Big Metrics Grid: Total, Attended, Right, Wrong, Score & Percentage -->
+          <div class="report-metrics-grid">
+            <div class="metric-box">
+              <div class="m-label">Total Questions</div>
+              <div class="m-val" id="rep-metric-total-q">0</div>
+              <div class="m-sub">Questions on Paper</div>
+            </div>
+            <div class="metric-box">
+              <div class="m-label">Attended</div>
+              <div class="m-val" id="rep-metric-attended">0</div>
+              <div class="m-sub">Attempted by Student</div>
+            </div>
+            <div class="metric-box right">
+              <div class="m-label">Right Answers</div>
+              <div class="m-val" id="rep-metric-right">0</div>
+              <div class="m-sub">Correct Solutions</div>
+            </div>
+            <div class="metric-box wrong">
+              <div class="m-label">Wrong Answers</div>
+              <div class="m-val" id="rep-metric-wrong">0</div>
+              <div class="m-sub">Incorrect Choices</div>
+            </div>
+            <div class="metric-box primary">
+              <div class="m-label">Marks & Score</div>
+              <div class="m-val" id="rep-metric-score">0 / 0</div>
+              <div class="m-sub" id="rep-metric-percent">0% Percentage</div>
+            </div>
+          </div>
+
+          <!-- Evaluation Status Banner -->
+          <div class="report-status-banner pass" id="rep-status-banner">
+            <div>
+              <strong id="rep-grade-badge" style="font-size: 1.05rem;">GRADE: A (PASSED)</strong>
+              <div style="font-size: 0.8rem; margin-top: 2px;" id="rep-grade-comment">Demonstrated satisfactory mastery of the curriculum topics.</div>
+            </div>
+            <div style="font-size: 1.4rem; font-weight: 800;" id="rep-final-percent">0%</div>
+          </div>
+
+          <!-- Itemized Breakdown Table -->
+          <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 10px; color: var(--text-main);">Itemized Question Evaluation</h4>
+          <table class="report-itemized-table">
+            <thead>
+              <tr>
+                <th style="width: 45px;">#</th>
+                <th>Question</th>
+                <th style="width: 150px;">Student Response</th>
+                <th style="width: 150px;">Correct Answer</th>
+                <th style="width: 100px;">Status</th>
+                <th style="width: 70px; text-align: right;">Marks</th>
+              </tr>
+            </thead>
+            <tbody id="rep-itemized-tbody">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+
+          <!-- Signatures Section -->
+          <div class="report-signatures-row page-break-auto">
+            <div>
+              <div class="signature-line"></div>
+              <div class="signature-title">Candidate's Signature</div>
+            </div>
+            <div>
+              <div class="signature-line"></div>
+              <div class="signature-title">Evaluator / Class Teacher</div>
+            </div>
+            <div>
+              <div class="signature-line"></div>
+              <div class="signature-title">Principal / Controller of Exams</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer no-print" style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.8rem; color: var(--text-muted);">PDF preview is formatted to standard A4 printing.</span>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn btn-secondary" onclick="App.closeModal('student-report-card-modal')">Close</button>
+          <button type="button" class="btn btn-primary" onclick="Reports.printCurrentReport('student-report-printable-area')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            Print / Save as PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 11: CLASS & DIVISION OVERALL STUDENTS BROADSHEET REPORT CARD (PDF READY) -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="class-division-report-modal">
+    <div class="modal-dialog" style="max-width: 980px; max-height: 94vh; display: flex; flex-direction: column;">
+      <div class="modal-header no-print">
+        <div class="modal-header-info">
+          <div class="modal-icon-badge" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(79, 70, 229, 0.18)); color: #0891b2;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </div>
+          <div>
+            <h3>Class & Division Broadsheet Performance Report</h3>
+            <p class="modal-subtitle">Consolidated academic report card for all students in a selected class & division</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button type="button" class="btn btn-primary btn-sm action-btn-premium btn-print-report" onclick="Reports.printCurrentReport('class-report-printable-area')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            <span>Print / Save as PDF</span>
+          </button>
+          <button type="button" class="modal-close-btn" onclick="App.closeModal('class-division-report-modal')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Controls filter bar (non-printed) -->
+      <div class="no-print" style="padding: 14px 24px; background: var(--bg-subtle); border-bottom: 1px solid var(--border-color); display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap;">
+        <div>
+          <label class="form-label" style="font-size: 0.78rem;">Class <span class="req">*</span></label>
+          <select id="class-rep-filter-class" class="custom-select" style="min-width: 120px;" onchange="Reports.onClassFilterChange()">
+            <option value="1">Class 1</option>
+            <option value="2">Class 2</option>
+            <option value="3">Class 3</option>
+            <option value="4">Class 4</option>
+            <option value="5">Class 5</option>
+            <option value="6">Class 6</option>
+            <option value="7">Class 7</option>
+            <option value="8">Class 8</option>
+            <option value="9">Class 9</option>
+            <option value="10" selected>Class 10</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="form-label" style="font-size: 0.78rem;">Division</label>
+          <select id="class-rep-filter-div" class="custom-select" style="min-width: 120px;" onchange="Reports.onClassFilterChange()">
+            <option value="All">All Divisions</option>
+            <option value="A">Division A</option>
+            <option value="B">Division B</option>
+            <option value="C">Division C</option>
+            <option value="D">Division D</option>
+            <option value="E">Division E</option>
+          </select>
+        </div>
+
+        <div style="flex: 1; min-width: 220px;">
+          <label class="form-label" style="font-size: 0.78rem;">Examination Paper</label>
+          <select id="class-rep-filter-exam" class="custom-select" style="width: 100%;">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+
+        <div>
+          <button type="button" class="btn btn-primary" onclick="Reports.loadClassDivisionReport()" style="padding: 9px 18px;">
+            <span>Load Broadsheet</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-body" style="overflow-y: auto; padding: 20px;">
+        <!-- Printable Broadsheet Area -->
+        <div id="class-report-printable-area" class="printable-report-sheet">
+          <!-- School Official Letterhead -->
+          <div class="report-school-header">
+            <div class="report-header-logo-wrap">
+              <img src="holy-family-logo.png" alt="Holy Family International School Crest" class="report-header-logo">
+              <div class="report-school-info">
+                <h2>HOLY FAMILY INTERNATIONAL SCHOOL</h2>
+                <p>Consolidated Academic Broadsheet & Class Examination Report</p>
+                <p style="font-size: 0.75rem; color: var(--text-muted);">Session: 2026 - 2027 • Official School Assessment Records</p>
+              </div>
+            </div>
+            <div class="report-title-badge-box">
+              <span class="report-type-badge">CLASS BROADSHEET</span>
+              <div class="report-date" id="class-rep-date">Date: Oct 7, 2026</div>
+            </div>
+          </div>
+
+          <!-- Class Meta Info -->
+          <div class="report-info-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="report-info-cell">
+              <span class="report-info-label">Standard & Class</span>
+              <span class="report-info-val" id="class-rep-class-info">Class 10</span>
+            </div>
+            <div class="report-info-cell">
+              <span class="report-info-label">Division</span>
+              <span class="report-info-val" id="class-rep-div-info">All Divisions</span>
+            </div>
+            <div class="report-info-cell">
+              <span class="report-info-label">Examination</span>
+              <span class="report-info-val" id="class-rep-exam-info">--</span>
+            </div>
+            <div class="report-info-cell">
+              <span class="report-info-label">Subject & Max Marks</span>
+              <span class="report-info-val" id="class-rep-subject-info">--</span>
+            </div>
+          </div>
+
+          <!-- Summary Metrics Cards -->
+          <div class="report-metrics-grid" style="grid-template-columns: repeat(6, 1fr);">
+            <div class="metric-box">
+              <div class="m-label">Enrolled</div>
+              <div class="m-val" id="class-rep-stat-enrolled">0</div>
+              <div class="m-sub">Total Students</div>
+            </div>
+            <div class="metric-box right">
+              <div class="m-label">Appeared</div>
+              <div class="m-val" id="class-rep-stat-appeared">0</div>
+              <div class="m-sub">Attended Exam</div>
+            </div>
+            <div class="metric-box wrong">
+              <div class="m-label">Absent</div>
+              <div class="m-val" id="class-rep-stat-absent">0</div>
+              <div class="m-sub">Not Appeared</div>
+            </div>
+            <div class="metric-box primary">
+              <div class="m-label">Class Average</div>
+              <div class="m-val" id="class-rep-stat-avg">0%</div>
+              <div class="m-sub">Mean Score</div>
+            </div>
+            <div class="metric-box right">
+              <div class="m-label">Pass Rate</div>
+              <div class="m-val" id="class-rep-stat-passrate">0%</div>
+              <div class="m-sub">Passing Ratio</div>
+            </div>
+            <div class="metric-box">
+              <div class="m-label">Class Topper</div>
+              <div class="m-val" id="class-rep-stat-topper" style="font-size: 1.1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">--</div>
+              <div class="m-sub" id="class-rep-stat-topperscore">Highest Mark</div>
+            </div>
+          </div>
+
+          <!-- Broadsheet Roster Table -->
+          <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 10px; color: var(--text-main);">Students Broadsheet Register</h4>
+          <table class="report-itemized-table" style="font-size: 0.8rem;">
+            <thead>
+              <tr>
+                <th style="width: 45px;">Rank</th>
+                <th>Admission No</th>
+                <th>Student Name</th>
+                <th>Slot</th>
+                <th style="text-align: center;">Total Qs</th>
+                <th style="text-align: center;">Attended</th>
+                <th style="text-align: center;">Right</th>
+                <th style="text-align: center;">Wrong</th>
+                <th style="text-align: right;">Score</th>
+                <th style="text-align: right;">%</th>
+                <th style="text-align: center;">Result</th>
+              </tr>
+            </thead>
+            <tbody id="class-rep-table-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+
+          <!-- Signatures Section -->
+          <div class="report-signatures-row page-break-auto">
+            <div>
+              <div class="signature-line"></div>
+              <div class="signature-title">Class Teacher Signature</div>
+            </div>
+            <div>
+              <div class="signature-line"></div>
+              <div class="signature-title">Examination In-charge</div>
+            </div>
+            <div>
+              <div class="signature-line"></div>
+              <div class="signature-title">Principal Seal & Signature</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer no-print" style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Broadsheet printable in high-resolution A4 landscape or portrait mode.</span>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn btn-secondary" onclick="App.closeModal('class-division-report-modal')">Close</button>
+          <button type="button" class="btn btn-primary" onclick="Reports.printCurrentReport('class-report-printable-area')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            Print / Save as PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
   <!-- LOGIN MODAL / OVERLAY -->
   <!-- ============================================================== -->
   <div class="login-overlay" id="login-modal" style="display: none;" onclick="if (event.target === this) Auth.hideLoginModal()">
@@ -1756,6 +2175,7 @@
   <script src="js/teacher.js"></script>
   <script src="js/student.js"></script>
   <script src="js/exams.js"></script>
+  <script src="js/reports.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

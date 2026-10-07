@@ -604,6 +604,11 @@ async function createExamSubmission(data) {
     score: parseInt(data.score, 10) || 0,
     total_marks: parseInt(data.total_marks, 10) || 0,
     percentage: parseFloat(data.percentage) || 0.0,
+    slot_label: data.slot_label || 'Slot 1',
+    total_questions: parseInt(data.total_questions, 10) || 0,
+    attended_count: parseInt(data.attended_count, 10) || 0,
+    right_count: parseInt(data.right_count, 10) || 0,
+    wrong_count: parseInt(data.wrong_count, 10) || 0,
     submitted_at: data.submitted_at || new Date().toISOString()
   };
 

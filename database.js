@@ -101,6 +101,26 @@ function initDatabase() {
     // Column already exists, safe to ignore
   }
 
+  try {
+    db.exec(`ALTER TABLE exam_submissions ADD COLUMN slot_label TEXT DEFAULT 'Slot 1';`);
+  } catch (e) {}
+
+  try {
+    db.exec(`ALTER TABLE exam_submissions ADD COLUMN attended_count INTEGER DEFAULT 0;`);
+  } catch (e) {}
+
+  try {
+    db.exec(`ALTER TABLE exam_submissions ADD COLUMN right_count INTEGER DEFAULT 0;`);
+  } catch (e) {}
+
+  try {
+    db.exec(`ALTER TABLE exam_submissions ADD COLUMN wrong_count INTEGER DEFAULT 0;`);
+  } catch (e) {}
+
+  try {
+    db.exec(`ALTER TABLE exam_submissions ADD COLUMN total_questions INTEGER DEFAULT 0;`);
+  } catch (e) {}
+
   // Migrate any existing exams that don't have schedules array populated
   try {
     const legacyExams = db.prepare('SELECT id, scheduled_start, scheduled_end, duration_minutes, schedules FROM exams').all();

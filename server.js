@@ -1545,10 +1545,13 @@ app.post('/api/exams/:id/submit', authenticateToken, requireRole(['student', 'ad
     }
     if (!student) return res.status(404).json({ error: 'Student record not found' });
 
-    // Calculate score
+    // Calculate score & question response metrics
     const questions = exam.questions || [];
     let score = 0;
     let totalMarks = 0;
+    let attendedCount = 0;
+    let rightCount = 0;
+    let wrongCount = 0;
 
     questions.forEach((q, idx) => {
       const qKey = q.id || `q_${idx + 1}`;
@@ -1556,6 +1559,8 @@ app.post('/api/exams/:id/submit', authenticateToken, requireRole(['student', 'ad
       totalMarks += qMarks;
 
       const studentAns = answers ? answers[qKey] : undefined;
+      const isAttended = studentAns !== undefined && studentAns !== null && (Array.isArray(studentAns) ? studentAns.length > 0 : String(studentAns).trim() !== '');
+      if (isAttended) attendedCount++;
 
       // Extract target correct answer indices
       let targetCorrect = [];
@@ -1574,16 +1579,22 @@ app.post('/api/exams/:id/submit', authenticateToken, requireRole(['student', 'ad
       }
 
       // Award marks if answers match
-      if (
+      const isRight = (
         targetCorrect.length > 0 &&
         targetCorrect.length === studentSelected.length &&
         targetCorrect.every((val, i) => val === studentSelected[i])
-      ) {
+      );
+
+      if (isRight) {
         score += qMarks;
+        rightCount++;
+      } else if (isAttended) {
+        wrongCount++;
       }
     });
 
     const percentage = totalMarks > 0 ? parseFloat(((score / totalMarks) * 100).toFixed(2)) : 0;
+    const slotLabel = req.body.slot_label || 'Slot 1';
 
     const submissionData = {
       exam_id: String(examId),
@@ -1596,6 +1607,11 @@ app.post('/api/exams/:id/submit', authenticateToken, requireRole(['student', 'ad
       score,
       total_marks: totalMarks,
       percentage,
+      slot_label: slotLabel,
+      total_questions: questions.length,
+      attended_count: attendedCount,
+      right_count: rightCount,
+      wrong_count: wrongCount,
       submitted_at: new Date().toISOString()
     };
 
@@ -1605,23 +1621,49 @@ app.post('/api/exams/:id/submit', authenticateToken, requireRole(['student', 'ad
     }
 
     if (!db) return res.status(500).json({ error: 'Database not initialized' });
-    const insert = db.prepare(`
-      INSERT INTO exam_submissions (exam_id, student_id, student_name, admission_no, class, div, answers, score, total_marks, percentage)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      examId,
-      student.id,
-      student.name,
-      student.admission_no,
-      student.class,
-      student.div,
-      JSON.stringify(answers || {}),
-      score,
-      totalMarks,
-      percentage
-    );
+    let insertId;
+    try {
+      const insert = db.prepare(`
+        INSERT INTO exam_submissions (exam_id, student_id, student_name, admission_no, class, div, answers, score, total_marks, percentage, slot_label, total_questions, attended_count, right_count, wrong_count)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        examId,
+        student.id,
+        student.name,
+        student.admission_no,
+        student.class,
+        student.div,
+        JSON.stringify(answers || {}),
+        score,
+        totalMarks,
+        percentage,
+        slotLabel,
+        questions.length,
+        attendedCount,
+        rightCount,
+        wrongCount
+      );
+      insertId = insert.lastInsertRowid;
+    } catch (e) {
+      const insert = db.prepare(`
+        INSERT INTO exam_submissions (exam_id, student_id, student_name, admission_no, class, div, answers, score, total_marks, percentage)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        examId,
+        student.id,
+        student.name,
+        student.admission_no,
+        student.class,
+        student.div,
+        JSON.stringify(answers || {}),
+        score,
+        totalMarks,
+        percentage
+      );
+      insertId = insert.lastInsertRowid;
+    }
 
-    const submission = { id: insert.lastInsertRowid, ...submissionData };
+    const submission = { id: insertId, ...submissionData };
     res.status(201).json({ success: true, message: 'Exam submitted successfully', submission });
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -1632,22 +1674,278 @@ app.post('/api/exams/:id/submit', authenticateToken, requireRole(['student', 'ad
 app.get('/api/exams/:id/submissions', authenticateToken, requireRole(['teacher', 'admin']), async (req, res) => {
   const examId = req.params.id;
   try {
+    let exam;
     if (USE_AWS) {
-      const subs = await dynamoService.getExamSubmissions(examId);
-      return res.json(subs);
+      exam = await dynamoService.getExamById(examId);
+    } else if (db) {
+      exam = db.prepare('SELECT * FROM exams WHERE id = ?').get(examId);
+      if (exam && typeof exam.questions === 'string') {
+        try { exam.questions = JSON.parse(exam.questions); } catch (e) {}
+      }
     }
 
-    if (!db) return res.status(500).json({ error: 'Database not initialized' });
-    const subs = db.prepare(`
-      SELECT * FROM exam_submissions 
-      WHERE exam_id = ? 
-      ORDER BY score DESC, submitted_at ASC
-    `).all(examId).map(s => ({
-      ...s,
-      answers: JSON.parse(s.answers || '{}')
-    }));
+    const questions = exam ? (exam.questions || []) : [];
+    const totalQ = questions.length;
 
-    res.json(subs);
+    let subs = [];
+    if (USE_AWS) {
+      subs = await dynamoService.getExamSubmissions(examId);
+    } else if (db) {
+      subs = db.prepare(`
+        SELECT * FROM exam_submissions 
+        WHERE exam_id = ? 
+        ORDER BY score DESC, submitted_at ASC
+      `).all(examId).map(s => ({
+        ...s,
+        answers: typeof s.answers === 'string' ? JSON.parse(s.answers || '{}') : (s.answers || {})
+      }));
+    }
+
+    // Ensure all metric fields are accurately present
+    const enrichedSubs = subs.map(s => {
+      const answers = s.answers || {};
+      let attended = s.attended_count;
+      let right = s.right_count;
+      let wrong = s.wrong_count;
+
+      if (attended === undefined || attended === null || (!attended && Object.keys(answers).length > 0)) {
+        attended = 0;
+        right = 0;
+        wrong = 0;
+        questions.forEach((q, idx) => {
+          const qKey = q.id || `q_${idx + 1}`;
+          const studentAns = answers[qKey];
+          const isAttended = studentAns !== undefined && studentAns !== null && (Array.isArray(studentAns) ? studentAns.length > 0 : String(studentAns).trim() !== '');
+          if (isAttended) attended++;
+
+          let targetCorrect = [];
+          if (Array.isArray(q.correct_indices) && q.correct_indices.length > 0) {
+            targetCorrect = q.correct_indices.map(v => parseInt(v, 10)).sort((a, b) => a - b);
+          } else if (q.correct_index !== undefined && q.correct_index !== null) {
+            targetCorrect = [parseInt(q.correct_index, 10)];
+          }
+
+          let studentSelected = [];
+          if (Array.isArray(studentAns)) {
+            studentSelected = studentAns.map(v => parseInt(v, 10)).sort((a, b) => a - b);
+          } else if (studentAns !== undefined && studentAns !== null) {
+            studentSelected = [parseInt(studentAns, 10)];
+          }
+
+          if (
+            targetCorrect.length > 0 &&
+            targetCorrect.length === studentSelected.length &&
+            targetCorrect.every((val, i) => val === studentSelected[i])
+          ) {
+            right++;
+          } else if (isAttended) {
+            wrong++;
+          }
+        });
+      }
+
+      return {
+        ...s,
+        slot_label: s.slot_label || 'Slot 1',
+        total_questions: s.total_questions || totalQ,
+        attended_count: attended !== undefined ? attended : 0,
+        right_count: right !== undefined ? right : 0,
+        wrong_count: wrong !== undefined ? wrong : 0
+      };
+    });
+
+    res.json(enrichedSubs);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 6b. GET /api/reports/class-division - Overall Broadsheet Performance Report Card
+app.get('/api/reports/class-division', authenticateToken, requireRole(['teacher', 'admin']), async (req, res) => {
+  try {
+    const classNum = parseInt(req.query.class, 10);
+    const div = req.query.division || 'All';
+    const examId = req.query.exam_id;
+
+    if (isNaN(classNum) || classNum < 1 || classNum > 10) {
+      return res.status(400).json({ error: 'Valid Class (1 to 10) is required' });
+    }
+
+    let students = [];
+    let exams = [];
+
+    if (USE_AWS) {
+      students = await dynamoService.getStudentsByClass(classNum);
+      if (div !== 'All' && div !== 'all') {
+        students = students.filter(s => s.div === div);
+      }
+      const allExams = await dynamoService.getExams({ classFilter: classNum });
+      exams = allExams.filter(e => e.class === classNum && (e.division === 'All' || div === 'All' || e.division === div));
+    } else if (db) {
+      let sQuery = 'SELECT s.*, u.username FROM students s JOIN users u ON s.user_id = u.id WHERE s.class = ?';
+      const sParams = [classNum];
+      if (div !== 'All' && div !== 'all') {
+        sQuery += ' AND s.div = ?';
+        sParams.push(div);
+      }
+      sQuery += ' ORDER BY s.admission_no ASC';
+      students = db.prepare(sQuery).all(...sParams);
+
+      let eQuery = 'SELECT * FROM exams WHERE class = ?';
+      const eParams = [classNum];
+      if (div !== 'All' && div !== 'all') {
+        eQuery += ' AND (division = "All" OR division = ?)';
+        eParams.push(div);
+      }
+      eQuery += ' ORDER BY created_at DESC';
+      exams = db.prepare(eQuery).all(...eParams).map(e => ({
+        ...e,
+        questions: typeof e.questions === 'string' ? JSON.parse(e.questions || '[]') : (e.questions || []),
+        schedules: typeof e.schedules === 'string' ? JSON.parse(e.schedules || '[]') : (e.schedules || [])
+      }));
+    }
+
+    let selectedExam = null;
+    if (examId) {
+      selectedExam = exams.find(e => String(e.id) === String(examId)) || null;
+    }
+    if (!selectedExam && exams.length > 0) {
+      selectedExam = exams[0];
+    }
+
+    let submissions = [];
+    if (selectedExam) {
+      if (USE_AWS) {
+        submissions = await dynamoService.getExamSubmissions(selectedExam.id);
+      } else if (db) {
+        submissions = db.prepare('SELECT * FROM exam_submissions WHERE exam_id = ?').all(selectedExam.id).map(s => ({
+          ...s,
+          answers: typeof s.answers === 'string' ? JSON.parse(s.answers || '{}') : (s.answers || {})
+        }));
+      }
+    }
+
+    const subByStudent = {};
+    submissions.forEach(s => {
+      if (s.student_id) subByStudent[String(s.student_id)] = s;
+      if (s.admission_no) subByStudent[String(s.admission_no).trim().toLowerCase()] = s;
+      if (s.student_name) subByStudent[String(s.student_name).trim().toLowerCase()] = s;
+    });
+
+    const questions = selectedExam ? (selectedExam.questions || []) : [];
+    const totalQ = selectedExam ? (selectedExam.total_questions || questions.length || 0) : 0;
+    const maxMarks = selectedExam ? (selectedExam.total_marks || totalQ || 0) : 0;
+
+    const matchedSubIds = new Set();
+    const records = students.map((st) => {
+      const sub = (st.id && subByStudent[String(st.id)]) ||
+                  (st.admission_no && subByStudent[String(st.admission_no).trim().toLowerCase()]) ||
+                  (st.name && subByStudent[String(st.name).trim().toLowerCase()]) ||
+                  null;
+      if (sub && sub.id) matchedSubIds.add(String(sub.id));
+      if (sub) {
+        let attended = sub.attended_count || 0;
+        let right = sub.right_count || 0;
+        let wrong = sub.wrong_count || 0;
+
+        if (!attended && sub.answers && questions.length > 0) {
+          questions.forEach((q, qIdx) => {
+            const k = q.id || `q_${qIdx+1}`;
+            const a = sub.answers[k];
+            if (a !== undefined && a !== null && a !== '') attended++;
+          });
+          right = sub.score || 0;
+          wrong = Math.max(0, attended - right);
+        }
+
+        const pct = sub.percentage !== undefined ? sub.percentage : (maxMarks > 0 ? (sub.score / maxMarks) * 100 : 0);
+        return {
+          rank: 0,
+          student_id: st.id,
+          student_name: st.name,
+          admission_no: st.admission_no,
+          class: st.class,
+          div: st.div,
+          status: 'Appeared',
+          slot_label: sub.slot_label || 'Slot 1',
+          submitted_at: sub.submitted_at,
+          total_questions: totalQ || questions.length,
+          attended_count: attended,
+          right_count: right,
+          wrong_count: wrong,
+          score: sub.score,
+          total_marks: maxMarks,
+          percentage: parseFloat(Number(pct).toFixed(2)),
+          grade: pct >= 90 ? 'A+' : pct >= 75 ? 'A' : pct >= 60 ? 'B' : pct >= 40 ? 'Pass' : 'Needs Improvement',
+          answers: sub.answers
+        };
+      } else {
+        return {
+          rank: 0,
+          student_id: st.id,
+          student_name: st.name,
+          admission_no: st.admission_no,
+          class: st.class,
+          div: st.div,
+          status: 'Absent',
+          slot_label: '--',
+          submitted_at: null,
+          total_questions: totalQ,
+          attended_count: 0,
+          right_count: 0,
+          wrong_count: 0,
+          score: 0,
+          total_marks: maxMarks,
+          percentage: 0,
+          grade: 'Absent',
+          answers: {}
+        };
+      }
+    });
+
+    records.sort((a, b) => {
+      if (a.status === 'Appeared' && b.status === 'Absent') return -1;
+      if (a.status === 'Absent' && b.status === 'Appeared') return 1;
+      return b.score - a.score;
+    });
+
+    let rankCounter = 1;
+    records.forEach(r => {
+      if (r.status === 'Appeared') {
+        r.rank = rankCounter++;
+      } else {
+        r.rank = '-';
+      }
+    });
+
+    const appearedRecords = records.filter(r => r.status === 'Appeared');
+    const totalEnrolled = students.length;
+    const totalAppeared = appearedRecords.length;
+    const totalAbsent = totalEnrolled - totalAppeared;
+    const avgScore = totalAppeared > 0 ? (appearedRecords.reduce((sum, r) => sum + r.score, 0) / totalAppeared).toFixed(2) : '0';
+    const avgPct = totalAppeared > 0 ? (appearedRecords.reduce((sum, r) => sum + r.percentage, 0) / totalAppeared).toFixed(2) : '0';
+    const highestRecord = appearedRecords[0] || null;
+    const passCount = appearedRecords.filter(r => r.percentage >= 40).length;
+    const passRate = totalAppeared > 0 ? ((passCount / totalAppeared) * 100).toFixed(1) : '0';
+
+    res.json({
+      success: true,
+      class: classNum,
+      division: div,
+      exam: selectedExam,
+      available_exams: exams.map(e => ({ id: e.id, title: e.title, subject: e.subject })),
+      summary: {
+        total_enrolled: totalEnrolled,
+        total_appeared: totalAppeared,
+        total_absent: totalAbsent,
+        average_score: parseFloat(avgScore),
+        average_percentage: parseFloat(avgPct),
+        highest_score: highestRecord ? highestRecord.score : 0,
+        highest_student: highestRecord ? highestRecord.student_name : 'N/A',
+        pass_rate: parseFloat(passRate)
+      },
+      records
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

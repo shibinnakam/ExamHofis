@@ -140,8 +140,8 @@ const Auth = {
       modal.style.zIndex = '99999';
       const u = document.getElementById('login-username');
       const p = document.getElementById('login-password');
-      if (u && !u.value) u.value = 'admin';
-      if (p && !p.value) p.value = 'admin123';
+      if (u) u.value = '';
+      if (p) p.value = '';
       setTimeout(() => u?.focus(), 50);
     }
   },

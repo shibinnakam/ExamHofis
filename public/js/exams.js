@@ -188,6 +188,10 @@ const TeacherExams = {
           </div>
 
           <div class="exam-card-actions">
+            <button class="btn btn-secondary btn-sm action-btn-premium" onclick="AdminExams.viewQuestionsModal('${e.id}')" title="View Question Paper & Answers">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              <span>Q&A Key</span>
+            </button>
             <button class="btn btn-secondary btn-sm action-btn-premium" onclick="TeacherExams.viewSubmissions('${e.id}')">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"></path><path d="M12 20V4"></path><path d="M6 20v-6"></path></svg>
               <span>Submissions</span>
@@ -537,7 +541,7 @@ const TeacherExams = {
 
       if (bodyEl) {
         if (submissions.length === 0) {
-          bodyEl.innerHTML = `<tr><td colspan="7" class="text-center" style="padding: 28px;">No students have submitted this exam yet.</td></tr>`;
+          bodyEl.innerHTML = `<tr><td colspan="8" class="text-center" style="padding: 28px;">No students have submitted this exam yet.</td></tr>`;
         } else {
           bodyEl.innerHTML = submissions.map((s, idx) => `
             <tr>
@@ -548,6 +552,12 @@ const TeacherExams = {
               <td><strong style="color:var(--primary); font-size:1.05rem;">${s.score}</strong> / ${s.total_marks}</td>
               <td><span class="badge ${s.percentage >= 60 ? 'badge-subject' : 'badge-adm'}">${s.percentage}%</span></td>
               <td style="font-size:0.78rem; color:var(--text-muted);">${formatDateTime(s.submitted_at)}</td>
+              <td style="text-align: center;">
+                <button class="btn btn-secondary btn-sm action-btn-premium" onclick="Reports.openStudentReportCard('${s.id || s.student_id}', '${exam ? exam.id : ''}')" title="Generate Official Student Report Card (PDF)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                  <span>Report Card</span>
+                </button>
+              </td>
             </tr>
           `).join('');
         }
@@ -710,6 +720,10 @@ const AdminExams = {
           </div>
 
           <div class="exam-card-actions">
+            <button class="btn btn-secondary btn-sm action-btn-premium" onclick="AdminExams.viewQuestionsModal('${e.id}')" title="View Question Paper & Answers">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              <span>Q&A Key</span>
+            </button>
             <button class="btn btn-primary btn-sm action-btn-premium" onclick="AdminExams.openScheduleModal('${e.id}')">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
               <span>${isScheduled ? `Manage Schedules (${schedules.length}/4)` : 'Schedule Exam (Max 4)'}</span>
@@ -1005,7 +1019,7 @@ const AdminExams = {
 
       if (bodyEl) {
         if (submissions.length === 0) {
-          bodyEl.innerHTML = `<tr><td colspan="7" class="text-center" style="padding: 28px;">No submissions received yet.</td></tr>`;
+          bodyEl.innerHTML = `<tr><td colspan="8" class="text-center" style="padding: 28px;">No submissions received yet.</td></tr>`;
         } else {
           bodyEl.innerHTML = submissions.map((s, idx) => `
             <tr>
@@ -1016,6 +1030,12 @@ const AdminExams = {
               <td><strong style="color:var(--primary); font-size:1.05rem;">${s.score}</strong> / ${s.total_marks}</td>
               <td><span class="badge ${s.percentage >= 60 ? 'badge-subject' : 'badge-adm'}">${s.percentage}%</span></td>
               <td style="font-size:0.78rem; color:var(--text-muted);">${formatDateTime(s.submitted_at)}</td>
+              <td style="text-align: center;">
+                <button class="btn btn-secondary btn-sm action-btn-premium" onclick="Reports.openStudentReportCard('${s.id || s.student_id}', '${exam ? exam.id : ''}')" title="Generate Official Student Report Card (PDF)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                  <span>Report Card</span>
+                </button>
+              </td>
             </tr>
           `).join('');
         }
@@ -1024,6 +1044,84 @@ const AdminExams = {
       App.openModal('exam-submissions-modal');
     } catch (err) {
       App.showToast('Failed to load submissions: ' + err.message, 'error');
+    }
+  },
+
+  async viewQuestionsModal(examId) {
+    try {
+      let exam = (this.exams || []).find(e => String(e.id) === String(examId));
+      if (!exam || !exam.questions || exam.questions.length === 0) {
+        const fullExamResp = await API.getExam(examId);
+        exam = fullExamResp.exam || fullExamResp;
+      }
+
+      if (!exam) {
+        App.showToast('Could not load examination questions', 'error');
+        return;
+      }
+
+      const questions = exam.questions || [];
+      const titleEl = document.getElementById('qa-modal-exam-title');
+      const subtitleEl = document.getElementById('qa-modal-exam-subtitle');
+      const classEl = document.getElementById('qa-modal-badge-class');
+      const divEl = document.getElementById('qa-modal-badge-div');
+      const subjectEl = document.getElementById('qa-modal-badge-subject');
+      const durEl = document.getElementById('qa-modal-badge-duration');
+      const marksEl = document.getElementById('qa-modal-badge-marks');
+      const listEl = document.getElementById('qa-modal-questions-list');
+
+      if (titleEl) titleEl.textContent = `${exam.title} - Questions & Answer Key`;
+      if (subtitleEl) subtitleEl.textContent = `Author: ${exam.created_by || 'Faculty'} • Class ${exam.class} (Div ${exam.division || 'All'})`;
+      if (classEl) classEl.textContent = `Class ${exam.class}`;
+      if (divEl) divEl.textContent = `Div ${exam.division || 'All'}`;
+      if (subjectEl) subjectEl.textContent = exam.subject;
+      if (durEl) durEl.textContent = `${exam.duration_minutes || 30} Mins`;
+      if (marksEl) marksEl.textContent = `${questions.length} Questions • ${exam.total_marks || questions.length} Total Marks`;
+
+      if (listEl) {
+        if (questions.length === 0) {
+          listEl.innerHTML = `<div class="empty-state" style="padding: 30px;"><p>No questions configured for this examination.</p></div>`;
+        } else {
+          const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+          listEl.innerHTML = questions.map((q, idx) => {
+            let correctIndices = [];
+            if (Array.isArray(q.correct_indices) && q.correct_indices.length > 0) {
+              correctIndices = q.correct_indices.map(v => parseInt(v, 10));
+            } else if (q.correct_index !== undefined && q.correct_index !== null) {
+              correctIndices = [parseInt(q.correct_index, 10)];
+            }
+
+            const options = q.options || [];
+
+            return `
+              <div class="qa-question-card">
+                <div class="qa-card-header">
+                  <span class="badge badge-adm">Question ${idx + 1} of ${questions.length}</span>
+                  <span class="badge badge-class">${q.marks || 1} Mark${(q.marks || 1) > 1 ? 's' : ''}</span>
+                </div>
+                <div class="qa-question-title">${q.question}</div>
+                <div class="qa-options-grid">
+                  ${options.map((optText, optIdx) => {
+                    const isCorrect = correctIndices.includes(optIdx);
+                    return `
+                      <div class="qa-option-item ${isCorrect ? 'correct' : ''}">
+                        <div class="qa-option-marker">${letters[optIdx] || optIdx + 1}</div>
+                        <div style="flex: 1;">${optText}</div>
+                        ${isCorrect ? `<span style="font-size: 0.72rem; color: #10b981; font-weight: 800; display: inline-flex; align-items: center; gap: 2px;">✓ Correct</span>` : ''}
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      App.openModal('exam-qa-modal');
+    } catch (err) {
+      console.error('Error viewing questions modal:', err);
+      App.showToast('Could not load questions: ' + err.message, 'error');
     }
   },
 
@@ -1123,7 +1221,7 @@ const StudentExams = {
         actionBtn = `
           <button class="btn btn-secondary btn-sm action-btn-premium" onclick="StudentExams.viewScoreCard('${e.id}')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-            <span>View Result & Score Card</span>
+            <span>View Report Card (PDF)</span>
           </button>
         `;
       } else if (isLive) {
@@ -1511,15 +1609,16 @@ const StudentExams = {
     }
 
     try {
-      const result = await API.submitExam(this.activeExam.id, this.answers);
+      const slotLabel = (this.activeSlot && this.activeSlot.label) ? this.activeSlot.label : 'Slot 1';
+      const result = await API.submitExam(this.activeExam.id, this.answers, slotLabel);
       const submission = result.submission;
 
       // Close fullscreen exam interface
       const takerEl = document.getElementById('student-exam-taker');
       if (takerEl) takerEl.style.display = 'none';
 
-      App.showToast(isAutoSubmit ? 'Time expired: Exam submitted automatically' : 'Exam submitted successfully!', 'success');
-      this.showScoreCardModal(submission, this.activeExam);
+      App.showToast(isAutoSubmit ? 'Time expired: Exam submitted automatically' : 'Exam submitted successfully! Generating official report card...', 'success');
+      Reports.openStudentReportCard(submission, this.activeExam);
       await this.loadExams();
     } catch (err) {
       App.showToast('Submission error: ' + err.message, 'error');
@@ -1530,12 +1629,12 @@ const StudentExams = {
     try {
       const data = await API.getExam(examId);
       if (data && data.studentSubmission) {
-        this.showScoreCardModal(data.studentSubmission, data.exam);
+        Reports.openStudentReportCard(data.studentSubmission, data.exam);
       } else {
         App.showToast('No submission found for this exam', 'error');
       }
     } catch (err) {
-      App.showToast('Could not load score card: ' + err.message, 'error');
+      App.showToast('Could not load report card: ' + err.message, 'error');
     }
   },
 

@@ -177,15 +177,20 @@ const API = {
     });
   },
 
-  submitExam(id, answers) {
+  submitExam(id, answers, slotLabel = 'Slot 1') {
     return this.request(`/api/exams/${id}/submit`, {
       method: 'POST',
-      body: JSON.stringify({ answers })
+      body: JSON.stringify({ answers, slot_label: slotLabel })
     });
   },
 
   getExamSubmissions(id) {
     return this.request(`/api/exams/${id}/submissions`);
+  },
+
+  getClassDivisionReport(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return this.request(`/api/reports/class-division${query ? '?' + query : ''}`);
   },
 
   deleteExam(id) {

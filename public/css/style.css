@@ -2133,3 +2133,474 @@ body {
   opacity: 0.85;
 }
 
+/* ===================================================================== */
+/* SIDEBAR LOGOUT BUTTON */
+/* ===================================================================== */
+.btn-sidebar-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-sidebar-logout:hover {
+  background-color: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.28);
+  transform: translateY(-1px);
+}
+
+.btn-sidebar-logout svg {
+  transition: transform var(--transition-fast);
+}
+
+.btn-sidebar-logout:hover svg {
+  transform: translateX(2px);
+}
+
+/* ===================================================================== */
+/* Q&A KEY MODAL STYLES */
+/* ===================================================================== */
+.qa-paper-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.qa-question-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  transition: all var(--transition-fast);
+}
+
+.qa-question-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+}
+
+.qa-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.qa-question-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.45;
+  margin-bottom: 12px;
+}
+
+.qa-options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .qa-options-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.qa-option-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.qa-option-item.correct {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1.5px solid #10b981;
+  color: #065f46;
+  font-weight: 700;
+}
+
+[data-theme="dark"] .qa-option-item.correct {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.qa-option-marker {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-main);
+  flex-shrink: 0;
+}
+
+.qa-option-item.correct .qa-option-marker {
+  background: #10b981;
+  color: #ffffff;
+}
+
+/* ===================================================================== */
+/* OFFICIAL REPORT CARD STYLES (INDIVIDUAL & CLASS BROADSHEET) */
+/* ===================================================================== */
+.printable-report-sheet {
+  background: #ffffff;
+  color: #1e293b;
+  border-radius: var(--radius-lg);
+  padding: 32px 36px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .printable-report-sheet {
+  background: #1e293b;
+  color: #f8fafc;
+  border-color: #334155;
+}
+
+/* School Letterhead Header */
+.report-school-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--primary);
+  padding-bottom: 18px;
+  margin-bottom: 22px;
+  gap: 16px;
+}
+
+.report-header-logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.report-header-logo {
+  max-height: 58px;
+  width: auto;
+  object-fit: contain;
+}
+
+.report-school-info h2 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.report-school-info p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 2px 0 0;
+}
+
+.report-title-badge-box {
+  text-align: right;
+}
+
+.report-title-badge-box .report-type-badge {
+  display: inline-block;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+}
+
+.report-title-badge-box .report-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* Student & Exam Info Grid */
+.report-info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 22px;
+}
+
+@media (max-width: 768px) {
+  .report-info-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.report-info-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.report-info-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.report-info-val {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-top: 2px;
+}
+
+/* Key Metrics 5-Column Grid */
+.report-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .report-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.metric-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  text-align: center;
+  transition: transform var(--transition-fast);
+}
+
+.metric-box .m-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.metric-box .m-val {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text-main);
+}
+
+.metric-box .m-sub {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.metric-box.right {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.06);
+}
+.metric-box.right .m-val {
+  color: #10b981;
+}
+
+.metric-box.wrong {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.06);
+}
+.metric-box.wrong .m-val {
+  color: #ef4444;
+}
+
+.metric-box.primary {
+  border-color: var(--primary-glow);
+  background: rgba(79, 70, 229, 0.06);
+}
+.metric-box.primary .m-val {
+  color: var(--primary);
+}
+
+/* Evaluation Status Banner */
+.report-status-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-radius: var(--radius-md);
+  margin-bottom: 22px;
+  border: 1px solid transparent;
+}
+
+.report-status-banner.pass {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #065f46;
+}
+
+[data-theme="dark"] .report-status-banner.pass {
+  color: #34d399;
+}
+
+.report-status-banner.fail {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #991b1b;
+}
+
+/* Itemized Questions Breakdown Table */
+.report-itemized-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+  margin-bottom: 28px;
+}
+
+.report-itemized-table th {
+  background: var(--bg-subtle);
+  color: var(--text-main);
+  font-weight: 700;
+  text-align: left;
+  padding: 9px 12px;
+  border-bottom: 1.5px solid var(--border-color);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+.report-itemized-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+.report-itemized-table tr:hover td {
+  background: rgba(0, 0, 0, 0.015);
+}
+
+.pill-res {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.pill-res.correct {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.pill-res.wrong {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.pill-res.skipped {
+  background: rgba(148, 163, 184, 0.2);
+  color: #64748b;
+}
+
+/* Signatures Row */
+.report-signatures-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 36px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--border-color);
+  text-align: center;
+}
+
+.signature-line {
+  border-top: 1px solid var(--text-muted);
+  width: 75%;
+  margin: 36px auto 6px;
+}
+
+.signature-title {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ===================================================================== */
+/* PRINT MEDIA OPTIMIZATIONS (NEAT PDF EXPORT) */
+/* ===================================================================== */
+@media print {
+  /* Hide all website chrome */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Show only the active printable report container */
+  .printable-active,
+  .printable-active * {
+    visibility: visible;
+  }
+
+  .printable-active {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 12mm 15mm !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Force background colors and borders in PDF print preview */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide print buttons and close buttons inside report dialog during print */
+  .no-print,
+  .modal-close-btn,
+  .btn-print-report {
+    display: none !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
+  }
+
+  .page-break-auto {
+    page-break-inside: avoid;
+  }
+}
+
+
