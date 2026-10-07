@@ -396,17 +396,182 @@ const Reports = {
       return;
     }
 
-    // Add printable-active class so only this container is visible during window.print()
-    document.querySelectorAll('.printable-active').forEach(node => node.classList.remove('printable-active'));
-    el.classList.add('printable-active');
+    const isBroadsheet = printableAreaId === 'class-report-printable-area';
+    const pageOrientation = isBroadsheet ? 'A4 landscape' : 'A4 portrait';
 
-    // Trigger browser print dialog (Users can "Save as PDF" or Print)
-    window.print();
+    // Clone content to ensure no modification to DOM
+    const contentHtml = el.innerHTML;
 
-    // Clean up class after print
+    // Create or reuse isolated print iframe
+    let iframe = document.getElementById('hfis-report-print-frame');
+    if (iframe) {
+      iframe.remove();
+    }
+    iframe = document.createElement('iframe');
+    iframe.id = 'hfis-report-print-frame';
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    iframe.style.zIndex = '-9999';
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <title>Holy Family International School - Official Examination Report Card</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="css/style.css">
+        <style>
+          @page {
+            size: ${pageOrientation};
+            margin: 8mm 10mm;
+          }
+          * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
+          html, body {
+            margin: 0;
+            padding: 0;
+            background: #ffffff !important;
+            color: #0f172a !important;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 13px;
+          }
+          .printable-report-sheet {
+            border: none !important;
+            box-shadow: none !important;
+            padding: 10px 14px !important;
+            background: #ffffff !important;
+            color: #0f172a !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+          .report-school-header {
+            border-bottom: 2.5px solid #4f46e5 !important;
+            padding-bottom: 14px !important;
+            margin-bottom: 18px !important;
+          }
+          .report-header-logo {
+            max-height: 52px !important;
+            width: auto !important;
+          }
+          .report-school-info h2 {
+            color: #4f46e5 !important;
+            font-size: 1.3rem !important;
+            margin: 0 !important;
+          }
+          .report-school-info p {
+            color: #475569 !important;
+            margin: 2px 0 0 !important;
+          }
+          .report-info-grid {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            padding: 12px 14px !important;
+            margin-bottom: 18px !important;
+          }
+          .report-metrics-grid {
+            margin-bottom: 20px !important;
+          }
+          .metric-box {
+            background: #ffffff !important;
+            border: 1px solid #cbd5e1 !important;
+            padding: 10px !important;
+          }
+          .metric-box.right {
+            background: #f0fdf4 !important;
+            border-color: #86efac !important;
+          }
+          .metric-box.right .m-val {
+            color: #16a34a !important;
+          }
+          .metric-box.wrong {
+            background: #fef2f2 !important;
+            border-color: #fca5a5 !important;
+          }
+          .metric-box.wrong .m-val {
+            color: #dc2626 !important;
+          }
+          .metric-box.primary {
+            background: #eef2ff !important;
+            border-color: #a5b4fc !important;
+          }
+          .metric-box.primary .m-val {
+            color: #4f46e5 !important;
+          }
+          .report-status-banner.pass {
+            background: #f0fdf4 !important;
+            border: 1px solid #86efac !important;
+            color: #166534 !important;
+          }
+          .report-status-banner.fail {
+            background: #fef2f2 !important;
+            border: 1px solid #fca5a5 !important;
+            color: #991b1b !important;
+          }
+          .report-itemized-table {
+            border-collapse: collapse !important;
+            width: 100% !important;
+          }
+          .report-itemized-table th {
+            background: #f1f5f9 !important;
+            color: #1e293b !important;
+            border-bottom: 2px solid #cbd5e1 !important;
+            padding: 8px 10px !important;
+          }
+          .report-itemized-table td {
+            border-bottom: 1px solid #e2e8f0 !important;
+            padding: 8px 10px !important;
+          }
+          .pill-res.correct {
+            background: #dcfce7 !important;
+            color: #15803d !important;
+          }
+          .pill-res.wrong {
+            background: #fee2e2 !important;
+            color: #b91c1c !important;
+          }
+          .pill-res.skipped {
+            background: #f1f5f9 !important;
+            color: #64748b !important;
+          }
+          .report-signatures-row {
+            margin-top: 32px !important;
+            padding-top: 14px !important;
+            border-top: 1px dashed #94a3b8 !important;
+            page-break-inside: avoid !important;
+          }
+          .no-print, button, .modal-close-btn {
+            display: none !important;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="printable-report-sheet">
+          ${contentHtml}
+        </div>
+      </body>
+      </html>
+    `);
+    doc.close();
+
+    // Ensure resources (fonts & school logo) are fully rendered before printing
     setTimeout(() => {
-      el.classList.remove('printable-active');
-    }, 1200);
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+    }, 450);
   }
 };
 

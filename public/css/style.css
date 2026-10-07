@@ -2566,47 +2566,68 @@ body {
 /* PRINT MEDIA OPTIMIZATIONS (NEAT PDF EXPORT) */
 /* ===================================================================== */
 @media print {
-  /* Hide all website chrome */
-  body * {
-    visibility: hidden;
+  /* Hide navigation, sidebar, and action buttons during print */
+  .hfis-navbar,
+  .sidebar,
+  .top-navbar,
+  .controls-bar,
+  .no-print,
+  .modal-close-btn,
+  .btn-print-report,
+  .btn,
+  button,
+  .login-overlay,
+  .toast-container {
+    display: none !important;
   }
 
-  /* Show only the active printable report container */
-  .printable-active,
-  .printable-active * {
-    visibility: visible;
-  }
-
-  .printable-active {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 12mm 15mm !important;
+  body {
     background: #ffffff !important;
-    color: #000000 !important;
+    color: #0f172a !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .main-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  .modal-backdrop {
+    position: static !important;
+    background: none !important;
+    padding: 0 !important;
+    display: block !important;
+    opacity: 1 !important;
+  }
+
+  .modal-dialog {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+  }
+
+  .printable-report-sheet {
     border: none !important;
     box-shadow: none !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
   }
 
-  /* Force background colors and borders in PDF print preview */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  /* Hide print buttons and close buttons inside report dialog during print */
-  .no-print,
-  .modal-close-btn,
-  .btn-print-report {
-    display: none !important;
-  }
-
   @page {
     size: A4 portrait;
-    margin: 8mm;
+    margin: 10mm;
   }
 
   .page-break-auto {
