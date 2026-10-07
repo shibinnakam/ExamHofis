@@ -545,17 +545,17 @@ const TeacherExams = {
         } else {
           bodyEl.innerHTML = submissions.map((s, idx) => `
             <tr>
-              <td><strong>#${idx + 1}</strong></td>
-              <td>${s.student_name}</td>
+              <td style="text-align: center; font-weight: 800; color: var(--text-muted);">#${idx + 1}</td>
+              <td><strong style="color: var(--text-main); font-size: 0.94rem;">${s.student_name}</strong></td>
               <td><span class="badge badge-adm">${s.admission_no}</span></td>
-              <td>Class ${s.class} - ${s.div}</td>
-              <td><strong style="color:var(--primary); font-size:1.05rem;">${s.score}</strong> / ${s.total_marks}</td>
-              <td><span class="badge ${s.percentage >= 60 ? 'badge-subject' : 'badge-adm'}">${s.percentage}%</span></td>
-              <td style="font-size:0.78rem; color:var(--text-muted);">${formatDateTime(s.submitted_at)}</td>
+              <td><span class="badge badge-class">Class ${s.class} - ${s.div}</span></td>
+              <td style="text-align: center;"><strong style="color:var(--primary); font-size:1.1rem;">${s.score}</strong> <span style="font-size:0.8rem; color:var(--text-muted);">/ ${s.total_marks}</span></td>
+              <td style="text-align: center;"><span class="badge ${s.percentage >= 60 ? 'badge-subject' : 'badge-adm'}" style="font-weight:800;">${s.percentage}%</span></td>
+              <td style="font-size:0.82rem; color:var(--text-muted);">${formatDateTime(s.submitted_at)}</td>
               <td style="text-align: center;">
-                <button class="btn btn-secondary btn-sm action-btn-premium" onclick="Reports.openStudentReportCard('${s.id || s.student_id}', '${exam ? exam.id : ''}')" title="Generate Official Student Report Card (PDF)">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                  <span>Report Card</span>
+                <button class="btn btn-primary btn-sm action-btn-premium" onclick="Reports.openStudentReportCard('${s.id || s.student_id}', '${exam ? exam.id : ''}')" title="Generate Official Student Report Card (PDF)" style="white-space: nowrap; padding: 7px 14px; font-weight: 700; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                  <span>Report Card (PDF)</span>
                 </button>
               </td>
             </tr>
@@ -1030,17 +1030,17 @@ const AdminExams = {
         } else {
           bodyEl.innerHTML = submissions.map((s, idx) => `
             <tr>
-              <td><strong>#${idx + 1}</strong></td>
-              <td>${s.student_name}</td>
+              <td style="text-align: center; font-weight: 800; color: var(--text-muted);">#${idx + 1}</td>
+              <td><strong style="color: var(--text-main); font-size: 0.94rem;">${s.student_name}</strong></td>
               <td><span class="badge badge-adm">${s.admission_no}</span></td>
-              <td>Class ${s.class} - ${s.div}</td>
-              <td><strong style="color:var(--primary); font-size:1.05rem;">${s.score}</strong> / ${s.total_marks}</td>
-              <td><span class="badge ${s.percentage >= 60 ? 'badge-subject' : 'badge-adm'}">${s.percentage}%</span></td>
-              <td style="font-size:0.78rem; color:var(--text-muted);">${formatDateTime(s.submitted_at)}</td>
+              <td><span class="badge badge-class">Class ${s.class} - ${s.div}</span></td>
+              <td style="text-align: center;"><strong style="color:var(--primary); font-size:1.1rem;">${s.score}</strong> <span style="font-size:0.8rem; color:var(--text-muted);">/ ${s.total_marks}</span></td>
+              <td style="text-align: center;"><span class="badge ${s.percentage >= 60 ? 'badge-subject' : 'badge-adm'}" style="font-weight:800;">${s.percentage}%</span></td>
+              <td style="font-size:0.82rem; color:var(--text-muted);">${formatDateTime(s.submitted_at)}</td>
               <td style="text-align: center;">
-                <button class="btn btn-secondary btn-sm action-btn-premium" onclick="Reports.openStudentReportCard('${s.id || s.student_id}', '${exam ? exam.id : ''}')" title="Generate Official Student Report Card (PDF)">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                  <span>Report Card</span>
+                <button class="btn btn-primary btn-sm action-btn-premium" onclick="Reports.openStudentReportCard('${s.id || s.student_id}', '${exam ? exam.id : ''}')" title="Generate Official Student Report Card (PDF)" style="white-space: nowrap; padding: 7px 14px; font-weight: 700; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                  <span>Report Card (PDF)</span>
                 </button>
               </td>
             </tr>
