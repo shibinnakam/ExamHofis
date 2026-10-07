@@ -30,6 +30,38 @@ function formatTimeRemaining(ms) {
   return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
 }
 
+// Helper to convert ISO string or Date to HTML datetime-local format
+function toLocalDatetimeInputValue(dateInput) {
+  const d = dateInput ? new Date(dateInput) : new Date(Date.now() + 2 * 60000);
+  if (isNaN(d.getTime())) return '';
+  const tzOffset = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - tzOffset).toISOString().slice(0, 16);
+}
+
+// Helper to extract and normalize up to 4 schedules from exam object
+function getNormalizedSchedules(exam) {
+  if (!exam) return [];
+  if (Array.isArray(exam.schedules) && exam.schedules.length > 0) {
+    return exam.schedules.slice(0, 4);
+  }
+  if (typeof exam.schedules === 'string') {
+    try {
+      const parsed = JSON.parse(exam.schedules);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed.slice(0, 4);
+    } catch (e) {}
+  }
+  if (exam.scheduled_start) {
+    return [{
+      id: 'sched_1',
+      label: 'Slot 1',
+      start: exam.scheduled_start,
+      end: exam.scheduled_end,
+      duration_minutes: exam.duration_minutes || 45
+    }];
+  }
+  return [];
+}
+
 // =====================================================================
 // 1. TEACHER MCQ EXAMS MANAGER
 // =====================================================================
@@ -91,18 +123,23 @@ const TeacherExams = {
     }
 
     container.innerHTML = filtered.map(e => {
-      const isDraft = e.status === 'draft';
-      const isScheduled = e.status === 'scheduled';
+      const schedules = getNormalizedSchedules(e);
+      const isDraft = e.status === 'draft' || schedules.length === 0;
+      const isScheduled = e.status === 'scheduled' && schedules.length > 0;
       const now = Date.now();
-      const startTime = e.scheduled_start ? new Date(e.scheduled_start).getTime() : 0;
-      const endTime = e.scheduled_end ? new Date(e.scheduled_end).getTime() : 0;
-      const isLive = isScheduled && now >= startTime && now <= endTime;
+
+      const activeSlot = schedules.find(s => {
+        const sTime = new Date(s.start).getTime();
+        const eTime = new Date(s.end).getTime();
+        return now >= sTime && now <= eTime;
+      });
+      const isLive = isScheduled && !!activeSlot;
 
       let statusBadge = `<span class="exam-status-badge exam-status-draft">Draft (Unscheduled)</span>`;
       if (isLive) {
         statusBadge = `<span class="exam-status-badge exam-status-live">🟢 Live Now</span>`;
       } else if (isScheduled) {
-        statusBadge = `<span class="exam-status-badge exam-status-scheduled">Scheduled</span>`;
+        statusBadge = `<span class="exam-status-badge exam-status-scheduled">Scheduled (${schedules.length}/4 Slots)</span>`;
       }
 
       const qCount = e.total_questions || (e.questions ? e.questions.length : 0);
@@ -132,11 +169,21 @@ const TeacherExams = {
                 <span class="detail-value">${e.duration_minutes || 30} Minutes</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">Schedule Window:</span>
-                <span class="detail-value" style="font-size: 0.78rem;">
-                  ${e.scheduled_start ? `${formatDateTime(e.scheduled_start)}` : 'Waiting for Admin Schedule'}
+                <span class="detail-label">Schedules:</span>
+                <span class="detail-value" style="font-size: 0.8rem; font-weight: 700; color: var(--primary);">
+                  ${schedules.length > 0 ? `${schedules.length} / 4 Configured` : 'Awaiting Admin'}
                 </span>
               </div>
+              ${schedules.length > 0 ? `
+                <div style="background: rgba(0,0,0,0.03); border-radius: var(--radius-sm); padding: 6px 8px; margin-top: 4px; display: flex; flex-direction: column; gap: 4px;">
+                  ${schedules.map((s, idx) => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.74rem;">
+                      <strong>${s.label || `Slot ${idx+1}`}:</strong>
+                      <span>${formatDateTime(s.start)}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
             </div>
           </div>
 
@@ -553,6 +600,8 @@ const AdminExams = {
     }
   },
 
+  currentModalSchedules: [],
+
   filterAndRender() {
     const search = (document.getElementById('admin-exam-search')?.value || '').toLowerCase().trim();
     let filtered = [...this.exams];
@@ -582,18 +631,23 @@ const AdminExams = {
     }
 
     container.innerHTML = filtered.map(e => {
-      const isDraft = e.status === 'draft';
-      const isScheduled = e.status === 'scheduled';
+      const schedules = getNormalizedSchedules(e);
+      const isDraft = e.status === 'draft' || schedules.length === 0;
+      const isScheduled = e.status === 'scheduled' && schedules.length > 0;
       const now = Date.now();
-      const startTime = e.scheduled_start ? new Date(e.scheduled_start).getTime() : 0;
-      const endTime = e.scheduled_end ? new Date(e.scheduled_end).getTime() : 0;
-      const isLive = isScheduled && now >= startTime && now <= endTime;
+
+      const activeSlot = schedules.find(s => {
+        const sTime = new Date(s.start).getTime();
+        const eTime = new Date(s.end).getTime();
+        return now >= sTime && now <= eTime;
+      });
+      const isLive = isScheduled && !!activeSlot;
 
       let statusBadge = `<span class="exam-status-badge exam-status-draft">Draft</span>`;
       if (isLive) {
-        statusBadge = `<span class="exam-status-badge exam-status-live">🟢 Live</span>`;
+        statusBadge = `<span class="exam-status-badge exam-status-live">🟢 Live Now</span>`;
       } else if (isScheduled) {
-        statusBadge = `<span class="exam-status-badge exam-status-scheduled">Scheduled</span>`;
+        statusBadge = `<span class="exam-status-badge exam-status-scheduled">Scheduled (${schedules.length}/4)</span>`;
       }
 
       const qCount = e.total_questions || (e.questions ? e.questions.length : 0);
@@ -622,19 +676,41 @@ const AdminExams = {
                 <span class="detail-value">${e.created_by || 'Teacher'}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">Schedule Start:</span>
-                <span class="detail-value" style="color:var(--primary);">${formatDateTime(e.scheduled_start)}</span>
+                <span class="detail-label">Schedules Configured:</span>
+                <span class="detail-value" style="font-weight:700; color:var(--primary);">${schedules.length} / 4 Slots Max</span>
               </div>
-              <div class="detail-item">
-                <span class="detail-label">Schedule End:</span>
-                <span class="detail-value">${formatDateTime(e.scheduled_end)}</span>
-              </div>
+              ${schedules.length > 0 ? `
+                <div style="background: rgba(0,0,0,0.03); border-radius: var(--radius-sm); padding: 8px; margin-top: 4px; display: flex; flex-direction: column; gap: 5px;">
+                  ${schedules.map((s, idx) => {
+                    const sStart = new Date(s.start).getTime();
+                    const sEnd = new Date(s.end).getTime();
+                    const slotLive = now >= sStart && now <= sEnd;
+                    const slotPast = now > sEnd;
+                    const pillColor = slotLive ? '#10b981' : (slotPast ? 'var(--text-muted)' : '#0891b2');
+                    const pillText = slotLive ? '🟢 Live' : (slotPast ? '⏳ Ended' : '⏰ Upcoming');
+                    return `
+                      <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; border-bottom:1px solid rgba(0,0,0,0.04); padding-bottom:3px;">
+                        <div>
+                          <strong style="color:var(--text-main);">${s.label || `Slot ${idx+1}`}:</strong>
+                          <span style="font-size:0.73rem; color:var(--text-muted); margin-left:3px;">${formatDateTime(s.start)}</span>
+                        </div>
+                        <span style="color:${pillColor}; font-weight:700; font-size:0.7rem;">${pillText}</span>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              ` : `
+                <div class="detail-item">
+                  <span class="detail-label">Status:</span>
+                  <span class="detail-value" style="color:var(--text-muted);">Awaiting admin schedule (0/4)</span>
+                </div>
+              `}
             </div>
           </div>
 
           <div class="exam-card-actions">
             <button class="btn btn-primary btn-sm" onclick="AdminExams.openScheduleModal('${e.id}')">
-              📅 ${isScheduled ? 'Reschedule' : 'Set Date & Time'}
+              📅 ${isScheduled ? `Manage Schedules (${schedules.length}/4)` : 'Schedule Exam (Max 4)'}
             </button>
             <button class="btn btn-secondary btn-sm" onclick="AdminExams.viewSubmissions('${e.id}')">
               📊 Submissions
@@ -657,72 +733,243 @@ const AdminExams = {
     document.getElementById('schedule-modal-class').textContent = `Class ${exam.class}`;
     document.getElementById('schedule-modal-div').textContent = `Division ${exam.division || 'All'}`;
     document.getElementById('schedule-modal-subject').textContent = exam.subject;
-    document.getElementById('schedule-duration-minutes').value = exam.duration_minutes || 45;
 
-    // Default datetime to now + 2 minutes formatted as YYYY-MM-DDTHH:MM
-    const defaultStart = new Date(Date.now() + 2 * 60000);
-    // Pad to local ISO string without timezone
-    const tzOffset = defaultStart.getTimezoneOffset() * 60000;
-    const localISOTime = (new Date(defaultStart.getTime() - tzOffset)).toISOString().slice(0, 16);
-    document.getElementById('schedule-start-datetime').value = localISOTime;
+    const existingSchedules = getNormalizedSchedules(exam);
+    if (existingSchedules.length > 0) {
+      this.currentModalSchedules = existingSchedules.slice(0, 4).map((s, idx) => ({
+        id: s.id || `sched_${idx + 1}`,
+        label: s.label || `Slot ${idx + 1}`,
+        startLocal: toLocalDatetimeInputValue(s.start),
+        duration_minutes: s.duration_minutes || exam.duration_minutes || 45
+      }));
+    } else {
+      const defaultStart = new Date(Date.now() + 5 * 60000);
+      this.currentModalSchedules = [
+        {
+          id: 'sched_1',
+          label: 'Slot 1 (Morning Batch)',
+          startLocal: toLocalDatetimeInputValue(defaultStart),
+          duration_minutes: exam.duration_minutes || 45
+        }
+      ];
+    }
 
-    this.updateEndTimePreview();
+    this.renderModalSlots();
     App.openModal('exam-schedule-modal');
   },
 
-  updateEndTimePreview() {
-    const startVal = document.getElementById('schedule-start-datetime')?.value;
-    const duration = parseInt(document.getElementById('schedule-duration-minutes')?.value, 10) || 45;
-    const previewEl = document.getElementById('schedule-end-time-preview');
+  renderModalSlots() {
+    const container = document.getElementById('schedule-slots-container');
+    const countEl = document.getElementById('schedule-slot-count');
+    const remainingEl = document.getElementById('schedule-slots-remaining');
+    const addBtn = document.getElementById('btn-add-schedule-slot');
 
-    if (!startVal) {
-      if (previewEl) previewEl.textContent = 'Calculated End: --';
+    const count = this.currentModalSchedules.length;
+    if (countEl) countEl.textContent = count;
+    if (remainingEl) remainingEl.textContent = Math.max(0, 4 - count);
+
+    if (addBtn) {
+      if (count >= 4) {
+        addBtn.disabled = true;
+        addBtn.style.opacity = '0.6';
+        addBtn.style.cursor = 'not-allowed';
+        addBtn.innerHTML = '<span>🔒 Max 4 Schedules Reached</span>';
+      } else {
+        addBtn.disabled = false;
+        addBtn.style.opacity = '1';
+        addBtn.style.cursor = 'pointer';
+        addBtn.innerHTML = `<span>➕ Add Schedule Slot (${4 - count} left)</span>`;
+      }
+    }
+
+    if (!container) return;
+
+    const now = Date.now();
+
+    container.innerHTML = this.currentModalSchedules.map((slot, idx) => {
+      const dur = parseInt(slot.duration_minutes, 10) || 45;
+      let calculatedEnd = '--';
+      let statusPill = '';
+
+      if (slot.startLocal) {
+        const sDate = new Date(slot.startLocal);
+        if (!isNaN(sDate.getTime())) {
+          const eDate = new Date(sDate.getTime() + dur * 60000);
+          calculatedEnd = formatDateTime(eDate.toISOString());
+
+          if (now >= sDate.getTime() && now <= eDate.getTime()) {
+            statusPill = '<span class="badge" style="background:rgba(16,185,129,0.15); color:#10b981; font-weight:700;">🟢 Live Now</span>';
+          } else if (now < sDate.getTime()) {
+            statusPill = '<span class="badge" style="background:rgba(6,182,212,0.15); color:#0891b2; font-weight:700;">⏰ Upcoming</span>';
+          } else {
+            statusPill = '<span class="badge" style="background:rgba(239,68,68,0.12); color:#ef4444; font-weight:700;">⏳ Past</span>';
+          }
+        }
+      }
+
+      return `
+        <div class="schedule-slot-card" data-slot-idx="${idx}" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; position: relative;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="background: var(--primary); color: white; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800;">
+                ${idx + 1}
+              </span>
+              <input type="text" class="form-input slot-input-label" value="${slot.label || `Slot ${idx + 1}`}" placeholder="Slot Name (e.g. Slot ${idx + 1} / Morning Batch)" style="font-size: 0.88rem; font-weight: 700; padding: 4px 10px; width: 230px; height: 32px;" required oninput="AdminExams.syncSlotData(${idx})">
+            </div>
+            <div>
+              ${count > 1 ? `
+                <button type="button" class="btn btn-sm" onclick="AdminExams.removeScheduleSlot(${idx})" title="Remove this schedule slot" style="padding: 4px 10px; font-size: 0.78rem; color: var(--danger); background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2);">
+                  🗑️ Remove
+                </button>
+              ` : `
+                <span style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600;">(At least 1 slot required)</span>
+              `}
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 140px; gap: 12px;">
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-size: 0.8rem; margin-bottom: 4px;">Start Date & Time <span class="req">*</span></label>
+              <input type="datetime-local" class="form-input slot-input-start" value="${slot.startLocal || ''}" required onchange="AdminExams.syncSlotData(${idx})">
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-size: 0.8rem; margin-bottom: 4px;">Duration (Mins) <span class="req">*</span></label>
+              <input type="number" class="form-input slot-input-duration" min="5" max="360" value="${slot.duration_minutes || 45}" required oninput="AdminExams.syncSlotData(${idx})">
+            </div>
+          </div>
+
+          <div style="margin-top: 10px; font-size: 0.78rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-color); padding-top: 6px;">
+            <span>Calculated End: <strong class="slot-end-preview" style="color: var(--text-main);">${calculatedEnd}</strong></span>
+            <div>${statusPill}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  },
+
+  syncSlotData(idx) {
+    const card = document.querySelector(`.schedule-slot-card[data-slot-idx="${idx}"]`);
+    if (!card) return;
+
+    const labelInput = card.querySelector('.slot-input-label');
+    const startInput = card.querySelector('.slot-input-start');
+    const durInput = card.querySelector('.slot-input-duration');
+    const endPreview = card.querySelector('.slot-end-preview');
+
+    if (this.currentModalSchedules[idx]) {
+      this.currentModalSchedules[idx].label = labelInput ? labelInput.value.trim() : `Slot ${idx + 1}`;
+      this.currentModalSchedules[idx].startLocal = startInput ? startInput.value : '';
+      const dur = durInput ? parseInt(durInput.value, 10) || 45 : 45;
+      this.currentModalSchedules[idx].duration_minutes = dur;
+
+      if (startInput && startInput.value && endPreview) {
+        const sDate = new Date(startInput.value);
+        if (!isNaN(sDate.getTime())) {
+          const eDate = new Date(sDate.getTime() + dur * 60000);
+          endPreview.textContent = formatDateTime(eDate.toISOString());
+        } else {
+          endPreview.textContent = '--';
+        }
+      }
+    }
+  },
+
+  addScheduleSlot() {
+    if (this.currentModalSchedules.length >= 4) {
+      App.showToast('Maximum 4 schedules allowed per examination', 'warning');
       return;
     }
 
-    const startDate = new Date(startVal);
-    if (!isNaN(startDate.getTime())) {
-      const endDate = new Date(startDate.getTime() + duration * 60000);
-      if (previewEl) {
-        previewEl.innerHTML = `Calculated End: <strong style="color:var(--text-main);">${formatDateTime(endDate.toISOString())}</strong>`;
+    const prevSlot = this.currentModalSchedules[this.currentModalSchedules.length - 1];
+    let nextStart = new Date(Date.now() + 60 * 60000); // 1 hr from now
+    if (prevSlot && prevSlot.startLocal) {
+      const prevDate = new Date(prevSlot.startLocal);
+      if (!isNaN(prevDate.getTime())) {
+        nextStart = new Date(prevDate.getTime() + (prevSlot.duration_minutes || 45) * 60000 + 30 * 60000);
       }
     }
+
+    const newIdx = this.currentModalSchedules.length + 1;
+    this.currentModalSchedules.push({
+      id: `sched_${newIdx}_${Date.now()}`,
+      label: `Slot ${newIdx}`,
+      startLocal: toLocalDatetimeInputValue(nextStart),
+      duration_minutes: prevSlot ? prevSlot.duration_minutes : 45
+    });
+
+    this.renderModalSlots();
+    App.showToast(`Schedule Slot ${newIdx} added (${4 - this.currentModalSchedules.length} slots remaining)`, 'info');
+  },
+
+  removeScheduleSlot(idx) {
+    if (this.currentModalSchedules.length <= 1) {
+      App.showToast('An examination must have at least 1 schedule slot', 'warning');
+      return;
+    }
+
+    this.currentModalSchedules.splice(idx, 1);
+    this.renderModalSlots();
+    App.showToast('Schedule slot removed', 'info');
   },
 
   async handleScheduleSubmit(e) {
     e.preventDefault();
 
     const examId = document.getElementById('schedule-exam-id')?.value;
-    const startVal = document.getElementById('schedule-start-datetime')?.value;
-    const duration = parseInt(document.getElementById('schedule-duration-minutes')?.value, 10) || 45;
+    if (!examId) return;
 
-    if (!startVal) {
-      App.showToast('Please select a scheduled start date & time', 'error');
+    if (!Array.isArray(this.currentModalSchedules) || this.currentModalSchedules.length === 0) {
+      App.showToast('At least 1 schedule slot is required', 'error');
       return;
     }
 
-    const startDate = new Date(startVal);
-    if (isNaN(startDate.getTime())) {
-      App.showToast('Invalid date/time format', 'error');
+    if (this.currentModalSchedules.length > 4) {
+      App.showToast('Maximum 4 schedules allowed per examination', 'error');
       return;
     }
 
-    const endDate = new Date(startDate.getTime() + duration * 60000);
+    // Sync latest inputs from DOM
+    this.currentModalSchedules.forEach((_, idx) => this.syncSlotData(idx));
+
+    // Validate slots
+    const schedulesPayload = [];
+    for (let i = 0; i < this.currentModalSchedules.length; i++) {
+      const slot = this.currentModalSchedules[i];
+      if (!slot.startLocal) {
+        App.showToast(`Please select start date & time for ${slot.label || `Slot ${i + 1}`}`, 'error');
+        return;
+      }
+      const sDate = new Date(slot.startLocal);
+      if (isNaN(sDate.getTime())) {
+        App.showToast(`Invalid start date & time for ${slot.label || `Slot ${i + 1}`}`, 'error');
+        return;
+      }
+      const dur = parseInt(slot.duration_minutes, 10) || 45;
+      if (dur < 5) {
+        App.showToast(`Duration must be at least 5 minutes for ${slot.label || `Slot ${i + 1}`}`, 'error');
+        return;
+      }
+      const eDate = new Date(sDate.getTime() + dur * 60000);
+
+      schedulesPayload.push({
+        id: slot.id || `sched_${i + 1}`,
+        label: slot.label || `Slot ${i + 1}`,
+        start: sDate.toISOString(),
+        end: eDate.toISOString(),
+        duration_minutes: dur
+      });
+    }
 
     const submitBtn = document.getElementById('btn-schedule-submit');
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Publishing Schedule...';
+      submitBtn.textContent = 'Publishing Schedules...';
     }
 
     try {
-      await API.scheduleExam(examId, {
-        scheduled_start: startDate.toISOString(),
-        scheduled_end: endDate.toISOString(),
-        duration_minutes: duration
-      });
+      await API.scheduleExam(examId, { schedules: schedulesPayload });
 
-      App.showToast('Exam successfully scheduled! Corresponding students can now take it during the scheduled window.', 'success');
+      App.showToast(`Exam successfully scheduled with ${schedulesPayload.length} slot(s)!`, 'success');
       App.closeModal('exam-schedule-modal');
       await this.loadExams();
     } catch (err) {
@@ -732,7 +979,7 @@ const AdminExams = {
         submitBtn.disabled = false;
         submitBtn.innerHTML = `
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          Publish & Schedule Exam
+          Publish & Save Schedules
         `;
       }
     }
@@ -840,14 +1087,28 @@ const StudentExams = {
     const now = Date.now();
 
     container.innerHTML = this.exams.map(e => {
-      const startTime = e.scheduled_start ? new Date(e.scheduled_start).getTime() : 0;
-      const endTime = e.scheduled_end ? new Date(e.scheduled_end).getTime() : 0;
-      const isScheduled = e.status === 'scheduled';
+      const schedules = getNormalizedSchedules(e);
+      const isScheduled = e.status === 'scheduled' && schedules.length > 0;
       const isSubmitted = e.submitted;
 
-      const isUpcoming = isScheduled && !isSubmitted && now < startTime;
-      const isLive = isScheduled && !isSubmitted && now >= startTime && now <= endTime;
-      const isEnded = isScheduled && !isSubmitted && now > endTime;
+      // Check which slot (if any) is currently live
+      const activeSlot = schedules.find(s => {
+        const sTime = new Date(s.start).getTime();
+        const eTime = new Date(s.end).getTime();
+        return now >= sTime && now <= eTime;
+      });
+
+      // Find upcoming slots
+      const upcomingSlots = schedules
+        .filter(s => now < new Date(s.start).getTime())
+        .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+
+      const nextSlot = upcomingSlots[0] || null;
+      const allEnded = schedules.length > 0 && !activeSlot && upcomingSlots.length === 0;
+
+      const isLive = isScheduled && !isSubmitted && !!activeSlot;
+      const isUpcoming = isScheduled && !isSubmitted && !activeSlot && !!nextSlot;
+      const isEnded = isScheduled && !isSubmitted && allEnded;
 
       let cardBanner = '';
       let statusBadge = '';
@@ -862,9 +1123,10 @@ const StudentExams = {
         `;
       } else if (isLive) {
         statusBadge = `<span class="exam-status-badge exam-status-live">🟢 Exam Portal Open</span>`;
+        const activeEndTime = new Date(activeSlot.end).getTime();
         cardBanner = `
           <div style="background: rgba(16, 185, 129, 0.12); color: #10b981; font-weight: 700; font-size: 0.82rem; padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 12px; display:flex; align-items:center; gap:6px;">
-            <span>🟢</span> <strong>EXAM PORTAL OPEN NOW!</strong> Closes in ${formatTimeRemaining(endTime - now)}
+            <span>🟢</span> <strong>EXAM PORTAL OPEN NOW! (${activeSlot.label || 'Active Session'})</strong> &bull; Closes in ${formatTimeRemaining(activeEndTime - now)}
           </div>
         `;
         actionBtn = `
@@ -873,22 +1135,22 @@ const StudentExams = {
           </button>
         `;
       } else if (isUpcoming) {
-        statusBadge = `<span class="exam-status-badge exam-status-scheduled">⏰ Upcoming</span>`;
-        const timeToStart = startTime - now;
+        statusBadge = `<span class="exam-status-badge exam-status-scheduled">⏰ Upcoming (${schedules.length} Slots)</span>`;
+        const timeToStart = new Date(nextSlot.start).getTime() - now;
         cardBanner = `
           <div style="background: var(--bg-subtle); color: var(--text-muted); font-size: 0.82rem; padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 12px;">
-            ⏳ Opens in: <strong>${formatTimeRemaining(timeToStart)}</strong>
+            ⏳ Next Session (${nextSlot.label || 'Slot'}): Opens in <strong>${formatTimeRemaining(timeToStart)}</strong>
           </div>
         `;
         actionBtn = `
           <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.6; cursor: not-allowed;" title="Portal opens at scheduled start time">
-            🔒 Opens at ${formatDateTime(e.scheduled_start)}
+            🔒 Next Session: ${formatDateTime(nextSlot.start)}
           </button>
         `;
       } else if (isEnded) {
         statusBadge = `<span class="exam-status-badge exam-status-ended">⏳ Closed</span>`;
         actionBtn = `
-          <span style="font-size: 0.82rem; color: var(--danger); font-weight: 700;">Window Closed (Missed)</span>
+          <span style="font-size: 0.82rem; color: var(--danger); font-weight: 700;">All Schedules Closed (Missed)</span>
         `;
       } else {
         statusBadge = `<span class="exam-status-badge exam-status-draft">Pending Schedule</span>`;
@@ -920,13 +1182,35 @@ const StudentExams = {
                 <span class="detail-value">${e.duration_minutes || 30} Minutes</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">Start Time:</span>
-                <span class="detail-value">${formatDateTime(e.scheduled_start)}</span>
+                <span class="detail-label">Available Sessions:</span>
+                <span class="detail-value" style="font-weight:700; color:var(--primary);">${schedules.length} / 4 Slots Configured</span>
               </div>
-              <div class="detail-item">
-                <span class="detail-label">End Time:</span>
-                <span class="detail-value">${formatDateTime(e.scheduled_end)}</span>
-              </div>
+              ${schedules.length > 0 ? `
+                <div style="background: rgba(0,0,0,0.03); border-radius: var(--radius-sm); padding: 8px; margin-top: 4px; display: flex; flex-direction: column; gap: 5px;">
+                  ${schedules.map((s, idx) => {
+                    const sStart = new Date(s.start).getTime();
+                    const sEnd = new Date(s.end).getTime();
+                    const isSlotLive = now >= sStart && now <= sEnd;
+                    const isSlotPast = now > sEnd;
+                    const pillColor = isSlotLive ? '#10b981' : (isSlotPast ? 'var(--text-muted)' : '#0891b2');
+                    const pillText = isSlotLive ? '🟢 Open Now' : (isSlotPast ? 'Closed' : 'Upcoming');
+                    return `
+                      <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem;">
+                        <div>
+                          <strong style="color:var(--text-main);">${s.label || `Slot ${idx + 1}`}:</strong>
+                          <span style="font-size:0.73rem; color:var(--text-muted); margin-left:4px;">${formatDateTime(s.start)}</span>
+                        </div>
+                        <span style="color:${pillColor}; font-weight:700; font-size:0.7rem;">${pillText}</span>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              ` : `
+                <div class="detail-item">
+                  <span class="detail-label">Schedule:</span>
+                  <span class="detail-value" style="color:var(--text-muted);">Waiting for Admin</span>
+                </div>
+              `}
               ${isSubmitted && e.submission ? `
                 <div class="detail-item" style="border-top: 1px solid var(--border-color); padding-top: 6px; margin-top: 4px;">
                   <span class="detail-label">Your Score:</span>
@@ -956,36 +1240,44 @@ const StudentExams = {
         return;
       }
 
-      const now = Date.now();
-      const startTime = exam.scheduled_start ? new Date(exam.scheduled_start).getTime() : 0;
-      const endTime = exam.scheduled_end ? new Date(exam.scheduled_end).getTime() : 0;
-
-      if (exam.status !== 'scheduled') {
-        App.showToast('This exam has not been scheduled yet', 'error');
-        return;
-      }
-
-      if (now < startTime) {
-        App.showToast(`This exam opens at ${formatDateTime(exam.scheduled_start)}`, 'error');
-        return;
-      }
-
-      if (now > endTime) {
-        App.showToast('The scheduled window for this exam has already closed', 'error');
-        return;
-      }
-
       if (data.studentSubmission) {
         this.showScoreCardModal(data.studentSubmission, exam);
         return;
       }
 
+      const schedules = getNormalizedSchedules(exam);
+      if (exam.status !== 'scheduled' || schedules.length === 0) {
+        App.showToast('This exam has not been scheduled yet', 'error');
+        return;
+      }
+
+      const now = Date.now();
+      const activeSlot = schedules.find(s => {
+        const sTime = new Date(s.start).getTime();
+        const eTime = new Date(s.end).getTime();
+        return now >= sTime && now <= eTime;
+      });
+
+      if (!activeSlot) {
+        const upcomingSlots = schedules
+          .filter(s => now < new Date(s.start).getTime())
+          .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+        if (upcomingSlots.length > 0) {
+          App.showToast(`Portal opens for ${upcomingSlots[0].label || 'the next session'} at ${formatDateTime(upcomingSlots[0].start)}`, 'error');
+        } else {
+          App.showToast('All scheduled windows for this exam have already closed', 'error');
+        }
+        return;
+      }
+
+      const activeEndTime = new Date(activeSlot.end).getTime();
       this.activeExam = exam;
+      this.activeSlot = activeSlot;
       this.currentQuestionIdx = 0;
       this.answers = {};
 
-      // Time remaining in seconds
-      this.timeRemainingSecs = Math.max(0, Math.floor((endTime - now) / 1000));
+      // Time remaining in seconds based on active slot's end time
+      this.timeRemainingSecs = Math.max(0, Math.floor((activeEndTime - now) / 1000));
 
       // Populate Header
       const titleEl = document.getElementById('taker-exam-title');
@@ -994,7 +1286,7 @@ const StudentExams = {
 
       if (titleEl) titleEl.textContent = exam.title;
       if (subjectEl) subjectEl.textContent = exam.subject;
-      if (classEl) classEl.textContent = `Class ${exam.class} - ${exam.division || 'All'}`;
+      if (classEl) classEl.textContent = `Class ${exam.class} - ${exam.division || 'All'} • ${activeSlot.label || 'Active Session'}`;
 
       // Start countdown timer
       if (this.timerInterval) clearInterval(this.timerInterval);

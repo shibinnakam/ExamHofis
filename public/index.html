@@ -1440,18 +1440,18 @@
   </div>
 
   <!-- ============================================================== -->
-  <!-- MODAL 6: ADMIN SCHEDULE EXAM DATE & TIME -->
+  <!-- MODAL 6: ADMIN SCHEDULE EXAM SESSIONS (MAX 4 SCHEDULES) -->
   <!-- ============================================================== -->
   <div class="modal-backdrop" id="exam-schedule-modal">
-    <div class="modal-dialog" style="max-width: 520px;">
+    <div class="modal-dialog" style="max-width: 640px;">
       <div class="modal-header">
         <div class="modal-header-info">
           <div class="modal-icon-badge" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(79, 70, 229, 0.18)); color: #0891b2;">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
           </div>
           <div>
-            <h3>Schedule Examination Date & Time</h3>
-            <p class="modal-subtitle">Set date & time window for student portal exam access</p>
+            <h3>Schedule Examination Sessions</h3>
+            <p class="modal-subtitle">Configure up to 4 scheduled time slots / batches for student access</p>
           </div>
         </div>
         <button type="button" class="modal-close-btn" onclick="App.closeModal('exam-schedule-modal')">
@@ -1461,35 +1461,48 @@
 
       <form id="exam-schedule-form" onsubmit="AdminExams.handleScheduleSubmit(event)">
         <input type="hidden" id="schedule-exam-id">
-        <div class="modal-body">
-          <div style="background: var(--bg-subtle); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 18px;">
-            <h4 id="schedule-modal-exam-title" style="font-size: 1.05rem; font-weight: 800; color: var(--text-main);">Exam Title</h4>
-            <div style="display: flex; gap: 8px; margin-top: 6px;">
-              <span class="badge badge-class" id="schedule-modal-class">Class 10</span>
-              <span class="badge badge-div" id="schedule-modal-div">Division All</span>
-              <span class="badge badge-subject" id="schedule-modal-subject">Physics</span>
+        <div class="modal-body" style="max-height: 72vh; overflow-y: auto; padding-right: 6px;">
+          <!-- Exam Info Card -->
+          <div style="background: var(--bg-subtle); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h4 id="schedule-modal-exam-title" style="font-size: 1.05rem; font-weight: 800; color: var(--text-main);">Exam Title</h4>
+              <div style="display: flex; gap: 8px; margin-top: 6px;">
+                <span class="badge badge-class" id="schedule-modal-class">Class 10</span>
+                <span class="badge badge-div" id="schedule-modal-div">Division All</span>
+                <span class="badge badge-subject" id="schedule-modal-subject">Physics</span>
+              </div>
+            </div>
+            <div id="schedule-counter-badge" style="background: rgba(6, 182, 212, 0.12); border: 1px solid rgba(6, 182, 212, 0.35); color: #0891b2; font-weight: 700; font-size: 0.85rem; padding: 6px 14px; border-radius: var(--radius-full);">
+              Schedules: <strong id="schedule-slot-count">1</strong> / 4 Max
             </div>
           </div>
 
-          <div class="form-group" style="margin-bottom: 16px;">
-            <label class="form-label" for="schedule-start-datetime">Scheduled Start Date & Time <span class="req">*</span></label>
-            <input type="datetime-local" id="schedule-start-datetime" class="form-input" required>
-            <span class="form-hint">At this exact moment, the exam portal opens for enrolled students</span>
+          <!-- Section header with Add Slot button -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <label class="form-label" style="margin: 0; font-size: 0.92rem; font-weight: 700;">Examination Time Slots (1 to 4)</label>
+              <span class="form-hint" style="display: block; margin-top: 2px;">Students can take this exam during any active scheduled slot.</span>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-add-schedule-slot" onclick="AdminExams.addScheduleSlot()" style="display: inline-flex; align-items: center; gap: 6px;">
+              <span>➕ Add Schedule Slot</span>
+            </button>
           </div>
 
-          <div class="form-group" style="margin-bottom: 16px;">
-            <label class="form-label" for="schedule-duration-minutes">Exam Window Duration (Minutes) <span class="req">*</span></label>
-            <input type="number" id="schedule-duration-minutes" class="form-input" min="5" max="360" value="45" required oninput="AdminExams.updateEndTimePreview()">
-            <span class="form-hint" id="schedule-end-time-preview">Calculated End: --</span>
+          <!-- Slots Container -->
+          <div id="schedule-slots-container" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 8px;">
+            <!-- Rendered dynamically via AdminExams.renderModalSlots() -->
           </div>
         </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="App.closeModal('exam-schedule-modal')">Cancel</button>
-          <button type="submit" class="btn btn-primary" id="btn-schedule-submit">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            Publish & Schedule Exam
-          </button>
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.8rem; color: var(--text-muted);" id="schedule-modal-footer-hint">Admin can schedule maximum 4 sessions per exam.</span>
+          <div style="display: flex; gap: 10px;">
+            <button type="button" class="btn btn-secondary" onclick="App.closeModal('exam-schedule-modal')">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="btn-schedule-submit">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Publish & Save Schedules
+            </button>
+          </div>
         </div>
       </form>
     </div>

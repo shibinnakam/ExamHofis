@@ -526,6 +526,7 @@ async function createExam(data) {
     status: data.status || 'draft',
     scheduled_start: data.scheduled_start || null,
     scheduled_end: data.scheduled_end || null,
+    schedules: Array.isArray(data.schedules) ? data.schedules : [],
     questions: data.questions || [],
     total_marks: parseInt(data.total_marks || (data.questions ? data.questions.length : 0), 10),
     total_questions: data.questions ? data.questions.length : 0,
@@ -552,8 +553,10 @@ async function createExam(data) {
 }
 
 async function updateExam(id, updates) {
-  const existing = await getExamById(id);
-  if (!existing) return null;
+  let existing = await getExamById(id);
+  if (!existing) {
+    existing = { id: String(id), title: 'Exam', class: 10, division: 'All' };
+  }
 
   const updated = { ...existing, ...updates, id: String(id) };
 

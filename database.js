@@ -60,6 +60,7 @@ function initDatabase() {
       status TEXT NOT NULL DEFAULT 'draft',
       scheduled_start DATETIME,
       scheduled_end DATETIME,
+      schedules TEXT DEFAULT '[]',
       questions TEXT NOT NULL,
       total_marks INTEGER NOT NULL DEFAULT 0,
       total_questions INTEGER NOT NULL DEFAULT 0,
@@ -92,6 +93,32 @@ function initDatabase() {
     db.exec(`ALTER TABLE teachers ADD COLUMN assignments TEXT;`);
   } catch (e) {
     // Column already exists, safe to ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE exams ADD COLUMN schedules TEXT DEFAULT '[]';`);
+  } catch (e) {
+    // Column already exists, safe to ignore
+  }
+
+  // Migrate any existing exams that don't have schedules array populated
+  try {
+    const legacyExams = db.prepare('SELECT id, scheduled_start, scheduled_end, duration_minutes, schedules FROM exams').all();
+    const updateSched = db.prepare('UPDATE exams SET schedules = ? WHERE id = ?');
+    for (const ex of legacyExams) {
+      if ((!ex.schedules || ex.schedules === '[]' || ex.schedules === '') && ex.scheduled_start) {
+        const synth = [{
+          id: 'sched_1',
+          label: 'Slot 1',
+          start: ex.scheduled_start,
+          end: ex.scheduled_end,
+          duration_minutes: ex.duration_minutes || 45
+        }];
+        updateSched.run(JSON.stringify(synth), ex.id);
+      }
+    }
+  } catch (e) {
+    // Safe to ignore
   }
 
   // Seed default admin if none exists
@@ -186,10 +213,19 @@ function initDatabase() {
     const now = new Date();
     const scheduledStart = new Date(now.getTime() - 5 * 60000).toISOString();
     const scheduledEnd = new Date(now.getTime() + 45 * 60000).toISOString();
+    const sampleSchedules = [
+      {
+        id: 'sched_1',
+        label: 'Slot 1 (Morning Batch)',
+        start: scheduledStart,
+        end: scheduledEnd,
+        duration_minutes: 45
+      }
+    ];
 
     db.prepare(`
-      INSERT INTO exams (title, subject, class, division, duration_minutes, created_by, created_by_id, status, scheduled_start, scheduled_end, questions, total_marks, total_questions)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO exams (title, subject, class, division, duration_minutes, created_by, created_by_id, status, scheduled_start, scheduled_end, schedules, questions, total_marks, total_questions)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       'Class 10 Physics Assessment - Mechanics & Optics',
       'Physics',
@@ -201,6 +237,7 @@ function initDatabase() {
       'scheduled',
       scheduledStart,
       scheduledEnd,
+      JSON.stringify(sampleSchedules),
       JSON.stringify(sampleQuestions),
       3,
       3

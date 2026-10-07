@@ -1196,10 +1196,28 @@ app.get('/api/exams', authenticateToken, async (req, res) => {
     }
 
     query += ` ORDER BY created_at DESC`;
-    let exams = db.prepare(query).all(...params).map(e => ({
-      ...e,
-      questions: JSON.parse(e.questions || '[]')
-    }));
+    let exams = db.prepare(query).all(...params).map(e => {
+      let parsedSchedules = [];
+      try {
+        parsedSchedules = typeof e.schedules === 'string' ? JSON.parse(e.schedules || '[]') : (e.schedules || []);
+      } catch (err) {
+        parsedSchedules = [];
+      }
+      if ((!parsedSchedules || parsedSchedules.length === 0) && e.scheduled_start) {
+        parsedSchedules = [{
+          id: 'sched_1',
+          label: 'Slot 1',
+          start: e.scheduled_start,
+          end: e.scheduled_end,
+          duration_minutes: e.duration_minutes || 45
+        }];
+      }
+      return {
+        ...e,
+        questions: JSON.parse(e.questions || '[]'),
+        schedules: parsedSchedules
+      };
+    });
 
     if (user.role === 'student' && currentStudent) {
       const submissions = db.prepare('SELECT * FROM exam_submissions WHERE student_id = ?').all(currentStudent.id);
@@ -1319,9 +1337,26 @@ app.get('/api/exams/:id', authenticateToken, async (req, res) => {
       if (exam && typeof exam.questions === 'string') {
         exam.questions = JSON.parse(exam.questions);
       }
+      if (exam && typeof exam.schedules === 'string') {
+        try {
+          exam.schedules = JSON.parse(exam.schedules);
+        } catch (e) {
+          exam.schedules = [];
+        }
+      }
     }
 
     if (!exam) return res.status(404).json({ error: 'Exam not found' });
+
+    if (exam && (!exam.schedules || !Array.isArray(exam.schedules) || exam.schedules.length === 0) && exam.scheduled_start) {
+      exam.schedules = [{
+        id: 'sched_1',
+        label: 'Slot 1',
+        start: exam.scheduled_start,
+        end: exam.scheduled_end,
+        duration_minutes: exam.duration_minutes || 45
+      }];
+    }
 
     // Check student submission
     let studentSubmission = null;
@@ -1361,48 +1396,118 @@ app.get('/api/exams/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// 4. POST /api/exams/:id/schedule - Admin schedules exam date and time
+// 4. POST /api/exams/:id/schedule - Admin schedules exam date and time (Max 4 schedules)
 app.post('/api/exams/:id/schedule', authenticateToken, requireRole(['admin']), async (req, res) => {
   const examId = req.params.id;
-  const { scheduled_start, scheduled_end, duration_minutes } = req.body;
+  const { schedules, scheduled_start, scheduled_end, duration_minutes } = req.body;
 
   try {
-    if (!scheduled_start) throw new Error('Scheduled start date and time is required');
+    let sanitizedSchedules = [];
 
-    const startDate = new Date(scheduled_start);
-    if (isNaN(startDate.getTime())) throw new Error('Invalid start date/time');
+    if (Array.isArray(schedules) && schedules.length > 0) {
+      if (schedules.length > 4) {
+        throw new Error('Maximum 4 schedules allowed per examination');
+      }
 
-    let endDate;
-    if (scheduled_end) {
-      endDate = new Date(scheduled_end);
+      sanitizedSchedules = schedules.map((s, idx) => {
+        if (!s.start) throw new Error(`Schedule Slot ${idx + 1} start date & time is required`);
+        const startDate = new Date(s.start);
+        if (isNaN(startDate.getTime())) throw new Error(`Schedule Slot ${idx + 1} has an invalid start date/time`);
+
+        const dur = parseInt(s.duration_minutes, 10) || parseInt(duration_minutes, 10) || 45;
+        let endDate;
+        if (s.end) {
+          endDate = new Date(s.end);
+          if (isNaN(endDate.getTime()) || endDate.getTime() <= startDate.getTime()) {
+            endDate = new Date(startDate.getTime() + dur * 60000);
+          }
+        } else {
+          endDate = new Date(startDate.getTime() + dur * 60000);
+        }
+
+        return {
+          id: s.id || `sched_${idx + 1}_${Date.now()}`,
+          label: (s.label && s.label.trim()) ? s.label.trim() : `Slot ${idx + 1}`,
+          start: startDate.toISOString(),
+          end: endDate.toISOString(),
+          duration_minutes: dur
+        };
+      });
+    } else if (scheduled_start) {
+      // Legacy single schedule format fallback
+      const startDate = new Date(scheduled_start);
+      if (isNaN(startDate.getTime())) throw new Error('Invalid start date/time');
+
+      const dur = parseInt(duration_minutes, 10) || 45;
+      let endDate;
+      if (scheduled_end) {
+        endDate = new Date(scheduled_end);
+        if (isNaN(endDate.getTime())) endDate = new Date(startDate.getTime() + dur * 60000);
+      } else {
+        endDate = new Date(startDate.getTime() + dur * 60000);
+      }
+
+      sanitizedSchedules = [{
+        id: 'sched_1',
+        label: 'Slot 1',
+        start: startDate.toISOString(),
+        end: endDate.toISOString(),
+        duration_minutes: dur
+      }];
     } else {
-      const duration = parseInt(duration_minutes, 10) || 45;
-      endDate = new Date(startDate.getTime() + duration * 60000);
+      throw new Error('At least 1 scheduled date & time slot is required (maximum 4 allowed)');
     }
+
+    if (sanitizedSchedules.length > 4) {
+      throw new Error('Maximum 4 schedules allowed per examination');
+    }
+
+    // Calculate earliest start and latest end for aggregate display & queries
+    const startTimestamps = sanitizedSchedules.map(s => new Date(s.start).getTime());
+    const endTimestamps = sanitizedSchedules.map(s => new Date(s.end).getTime());
+    const earliestStart = new Date(Math.min(...startTimestamps)).toISOString();
+    const latestEnd = new Date(Math.max(...endTimestamps)).toISOString();
 
     const updates = {
       status: 'scheduled',
-      scheduled_start: startDate.toISOString(),
-      scheduled_end: endDate.toISOString(),
-      ...(duration_minutes ? { duration_minutes: parseInt(duration_minutes, 10) } : {})
+      scheduled_start: earliestStart,
+      scheduled_end: latestEnd,
+      schedules: sanitizedSchedules,
+      duration_minutes: sanitizedSchedules[0].duration_minutes
     };
 
     if (USE_AWS) {
-      const updated = await dynamoService.updateExam(examId, updates);
-      return res.json({ success: true, message: 'Exam scheduled successfully in AWS', exam: updated });
+      let updated = await dynamoService.updateExam(examId, updates);
+      if (db) {
+        try {
+          db.prepare(`
+            UPDATE exams 
+            SET status = 'scheduled', scheduled_start = ?, scheduled_end = ?, schedules = ?, duration_minutes = ?
+            WHERE id = ?
+          `).run(updates.scheduled_start, updates.scheduled_end, JSON.stringify(sanitizedSchedules), updates.duration_minutes, examId);
+        } catch (e) {}
+      }
+      return res.json({ success: true, message: `Exam scheduled successfully with ${sanitizedSchedules.length} slot(s) in AWS`, exam: updated });
     }
 
     if (!db) return res.status(500).json({ error: 'Database not initialized' });
     db.prepare(`
       UPDATE exams 
-      SET status = 'scheduled', scheduled_start = ?, scheduled_end = ?
+      SET status = 'scheduled', scheduled_start = ?, scheduled_end = ?, schedules = ?, duration_minutes = ?
       WHERE id = ?
-    `).run(updates.scheduled_start, updates.scheduled_end, examId);
+    `).run(updates.scheduled_start, updates.scheduled_end, JSON.stringify(sanitizedSchedules), updates.duration_minutes, examId);
 
     const updatedExam = db.prepare('SELECT * FROM exams WHERE id = ?').get(examId);
-    if (updatedExam) updatedExam.questions = JSON.parse(updatedExam.questions || '[]');
+    if (updatedExam) {
+      updatedExam.questions = JSON.parse(updatedExam.questions || '[]');
+      try {
+        updatedExam.schedules = JSON.parse(updatedExam.schedules || '[]');
+      } catch (e) {
+        updatedExam.schedules = sanitizedSchedules;
+      }
+    }
 
-    res.json({ success: true, message: 'Exam scheduled successfully', exam: updatedExam });
+    res.json({ success: true, message: `Exam scheduled successfully with ${sanitizedSchedules.length} slot(s)`, exam: updatedExam });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
