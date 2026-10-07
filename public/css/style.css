@@ -2563,10 +2563,26 @@ body {
 }
 
 /* ===================================================================== */
-/* PRINT MEDIA OPTIMIZATIONS (NEAT PDF EXPORT) */
+/* PRINT MEDIA OPTIMIZATIONS (NEAT A4 PDF EXPORT) */
 /* ===================================================================== */
 @media print {
-  /* Hide navigation, sidebar, and action buttons during print */
+  /* 1. Page & Body Reset */
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  }
+
+  /* 2. Hide dashboard chrome, navbars, sidebars, buttons, and views */
   .hfis-navbar,
   .sidebar,
   .top-navbar,
@@ -2577,62 +2593,402 @@ body {
   .btn,
   button,
   .login-overlay,
-  .toast-container {
+  .toast-container,
+  #view-homepage,
+  #view-portal,
+  .main-wrapper,
+  .hero-section,
+  .features-section,
+  .about-section,
+  .contact-section {
     display: none !important;
   }
 
-  body {
+  /* 3. Hide all modals by default */
+  .modal-backdrop {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* 4. When printing Individual Student Report Card */
+  body.print-mode-student #student-report-card-modal,
+  body:not(.print-mode-class):not(.printing-id-card) #student-report-card-modal.open,
+  body:not(.print-mode-class):not(.printing-id-card) #student-report-card-modal.active {
+    display: block !important;
+    visibility: visible !important;
+    position: static !important;
     background: #ffffff !important;
     color: #0f172a !important;
     padding: 0 !important;
     margin: 0 !important;
-  }
-
-  .main-wrapper {
-    margin: 0 !important;
-    padding: 0 !important;
     width: 100% !important;
-  }
-
-  .modal-backdrop {
-    position: static !important;
-    background: none !important;
-    padding: 0 !important;
-    display: block !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
     opacity: 1 !important;
+    z-index: auto !important;
+    overflow: visible !important;
   }
 
-  .modal-dialog {
+  /* 5. When printing Consolidated Class Broadsheet */
+  body.print-mode-class #class-division-report-modal,
+  body:not(.print-mode-student):not(.printing-id-card) #class-division-report-modal.open,
+  body:not(.print-mode-student):not(.printing-id-card) #class-division-report-modal.active {
+    display: block !important;
+    visibility: visible !important;
+    position: static !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    opacity: 1 !important;
+    z-index: auto !important;
+    overflow: visible !important;
+  }
+
+  /* 6. Transparent dialog and body wrappers inside active report modals */
+  #student-report-card-modal .modal-dialog,
+  #class-division-report-modal .modal-dialog {
+    display: block !important;
+    visibility: visible !important;
+    position: static !important;
     max-width: 100% !important;
     width: 100% !important;
+    max-height: none !important;
     box-shadow: none !important;
     border: none !important;
     padding: 0 !important;
     margin: 0 !important;
     background: transparent !important;
+    overflow: visible !important;
   }
 
+  #student-report-card-modal .modal-header,
+  #student-report-card-modal .modal-footer,
+  #class-division-report-modal .modal-header,
+  #class-division-report-modal .modal-footer {
+    display: none !important;
+  }
+
+  #student-report-card-modal .modal-body,
+  #class-division-report-modal .modal-body {
+    display: block !important;
+    visibility: visible !important;
+    position: static !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: transparent !important;
+  }
+
+  /* 7. Printable Sheet Card */
   .printable-report-sheet {
+    display: block !important;
+    visibility: visible !important;
+    position: static !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
     border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .printable-report-sheet * {
+    visibility: visible !important;
+  }
+
+  /* Dark mode overrides during print: always crisp white with dark text */
+  [data-theme="dark"] .printable-report-sheet,
+  [data-theme="dark"] .printable-report-sheet h1,
+  [data-theme="dark"] .printable-report-sheet h2,
+  [data-theme="dark"] .printable-report-sheet h3,
+  [data-theme="dark"] .printable-report-sheet h4,
+  [data-theme="dark"] .printable-report-sheet p,
+  [data-theme="dark"] .printable-report-sheet span,
+  [data-theme="dark"] .printable-report-sheet td,
+  [data-theme="dark"] .printable-report-sheet th {
     background: #ffffff !important;
     color: #0f172a !important;
   }
 
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+  /* 8. School Official Header & Logo */
+  .report-school-header {
+    border-bottom: 2.5px solid #4f46e5 !important;
+    padding-bottom: 12px !important;
+    margin-bottom: 16px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
   }
 
-  @page {
-    size: A4 portrait;
-    margin: 10mm;
+  .report-header-logo-wrap {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
   }
 
-  .page-break-auto {
-    page-break-inside: avoid;
+  .report-header-logo {
+    max-height: 52px !important;
+    width: auto !important;
+    display: block !important;
+  }
+
+  .report-school-info h2 {
+    color: #4f46e5 !important;
+    font-size: 1.28rem !important;
+    margin: 0 !important;
+  }
+
+  .report-school-info p {
+    color: #475569 !important;
+    font-size: 0.78rem !important;
+    margin: 2px 0 0 !important;
+  }
+
+  .report-title-badge-box .report-type-badge {
+    background: #eef2ff !important;
+    color: #4f46e5 !important;
+    border: 1px solid #c7d2fe !important;
+    font-weight: 800 !important;
+  }
+
+  /* 9. Metadata 4-Column Grid */
+  .report-info-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 10px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 10px 14px !important;
+    margin-bottom: 16px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .report-info-label {
+    color: #64748b !important;
+    font-size: 0.72rem !important;
+  }
+
+  .report-info-val {
+    color: #0f172a !important;
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+  }
+
+  /* 10. Metric Boxes Grid */
+  .report-metrics-grid {
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 8px !important;
+    margin-bottom: 16px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .metric-box {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 8px 10px !important;
+    border-radius: 6px !important;
+    text-align: center !important;
+  }
+
+  .metric-box .m-lbl {
+    color: #64748b !important;
+    font-size: 0.68rem !important;
+  }
+
+  .metric-box .m-val {
+    font-size: 1.15rem !important;
+    font-weight: 800 !important;
+  }
+
+  .metric-box.right {
+    background: #f0fdf4 !important;
+    border-color: #86efac !important;
+  }
+  .metric-box.right .m-val {
+    color: #16a34a !important;
+  }
+
+  .metric-box.wrong {
+    background: #fef2f2 !important;
+    border-color: #fca5a5 !important;
+  }
+  .metric-box.wrong .m-val {
+    color: #dc2626 !important;
+  }
+
+  .metric-box.primary {
+    background: #eef2ff !important;
+    border-color: #a5b4fc !important;
+  }
+  .metric-box.primary .m-val {
+    color: #4f46e5 !important;
+  }
+
+  /* 11. Status Banner */
+  .report-status-banner {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 16px !important;
+    border-radius: 8px !important;
+    margin-bottom: 16px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .report-status-banner.pass {
+    background: #f0fdf4 !important;
+    border: 1.5px solid #86efac !important;
+    color: #166534 !important;
+  }
+
+  .report-status-banner.fail {
+    background: #fef2f2 !important;
+    border: 1.5px solid #fca5a5 !important;
+    color: #991b1b !important;
+  }
+
+  /* 12. Itemized Questions Table */
+  .report-itemized-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-top: 10px !important;
+  }
+
+  .report-itemized-table th {
+    background: #f1f5f9 !important;
+    color: #1e293b !important;
+    border-bottom: 2px solid #cbd5e1 !important;
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+    text-align: left !important;
+  }
+
+  .report-itemized-table td {
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 6px 10px !important;
+    color: #1e293b !important;
+    font-size: 11px !important;
+  }
+
+  .report-itemized-table tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .pill-res.correct {
+    background: #dcfce7 !important;
+    color: #15803d !important;
+    border: 1px solid #86efac !important;
+    padding: 2px 8px !important;
+    border-radius: 9999px !important;
+    font-weight: 700 !important;
+  }
+
+  .pill-res.wrong {
+    background: #fee2e2 !important;
+    color: #b91c1c !important;
+    border: 1px solid #fca5a5 !important;
+    padding: 2px 8px !important;
+    border-radius: 9999px !important;
+    font-weight: 700 !important;
+  }
+
+  .pill-res.skipped {
+    background: #f1f5f9 !important;
+    color: #64748b !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 2px 8px !important;
+    border-radius: 9999px !important;
+    font-weight: 700 !important;
+  }
+
+  /* 13. Signatures Section */
+  .report-signatures-row {
+    margin-top: 24px !important;
+    padding-top: 14px !important;
+    border-top: 1.5px dashed #94a3b8 !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    display: flex !important;
+    justify-content: space-between !important;
+  }
+
+  .report-sign-col {
+    text-align: center !important;
+    width: 170px !important;
+  }
+
+  .report-sign-line {
+    border-bottom: 1px solid #64748b !important;
+    margin-bottom: 6px !important;
+    height: 28px !important;
+  }
+
+  .report-sign-col span {
+    font-size: 0.72rem !important;
+    color: #475569 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+  }
+
+  /* 14. Class Broadsheet Summary and Table */
+  .class-report-summary-bar {
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 8px !important;
+    margin-bottom: 14px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .class-stat-box {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 8px !important;
+    border-radius: 6px !important;
+    text-align: center !important;
+  }
+
+  #class-rep-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 10.5px !important;
+  }
+
+  #class-rep-table th {
+    background: #f1f5f9 !important;
+    color: #1e293b !important;
+    border-bottom: 2px solid #cbd5e1 !important;
+    padding: 5px 6px !important;
+    white-space: nowrap !important;
+    font-weight: 700 !important;
+  }
+
+  #class-rep-table td {
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 5px 6px !important;
+    color: #1e293b !important;
+    white-space: nowrap !important;
+  }
+
+  #class-rep-table tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 }
+
 
 

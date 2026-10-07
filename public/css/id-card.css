@@ -150,20 +150,22 @@
   text-transform: uppercase;
 }
 
-/* Print Styles */
+/* Print Styles (Only when printing student ID badge) */
 @media print {
-  body * {
-    visibility: hidden;
+  body.printing-id-card * {
+    visibility: hidden !important;
   }
-  .school-id-card, .school-id-card * {
-    visibility: visible;
+  body.printing-id-card .school-id-card,
+  body.printing-id-card .school-id-card * {
+    visibility: visible !important;
   }
-  .school-id-card {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    box-shadow: none;
-    border: 1px solid #000;
+  body.printing-id-card .school-id-card {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    box-shadow: none !important;
+    border: 1px solid #000 !important;
   }
 }
+

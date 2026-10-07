@@ -321,6 +321,14 @@ const App = {
     if (modal) modal.classList.remove('open');
   },
 
+  printIdCard() {
+    if (window.Reports && typeof window.Reports.printIdCard === 'function') {
+      window.Reports.printIdCard();
+    } else {
+      window.print();
+    }
+  },
+
   generateRandomPassword(targetInputId) {
     const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$';
     let pass = '';
