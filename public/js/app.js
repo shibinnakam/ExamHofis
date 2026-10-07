@@ -201,6 +201,7 @@ const App = {
         document.querySelectorAll('.modal-backdrop.open').forEach(modal => {
           modal.classList.remove('open');
         });
+        Auth.hideLoginModal();
       }
     });
   },

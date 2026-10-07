@@ -1316,6 +1316,12 @@
         </div>
       </div>
 
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="App.closeModal('credentials-modal')">Got it</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ============================================================== -->
   <!-- MODAL 5: CREATE / EDIT MCQ EXAM (TEACHER) -->
   <!-- ============================================================== -->
@@ -1676,7 +1682,7 @@
   <!-- ============================================================== -->
   <!-- LOGIN MODAL / OVERLAY -->
   <!-- ============================================================== -->
-  <div class="login-overlay" id="login-modal" style="display: none;">
+  <div class="login-overlay" id="login-modal" style="display: none;" onclick="if (event.target === this) Auth.hideLoginModal()">
     <div class="login-card">
       <div style="display:flex; justify-content:flex-end; margin-top:-16px; margin-right:-12px; margin-bottom:8px;">
         <button class="modal-close-btn" onclick="Auth.hideLoginModal()" title="Close login">
