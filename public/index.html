@@ -24,11 +24,9 @@
   <div id="view-homepage" class="school-home-view">
     <!-- School Top Navigation Bar -->
     <header class="hfis-navbar">
-      <a class="hfis-brand" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-        <img src="logo.svg" alt="Holy Family International School Crest" class="hfis-brand-logo">
-        <div class="hfis-brand-titles">
-          <h1>Holy Family International School</h1>
-          <span>Excellence in Education • Rooted in Values</span>
+      <a class="hfis-brand" onclick="window.scrollTo({top:0, behavior:'smooth'})" title="Holy Family International School">
+        <div class="hfis-brand-logo-wrap">
+          <img src="holy-family-logo.png" alt="Holy Family International School" class="hfis-brand-logo">
         </div>
       </a>
 
@@ -45,7 +43,9 @@
       <!-- Navbar Action: Portal Login Button -->
       <div class="hfis-nav-actions">
         <!-- Theme Toggle -->
-        <button class="icon-btn" onclick="App.toggleTheme()" title="Toggle Dark/Light Mode">🌙</button>
+        <button class="icon-btn theme-toggle-btn-public" onclick="App.toggleTheme()" title="Toggle Dark/Light Mode" aria-label="Toggle theme">
+          <svg class="theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
 
         <!-- Login Button in Navbar -->
         <button class="btn-portal-login" id="home-navbar-login-btn" onclick="Auth.showLoginModal()">
@@ -100,13 +100,13 @@
         </div>
 
         <div class="hero-image-wrapper">
-          <img src="images/campus.jpg" alt="Holy Family International School Campus Building">
+          <img src="hofisimg.png" alt="Holy Family International School Campus Building" class="hero-campus-img">
           <div class="hero-floating-card">
-            <div style="width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,#1e3a8a,#2563eb); display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.2rem;">
-              🏛️
+            <div style="width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,#1e3a8a,#2563eb); display:flex; align-items:center; justify-content:center; color:#fff; flex-shrink:0;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
             </div>
             <div>
-              <div style="font-size:0.9rem; font-weight:800; color:var(--text-main);">Main Campus & Exam Office</div>
+              <div style="font-size:0.92rem; font-weight:800; color:var(--text-main);">Main Campus & Exam Office</div>
               <div style="font-size:0.75rem; color:var(--text-muted);">Smart Classrooms • Science Labs</div>
             </div>
           </div>
@@ -306,9 +306,8 @@
     <footer id="contact" class="hfis-footer">
       <div class="footer-grid">
         <div class="footer-col">
-          <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
-            <img src="logo.svg" alt="HFIS Crest" style="width:40px; height:40px;">
-            <h3 style="font-size:1.2rem; font-weight:800; color:#ffffff;">Holy Family International School</h3>
+          <div class="footer-brand-logo-wrap" style="background:#ffffff; padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; margin-bottom:14px;">
+            <img src="holy-family-logo.png" alt="Holy Family International School" style="height:36px; width:auto; max-width:210px; object-fit:contain;">
           </div>
           <p>
             Nurturing academic excellence, moral integrity, and social commitment in students from Class 1 through Class 10.
@@ -335,7 +334,7 @@
             <li><a onclick="Auth.showLoginModal()" style="cursor:pointer;">Admin Console</a></li>
             <li><a onclick="Auth.showLoginModal()" style="cursor:pointer;">Teacher Classroom Hub</a></li>
             <li><a onclick="Auth.showLoginModal()" style="cursor:pointer;">Student ID & Profile</a></li>
-            <li><a onclick="App.quickLogin('admin')" style="cursor:pointer; color:#60a5fa;">Quick Admin Demo</a></li>
+            <li><a onclick="Auth.showLoginModal()" style="cursor:pointer;">Academic Exam Hall</a></li>
           </ul>
         </div>
 
@@ -363,12 +362,11 @@
     <!-- Sidebar Navigation -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
-        <div class="logo-badge">
-          <img src="logo.svg" alt="HFIS Crest">
-        </div>
-        <div class="brand-text">
-          <h1>Holy Family IS</h1>
-          <span>Academic Portal</span>
+        <div class="sidebar-brand-box">
+          <div class="sidebar-brand-img-wrap">
+            <img src="holy-family-logo.png" alt="Holy Family International School" class="sidebar-brand-img">
+          </div>
+          <span class="sidebar-portal-badge">Academic & Exam Portal</span>
         </div>
       </div>
 
@@ -376,7 +374,7 @@
         <!-- Switch Back to School Website Button -->
         <button class="nav-link" onclick="App.showHomePage()" style="background:var(--bg-subtle); color:var(--primary); font-weight:700; margin-bottom:8px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-          🌐 School Website (Home)
+          School Website (Home)
         </button>
 
         <!-- Admin Links -->
@@ -454,12 +452,15 @@
           </div>
 
           <!-- Back to School Website Button -->
-          <button class="btn btn-sm btn-secondary" onclick="App.showHomePage()" title="View Public School Website">
-            🌐 School Home
+          <button class="btn btn-sm btn-secondary action-btn-premium" onclick="App.showHomePage()" title="View Public School Website">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            <span>School Home</span>
           </button>
 
           <!-- Theme Toggle -->
-          <button class="icon-btn" id="theme-toggle-btn" title="Toggle theme">🌙</button>
+          <button class="icon-btn" id="theme-toggle-btn" title="Toggle theme">
+            <svg class="theme-icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </button>
 
           <!-- Logout Button -->
           <button class="btn-logout" id="logout-btn" onclick="Auth.logout()">
@@ -770,7 +771,10 @@
 
             <div class="actions-group">
               <span class="badge badge-adm" id="admin-exams-count-badge">0 Exams</span>
-              <button class="btn btn-secondary btn-sm" onclick="AdminExams.loadExams()" title="Refresh Exams">🔄 Refresh</button>
+              <button class="btn btn-secondary btn-sm action-btn-premium" onclick="AdminExams.loadExams()" title="Refresh Exams">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                <span>Refresh</span>
+              </button>
             </div>
           </div>
 
@@ -864,7 +868,10 @@
             </div>
             <div class="actions-group">
               <span class="badge badge-class" id="teacher-exams-count-badge">0 Exams Saved</span>
-              <button class="btn btn-secondary btn-sm" onclick="TeacherExams.loadExams()">🔄 Refresh</button>
+              <button class="btn btn-secondary btn-sm action-btn-premium" onclick="TeacherExams.loadExams()" title="Refresh Exams">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                <span>Refresh</span>
+              </button>
             </div>
           </div>
 
@@ -888,8 +895,9 @@
                   <p id="student-profile-adm" style="font-size: 0.8rem; font-family: monospace; color: var(--primary);">Admission No: ADM-2026-001</p>
                 </div>
                 <div>
-                  <button class="btn btn-primary" onclick="App.switchTab('student-exams')">
-                    📝 Go to Online Examinations
+                  <button class="btn btn-primary action-btn-premium" onclick="App.switchTab('student-exams')">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    <span>Go to Online Examinations</span>
                   </button>
                 </div>
               </div>
@@ -901,7 +909,10 @@
             <div class="card">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
                 <h3 style="font-size: 1.15rem; font-weight: 700;">My Digital Identity Card</h3>
-                <button class="btn btn-sm btn-secondary" onclick="window.print()">🖨️ Print ID</button>
+                <button class="btn btn-sm btn-secondary action-btn-premium" onclick="window.print()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                  <span>Print ID</span>
+                </button>
               </div>
               
               <div class="id-card-wrapper">
@@ -975,7 +986,10 @@
                 <p style="color: var(--text-muted); font-size: 0.9rem;" id="student-exam-hall-info">Official computer-based assessments for your enrolled grade and division.</p>
               </div>
               <div>
-                <button class="btn btn-secondary btn-sm" onclick="StudentExams.loadExams()">🔄 Refresh Exam Schedule</button>
+                <button class="btn btn-secondary btn-sm action-btn-premium" onclick="StudentExams.loadExams()" title="Refresh Exam Schedule">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                  <span>Refresh Exam Schedule</span>
+                </button>
               </div>
             </div>
           </div>
@@ -1282,7 +1296,10 @@
 
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="App.closeModal('idcard-modal')">Close</button>
-        <button type="button" class="btn btn-primary" onclick="window.print()">🖨️ Print ID Card</button>
+        <button type="button" class="btn btn-primary action-btn-premium" onclick="window.print()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          <span>Print ID Card</span>
+        </button>
       </div>
     </div>
   </div>
@@ -1562,7 +1579,9 @@
     <!-- Top Bar -->
     <header class="exam-interface-topbar">
       <div style="display: flex; align-items: center; gap: 14px;">
-        <img src="logo.svg" alt="HFIS Crest" style="width: 38px; height: 38px;">
+        <div style="background:#ffffff; padding:4px 8px; border-radius:6px; display:inline-flex; align-items:center;">
+          <img src="holy-family-logo.png" alt="Holy Family International School" style="height: 30px; width: auto; max-width: 160px; object-fit: contain;">
+        </div>
         <div>
           <h3 id="taker-exam-title" style="font-size: 1.15rem; font-weight: 800; color: var(--text-main);">Exam Title</h3>
           <div style="display: flex; gap: 8px; margin-top: 2px;">
@@ -1703,45 +1722,27 @@
         </button>
       </div>
 
-      <div class="login-brand">
-        <img src="logo.svg" alt="HFIS Logo">
-        <div>
-          <h2 style="font-size:1.4rem;">Holy Family IS</h2>
-          <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Academic & Exam Portal</span>
+      <div class="login-brand" style="display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px;">
+        <div style="background:#ffffff; padding:6px 14px; border-radius:10px; display:inline-flex; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <img src="holy-family-logo.png" alt="Holy Family International School" style="max-height:48px; width:auto; max-width:250px; object-fit:contain;">
         </div>
+        <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.06em;">Academic & Exam Portal</span>
       </div>
-      <p class="login-desc">Sign in with your credentials to access the Administrator, Teacher, or Student portal.</p>
+      <p class="login-desc" style="text-align:center; margin-top:10px;">Sign in with your credentials to access the Administrator, Teacher, or Student portal.</p>
 
       <form id="login-form">
         <div class="form-group" style="text-align: left; margin-bottom: 14px;">
           <label class="form-label">Username</label>
-          <input type="text" id="login-username" class="form-input" placeholder="e.g. admin" value="admin" required autocomplete="username">
+          <input type="text" id="login-username" class="form-input" placeholder="Enter username" required autocomplete="username">
         </div>
 
         <div class="form-group" style="text-align: left; margin-bottom: 20px;">
           <label class="form-label">Password</label>
-          <input type="password" id="login-password" class="form-input" placeholder="Enter password" value="admin123" required autocomplete="current-password">
+          <input type="password" id="login-password" class="form-input" placeholder="Enter password" required autocomplete="current-password">
         </div>
 
         <button type="submit" class="btn btn-primary" id="login-submit-btn" style="width: 100%;">Sign In</button>
       </form>
-
-      <!-- Quick Demo Access Pills for 1-Click Login Testing -->
-      <div class="demo-account-pills">
-        <div class="title">⚡ Quick 1-Click Demo Accounts</div>
-        <button type="button" class="quick-login-btn" onclick="App.quickLogin('admin')">
-          <span>👑 Admin Console</span>
-          <span style="color:var(--text-muted); font-family:monospace;">admin / admin123</span>
-        </button>
-        <button type="button" class="quick-login-btn" onclick="App.quickLogin('teacher')">
-          <span>👨‍🏫 Teacher (Class 10 Physics)</span>
-          <span style="color:var(--text-muted); font-family:monospace;">ananya.physics / teacher123</span>
-        </button>
-        <button type="button" class="quick-login-btn" onclick="App.quickLogin('student')">
-          <span>🎓 Student (Class 10-A)</span>
-          <span style="color:var(--text-muted); font-family:monospace;">diya10a / student123</span>
-        </button>
-      </div>
     </div>
   </div>
 

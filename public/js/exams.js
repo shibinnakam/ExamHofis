@@ -188,11 +188,12 @@ const TeacherExams = {
           </div>
 
           <div class="exam-card-actions">
-            <button class="btn btn-secondary btn-sm" onclick="TeacherExams.viewSubmissions('${e.id}')">
-              📊 Submissions
+            <button class="btn btn-secondary btn-sm action-btn-premium" onclick="TeacherExams.viewSubmissions('${e.id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"></path><path d="M12 20V4"></path><path d="M6 20v-6"></path></svg>
+              <span>Submissions</span>
             </button>
-            <button class="btn btn-danger btn-sm" onclick="TeacherExams.deleteExam('${e.id}')" title="Delete Exam">
-              🗑️
+            <button class="btn btn-danger-soft btn-sm btn-icon-only" onclick="TeacherExams.deleteExam('${e.id}')" title="Delete Exam">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
             </button>
           </div>
         </div>
@@ -709,14 +710,16 @@ const AdminExams = {
           </div>
 
           <div class="exam-card-actions">
-            <button class="btn btn-primary btn-sm" onclick="AdminExams.openScheduleModal('${e.id}')">
-              📅 ${isScheduled ? `Manage Schedules (${schedules.length}/4)` : 'Schedule Exam (Max 4)'}
+            <button class="btn btn-primary btn-sm action-btn-premium" onclick="AdminExams.openScheduleModal('${e.id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              <span>${isScheduled ? `Manage Schedules (${schedules.length}/4)` : 'Schedule Exam (Max 4)'}</span>
             </button>
-            <button class="btn btn-secondary btn-sm" onclick="AdminExams.viewSubmissions('${e.id}')">
-              📊 Submissions
+            <button class="btn btn-secondary btn-sm action-btn-premium" onclick="AdminExams.viewSubmissions('${e.id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"></path><path d="M12 20V4"></path><path d="M6 20v-6"></path></svg>
+              <span>Submissions</span>
             </button>
-            <button class="btn btn-danger btn-sm" onclick="AdminExams.deleteExam('${e.id}')">
-              🗑️
+            <button class="btn btn-danger-soft btn-sm btn-icon-only" onclick="AdminExams.deleteExam('${e.id}')" title="Delete Exam">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
             </button>
           </div>
         </div>
@@ -773,12 +776,12 @@ const AdminExams = {
         addBtn.disabled = true;
         addBtn.style.opacity = '0.6';
         addBtn.style.cursor = 'not-allowed';
-        addBtn.innerHTML = '<span>🔒 Max 4 Schedules Reached</span>';
+        addBtn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Max 4 Schedules Reached</span>';
       } else {
         addBtn.disabled = false;
         addBtn.style.opacity = '1';
         addBtn.style.cursor = 'pointer';
-        addBtn.innerHTML = `<span>➕ Add Schedule Slot (${4 - count} left)</span>`;
+        addBtn.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Add Schedule Slot (${4 - count} left)</span>`;
       }
     }
 
@@ -798,11 +801,11 @@ const AdminExams = {
           calculatedEnd = formatDateTime(eDate.toISOString());
 
           if (now >= sDate.getTime() && now <= eDate.getTime()) {
-            statusPill = '<span class="badge" style="background:rgba(16,185,129,0.15); color:#10b981; font-weight:700;">🟢 Live Now</span>';
+            statusPill = '<span class="badge" style="background:rgba(16,185,129,0.15); color:#10b981; font-weight:700;">Live Now</span>';
           } else if (now < sDate.getTime()) {
-            statusPill = '<span class="badge" style="background:rgba(6,182,212,0.15); color:#0891b2; font-weight:700;">⏰ Upcoming</span>';
+            statusPill = '<span class="badge" style="background:rgba(6,182,212,0.15); color:#0891b2; font-weight:700;">Upcoming</span>';
           } else {
-            statusPill = '<span class="badge" style="background:rgba(239,68,68,0.12); color:#ef4444; font-weight:700;">⏳ Past</span>';
+            statusPill = '<span class="badge" style="background:rgba(239,68,68,0.12); color:#ef4444; font-weight:700;">Past</span>';
           }
         }
       }
@@ -818,8 +821,9 @@ const AdminExams = {
             </div>
             <div>
               ${count > 1 ? `
-                <button type="button" class="btn btn-sm" onclick="AdminExams.removeScheduleSlot(${idx})" title="Remove this schedule slot" style="padding: 4px 10px; font-size: 0.78rem; color: var(--danger); background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2);">
-                  🗑️ Remove
+                <button type="button" class="btn btn-sm btn-danger-soft action-btn-premium" onclick="AdminExams.removeScheduleSlot(${idx})" title="Remove this schedule slot" style="padding: 4px 10px; font-size: 0.78rem;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  <span>Remove</span>
                 </button>
               ` : `
                 <span style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600;">(At least 1 slot required)</span>
@@ -1115,40 +1119,45 @@ const StudentExams = {
       let actionBtn = '';
 
       if (isSubmitted) {
-        statusBadge = `<span class="exam-status-badge exam-status-completed">✅ Completed</span>`;
+        statusBadge = `<span class="exam-status-badge exam-status-completed" style="display:inline-flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>Completed</span>`;
         actionBtn = `
-          <button class="btn btn-secondary btn-sm" onclick="StudentExams.viewScoreCard('${e.id}')">
-            📄 View Result & Score Card
+          <button class="btn btn-secondary btn-sm action-btn-premium" onclick="StudentExams.viewScoreCard('${e.id}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            <span>View Result & Score Card</span>
           </button>
         `;
       } else if (isLive) {
-        statusBadge = `<span class="exam-status-badge exam-status-live">🟢 Exam Portal Open</span>`;
+        statusBadge = `<span class="exam-status-badge exam-status-live" style="display:inline-flex;align-items:center;gap:6px;"><span class="status-live-dot" style="width:8px;height:8px;background:#10b981;border-radius:50%;display:inline-block;"></span>Exam Portal Open</span>`;
         const activeEndTime = new Date(activeSlot.end).getTime();
         cardBanner = `
           <div style="background: rgba(16, 185, 129, 0.12); color: #10b981; font-weight: 700; font-size: 0.82rem; padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 12px; display:flex; align-items:center; gap:6px;">
-            <span>🟢</span> <strong>EXAM PORTAL OPEN NOW! (${activeSlot.label || 'Active Session'})</strong> &bull; Closes in ${formatTimeRemaining(activeEndTime - now)}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+            <strong>EXAM PORTAL OPEN NOW! (${activeSlot.label || 'Active Session'})</strong> &bull; Closes in ${formatTimeRemaining(activeEndTime - now)}
           </div>
         `;
         actionBtn = `
-          <button class="btn btn-primary" style="background:#10b981; border-color:#10b981; font-weight:800; padding:10px 18px;" onclick="StudentExams.startExam('${e.id}')">
-            🚀 Start Examination Now
+          <button class="btn btn-primary action-btn-premium" style="background:#10b981; border-color:#10b981; font-weight:800; padding:10px 18px;" onclick="StudentExams.startExam('${e.id}')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>Start Examination Now</span>
           </button>
         `;
       } else if (isUpcoming) {
-        statusBadge = `<span class="exam-status-badge exam-status-scheduled">⏰ Upcoming (${schedules.length} Slots)</span>`;
+        statusBadge = `<span class="exam-status-badge exam-status-scheduled" style="display:inline-flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Upcoming (${schedules.length} Slots)</span>`;
         const timeToStart = new Date(nextSlot.start).getTime() - now;
         cardBanner = `
-          <div style="background: var(--bg-subtle); color: var(--text-muted); font-size: 0.82rem; padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 12px;">
-            ⏳ Next Session (${nextSlot.label || 'Slot'}): Opens in <strong>${formatTimeRemaining(timeToStart)}</strong>
+          <div style="background: var(--bg-subtle); color: var(--text-muted); font-size: 0.82rem; padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 12px; display:flex; align-items:center; gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>Next Session (${nextSlot.label || 'Slot'}): Opens in <strong>${formatTimeRemaining(timeToStart)}</strong></span>
           </div>
         `;
         actionBtn = `
-          <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.6; cursor: not-allowed;" title="Portal opens at scheduled start time">
-            🔒 Next Session: ${formatDateTime(nextSlot.start)}
+          <button class="btn btn-secondary btn-sm action-btn-premium" disabled style="opacity: 0.6; cursor: not-allowed;" title="Portal opens at scheduled start time">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span>Next Session: ${formatDateTime(nextSlot.start)}</span>
           </button>
         `;
       } else if (isEnded) {
-        statusBadge = `<span class="exam-status-badge exam-status-ended">⏳ Closed</span>`;
+        statusBadge = `<span class="exam-status-badge exam-status-ended">Closed</span>`;
         actionBtn = `
           <span style="font-size: 0.82rem; color: var(--danger); font-weight: 700;">All Schedules Closed (Missed)</span>
         `;

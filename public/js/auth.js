@@ -58,8 +58,12 @@ const Auth = {
 
     if (this.currentUser) {
       const role = this.currentUser.role;
-      const roleIcon = role === 'admin' ? '👑' : role === 'teacher' ? '👨‍🏫' : '🎓';
-      navBtn.innerHTML = `${roleIcon} Open ${role.toUpperCase()} Portal`;
+      const roleSvg = role === 'admin' 
+        ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7 7-3-4 11H6L2 6l7 3 3-7z"></path></svg>`
+        : role === 'teacher' 
+        ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`
+        : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
+      navBtn.innerHTML = `${roleSvg} <span>Open ${role.toUpperCase()} Portal</span>`;
       navBtn.onclick = (e) => {
         if (e) e.preventDefault();
         App.showPortal();
@@ -104,7 +108,7 @@ const Auth = {
       if (nameEl) nameEl.textContent = displayName;
       if (roleEl) roleEl.textContent = role.toUpperCase();
       if (avatarEl) avatarEl.src = avatarUrl;
-      if (roleBadgeEl) roleBadgeEl.textContent = `${role === 'admin' ? '👑 Admin' : role === 'teacher' ? '👨‍🏫 Teacher' : '🎓 Student'}`;
+      if (roleBadgeEl) roleBadgeEl.textContent = `${role.toUpperCase()}`;
 
       if (role === 'admin') {
         navAdmin.forEach(el => el.style.setProperty('display', 'flex', 'important'));

@@ -41,30 +41,39 @@
   cursor: pointer;
 }
 
+.hfis-brand-logo-wrap {
+  display: flex;
+  align-items: center;
+  padding: 4px 6px;
+  border-radius: 8px;
+  transition: all var(--transition-fast);
+}
+
+[data-theme="dark"] .hfis-brand-logo-wrap {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 4px 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
 .hfis-brand-logo {
-  width: 50px;
-  height: 50px;
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
+  height: 48px;
+  width: auto;
+  max-width: 260px;
+  object-fit: contain;
+  display: block;
+  transition: transform var(--transition-fast);
 }
 
-.hfis-brand-titles h1 {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #1e3a8a;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
+.hfis-brand-logo:hover {
+  transform: scale(1.02);
 }
 
-[data-theme="dark"] .hfis-brand-titles h1 {
-  color: #93c5fd;
-}
-
-.hfis-brand-titles span {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #d97706;
+.hero-campus-img {
+  width: 100%;
+  height: 100%;
+  max-height: 460px;
+  object-fit: cover;
+  display: block;
 }
 
 .hfis-nav-links {

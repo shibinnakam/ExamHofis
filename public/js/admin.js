@@ -153,8 +153,9 @@ const Admin = {
           <td><span class="badge badge-class">Class ${s.class}</span></td>
           <td><span class="badge badge-div">Div ${s.div}</span></td>
           <td>
-            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); Admin.viewCredentials('${safeUser}', '${safePass}', '${safeName}')" title="View Credentials">
-              🔑 Show
+            <button class="btn btn-sm btn-secondary action-btn-premium" onclick="event.stopPropagation(); Admin.viewCredentials('${safeUser}', '${safePass}', '${safeName}')" title="View Credentials">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"></circle><path d="m21 2-9.6 9.6"></path><path d="m15.5 7.5 3 3L22 7l-3-3"></path></svg>
+              <span>Show</span>
             </button>
           </td>
           <td>
@@ -188,9 +189,18 @@ const Admin = {
             <span class="badge badge-div">Division ${s.div}</span>
           </div>
           <div class="profile-card-actions">
-            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); Admin.viewIdCard('${s.id}')">🆔 ID Card</button>
-            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); Admin.openEditStudentModal('${s.id}')">✏️ Edit</button>
-            <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); Admin.deleteStudent('${s.id}', '${safeName}')" title="Permanently Delete">🗑️ Delete</button>
+            <button class="btn btn-sm btn-secondary action-btn-premium" onclick="event.stopPropagation(); Admin.viewIdCard('${s.id}')" title="View ID Card">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><line x1="7" y1="8" x2="17" y2="8"></line><line x1="7" y1="12" x2="11" y2="12"></line><circle cx="15" cy="12" r="1"></circle></svg>
+              <span>ID Card</span>
+            </button>
+            <button class="btn btn-sm btn-secondary action-btn-premium" onclick="event.stopPropagation(); Admin.openEditStudentModal('${s.id}')" title="Edit Student">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+              <span>Edit</span>
+            </button>
+            <button class="btn btn-sm btn-danger action-btn-premium" onclick="event.stopPropagation(); Admin.deleteStudent('${s.id}', '${safeName}')" title="Permanently Delete">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <span>Delete</span>
+            </button>
           </div>
         </div>`;
       }).join('');
@@ -402,8 +412,9 @@ const Admin = {
           <td><div class="badges-wrap">${classBadges}</div></td>
           <td><div class="badges-wrap">${assignmentBadges}</div></td>
           <td>
-            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); Admin.viewCredentials('${safeUser}', '${safePass}', '${safeName}')" title="View Credentials">
-              🔑 Show
+            <button class="btn btn-sm btn-secondary action-btn-premium" onclick="event.stopPropagation(); Admin.viewCredentials('${safeUser}', '${safePass}', '${safeName}')" title="View Credentials">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"></circle><path d="m21 2-9.6 9.6"></path><path d="m15.5 7.5 3 3L22 7l-3-3"></path></svg>
+              <span>Show</span>
             </button>
           </td>
           <td>
@@ -449,8 +460,14 @@ const Admin = {
             ${assignmentBadges}
           </div>
           <div class="profile-card-actions">
-            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); Admin.openEditTeacherModal('${t.id}')">✏️ Edit</button>
-            <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); Admin.deleteTeacher('${t.id}', '${safeName}')" title="Permanently Delete">🗑️ Delete</button>
+            <button class="btn btn-sm btn-secondary action-btn-premium" onclick="event.stopPropagation(); Admin.openEditTeacherModal('${t.id}')" title="Edit Teacher">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+              <span>Edit</span>
+            </button>
+            <button class="btn btn-sm btn-danger action-btn-premium" onclick="event.stopPropagation(); Admin.deleteTeacher('${t.id}', '${safeName}')" title="Permanently Delete">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <span>Delete</span>
+            </button>
           </div>
         </div>`;
       }).join('');
