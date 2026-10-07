@@ -34,7 +34,22 @@ const API = {
 
     try {
       const response = await fetch(url, config);
-      const data = await response.json();
+      const contentType = response.headers.get('content-type') || '';
+      let data;
+
+      if (contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        if (!response.ok) {
+          throw new Error(`Server returned status ${response.status}: ${text.slice(0, 120)}`);
+        }
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          throw new Error(`Expected JSON response but server returned non-JSON data (${response.status})`);
+        }
+      }
 
       if (!response.ok) {
         throw new Error(data.error || 'Server error occurred');

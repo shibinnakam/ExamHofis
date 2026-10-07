@@ -905,6 +905,14 @@ body {
   transform: scale(1) translateY(0);
 }
 
+.modal-dialog > form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .modal-header {
   padding: 18px 24px;
   border-bottom: 1px solid var(--border-color);
@@ -912,6 +920,7 @@ body {
   align-items: center;
   justify-content: space-between;
   background-color: var(--bg-surface);
+  flex-shrink: 0;
 }
 
 .modal-header-info {
@@ -996,6 +1005,7 @@ body {
   justify-content: flex-end;
   gap: 12px;
   background-color: var(--bg-subtle);
+  flex-shrink: 0;
 }
 
 /* Forms */
@@ -1700,9 +1710,6 @@ body {
 
 /* Question Builder */
 .question-builder-container {
-  max-height: 60vh;
-  overflow-y: auto;
-  padding-right: 8px;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -1761,7 +1768,12 @@ body {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   padding: 6px 10px;
-  transition: border-color var(--transition-fast);
+  transition: all var(--transition-fast);
+}
+
+.option-builder-item.correct-selected {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.08);
 }
 
 .option-builder-item:focus-within {
@@ -1776,23 +1788,35 @@ body {
   text-align: center;
 }
 
-.option-radio-label {
+.option-radio-label,
+.option-check-label {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   cursor: pointer;
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-muted);
   white-space: nowrap;
-  padding: 4px 6px;
+  padding: 4px 8px;
   border-radius: 4px;
+  user-select: none;
 }
 
+.option-check-label input[type="checkbox"],
+.option-radio-label input[type="radio"] {
+  accent-color: #10b981;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.option-check-label:hover,
 .option-radio-label:hover {
   color: var(--success);
 }
 
+.option-builder-item input[type="checkbox"]:checked + .option-correct-text,
 .option-builder-item input[type="radio"]:checked + .option-correct-text {
   color: var(--success);
   font-weight: 800;

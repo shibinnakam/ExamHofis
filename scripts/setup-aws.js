@@ -144,6 +144,42 @@ async function createDynamoTables() {
     );
     console.log(`[DynamoDB] Table "${TABLES.TEACHERS}" created.`);
   }
+
+  // 4. Exams Table
+  if (await tableExists(TABLES.EXAMS)) {
+    console.log(`[DynamoDB] Table "${TABLES.EXAMS}" already exists.`);
+  } else {
+    console.log(`[DynamoDB] Creating table "${TABLES.EXAMS}"...`);
+    await ddbRawClient.send(
+      new CreateTableCommand({
+        TableName: TABLES.EXAMS,
+        BillingMode: 'PAY_PER_REQUEST',
+        KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
+        AttributeDefinitions: [
+          { AttributeName: 'id', AttributeType: 'S' }
+        ]
+      })
+    );
+    console.log(`[DynamoDB] Table "${TABLES.EXAMS}" created.`);
+  }
+
+  // 5. Exam Submissions Table
+  if (await tableExists(TABLES.SUBMISSIONS)) {
+    console.log(`[DynamoDB] Table "${TABLES.SUBMISSIONS}" already exists.`);
+  } else {
+    console.log(`[DynamoDB] Creating table "${TABLES.SUBMISSIONS}"...`);
+    await ddbRawClient.send(
+      new CreateTableCommand({
+        TableName: TABLES.SUBMISSIONS,
+        BillingMode: 'PAY_PER_REQUEST',
+        KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
+        AttributeDefinitions: [
+          { AttributeName: 'id', AttributeType: 'S' }
+        ]
+      })
+    );
+    console.log(`[DynamoDB] Table "${TABLES.SUBMISSIONS}" created.`);
+  }
 }
 
 async function createCognitoUserPool() {

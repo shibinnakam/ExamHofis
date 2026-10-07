@@ -7,7 +7,7 @@ s3_prefix = "examhofis"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 image_repositories = []
-parameter_overrides = "CognitoUserPoolId=\"ap-south-1_SyTllnO2Y\" CognitoClientId=\"297qnv5q845tqqafqa60slgf2i\" UsersTableName=\"ExamHofis_Users\" StudentsTableName=\"ExamHofis_Students\" TeachersTableName=\"ExamHofis_Teachers\""
+parameter_overrides = "CognitoUserPoolId=\"ap-south-1_SyTllnO2Y\" CognitoClientId=\"297qnv5q845tqqafqa60slgf2i\" UsersTableName=\"ExamHofis_Users\" StudentsTableName=\"ExamHofis_Students\" TeachersTableName=\"ExamHofis_Teachers\" ExamsTableName=\"ExamHofis_Exams\" SubmissionsTableName=\"ExamHofis_Submissions\""
 
 [default.global.parameters]
 region = "ap-south-1"

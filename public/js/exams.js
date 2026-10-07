@@ -185,6 +185,7 @@ const TeacherExams = {
       id: 'q_1',
       question: '',
       options: ['', '', '', ''],
+      correct_indices: [0],
       correct_index: 0,
       marks: 1
     }];
@@ -204,6 +205,7 @@ const TeacherExams = {
       id: nextId,
       question: '',
       options: ['', '', '', ''],
+      correct_indices: [0],
       correct_index: 0,
       marks: 1
     });
@@ -235,20 +237,23 @@ const TeacherExams = {
         id: 'q_1',
         question: `What is the SI unit of electric current in standard physics?`,
         options: ['Volt', 'Ampere', 'Ohm', 'Coulomb'],
+        correct_indices: [1],
         correct_index: 1,
         marks: 1
       },
       {
         id: 'q_2',
-        question: `According to Newton's Second Law of Motion, Force is directly proportional to which product?`,
-        options: ['Mass × Velocity', 'Mass × Acceleration', 'Weight × Gravity', 'Energy × Time'],
-        correct_index: 1,
-        marks: 1
+        question: `Which of the following are primary states of matter? (Multiple correct options)`,
+        options: ['Solid', 'Liquid', 'Energy', 'Gas'],
+        correct_indices: [0, 1, 3],
+        correct_index: 0,
+        marks: 2
       },
       {
         id: 'q_3',
         question: `What phenomenon is responsible for the twinkling of stars observed from the Earth's surface?`,
         options: ['Atmospheric Refraction', 'Total Internal Reflection', 'Light Dispersion', 'Light Diffraction'],
+        correct_indices: [0],
         correct_index: 0,
         marks: 1
       }
@@ -260,7 +265,7 @@ const TeacherExams = {
     }
 
     this.renderQuestionsBuilder();
-    App.showToast('Loaded 3 sample questions for quick testing!', 'success');
+    App.showToast('Loaded 3 sample questions (including multi-choice) for quick testing!', 'success');
   },
 
   renderQuestionsBuilder() {
@@ -272,12 +277,22 @@ const TeacherExams = {
 
     listEl.innerHTML = this.currentQuestions.map((q, qIdx) => {
       const letters = ['A', 'B', 'C', 'D'];
+      const correctList = Array.isArray(q.correct_indices)
+        ? q.correct_indices
+        : (q.correct_index !== undefined ? [q.correct_index] : [0]);
+      const isMulti = correctList.length > 1;
+
       return `
         <div class="question-builder-card" id="q-card-${qIdx}">
           <div class="question-builder-header">
-            <span class="question-num-pill">Question #${qIdx + 1}</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="question-num-pill">Question #${qIdx + 1}</span>
+              <span class="badge ${isMulti ? 'badge-subject' : 'badge-adm'}" style="font-size: 0.72rem;">
+                ${isMulti ? `Multiple Correct (${correctList.map(i => letters[i]).join(', ')})` : `Single Choice (${letters[correctList[0]] || 'A'})`}
+              </span>
+            </div>
             <div style="display: flex; align-items: center; gap: 10px;">
-              <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">
+              <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); display:flex; align-items:center; gap:4px;">
                 Marks:
                 <input type="number" min="1" max="10" value="${q.marks || 1}" 
                   style="width: 50px; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main);"
@@ -297,26 +312,33 @@ const TeacherExams = {
               oninput="TeacherExams.updateQuestionText(${qIdx}, this.value)">${q.question || ''}</textarea>
           </div>
 
-          <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">
-            Options & Correct Answer: (Select radio button for the correct option)
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+            <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">
+              Options & Correct Answers: (Check one or more boxes to designate correct options)
+            </span>
+            <span style="font-size: 0.72rem; color: var(--primary); font-weight: 600;">
+              💡 Select multiple checkboxes if this question has multiple answers
+            </span>
           </div>
 
           <div class="options-builder-grid">
-            ${letters.map((letter, optIdx) => `
-              <div class="option-builder-item">
+            ${letters.map((letter, optIdx) => {
+              const isCorrect = correctList.includes(optIdx);
+              return `
+              <div class="option-builder-item ${isCorrect ? 'correct-selected' : ''}">
                 <span class="option-letter-tag">${letter}</span>
                 <input type="text" class="form-input" placeholder="Option ${letter} text..." required
                   value="${(q.options && q.options[optIdx]) || ''}"
                   style="flex: 1; padding: 6px 10px;"
                   oninput="TeacherExams.updateOptionText(${qIdx}, ${optIdx}, this.value)">
-                <label class="option-radio-label" title="Mark Option ${letter} as the Correct Answer">
-                  <input type="radio" name="correct_opt_${qIdx}" value="${optIdx}" 
-                    ${q.correct_index === optIdx ? 'checked' : ''}
-                    onchange="TeacherExams.setCorrectOption(${qIdx}, ${optIdx})">
-                  <span class="option-correct-text">Correct</span>
+                <label class="option-check-label" title="Toggle Option ${letter} as a correct answer">
+                  <input type="checkbox" name="correct_opt_${qIdx}_${optIdx}" value="${optIdx}" 
+                    ${isCorrect ? 'checked' : ''}
+                    onchange="TeacherExams.toggleCorrectOption(${qIdx}, ${optIdx})">
+                  <span class="option-correct-text">${isCorrect ? '✓ Correct' : 'Correct'}</span>
                 </label>
               </div>
-            `).join('')}
+            `}).join('')}
           </div>
         </div>
       `;
@@ -342,10 +364,32 @@ const TeacherExams = {
     }
   },
 
-  setCorrectOption(qIdx, optIdx) {
-    if (this.currentQuestions[qIdx]) {
-      this.currentQuestions[qIdx].correct_index = optIdx;
+  toggleCorrectOption(qIdx, optIdx) {
+    const q = this.currentQuestions[qIdx];
+    if (!q) return;
+
+    if (!Array.isArray(q.correct_indices)) {
+      q.correct_indices = q.correct_index !== undefined ? [q.correct_index] : [0];
     }
+
+    const pos = q.correct_indices.indexOf(optIdx);
+    if (pos >= 0) {
+      if (q.correct_indices.length > 1) {
+        q.correct_indices.splice(pos, 1);
+      } else {
+        App.showToast('At least one option must remain marked as correct', 'warning');
+      }
+    } else {
+      q.correct_indices.push(optIdx);
+      q.correct_indices.sort((a, b) => a - b);
+    }
+
+    q.correct_index = q.correct_indices[0];
+    this.renderQuestionsBuilder();
+  },
+
+  setCorrectOption(qIdx, optIdx) {
+    this.toggleCorrectOption(qIdx, optIdx);
   },
 
   async handleSaveExam(e) {
@@ -387,10 +431,13 @@ const TeacherExams = {
           return;
         }
       }
-      if (q.correct_index === undefined || q.correct_index < 0 || q.correct_index > 3) {
-        App.showToast(`Question #${i + 1} must designate a correct answer`, 'error');
+      const corrects = Array.isArray(q.correct_indices) ? q.correct_indices : [q.correct_index];
+      if (!corrects || corrects.length === 0) {
+        App.showToast(`Question #${i + 1} must designate at least one correct answer`, 'error');
         return;
       }
+      q.correct_indices = corrects;
+      q.correct_index = corrects[0];
     }
 
     const payload = {
@@ -1005,8 +1052,15 @@ const StudentExams = {
     const qStatement = document.getElementById('taker-question-text');
     const navProgress = document.getElementById('taker-nav-progress');
 
+    const correctList = Array.isArray(q.correct_indices)
+      ? q.correct_indices
+      : (q.correct_index !== undefined ? [q.correct_index] : [0]);
+    const isMulti = correctList.length > 1;
+
     if (qBadge) qBadge.textContent = `Question ${this.currentQuestionIdx + 1} of ${total}`;
-    if (marksBadge) marksBadge.textContent = `${q.marks || 1} Mark`;
+    if (marksBadge) {
+      marksBadge.textContent = `${q.marks || 1} Mark${(q.marks || 1) > 1 ? 's' : ''} • ${isMulti ? 'Multiple Choices (Select all correct)' : 'Single Choice'}`;
+    }
     if (qStatement) qStatement.textContent = q.question;
     if (navProgress) navProgress.textContent = `Question ${this.currentQuestionIdx + 1} of ${total}`;
 
@@ -1015,15 +1069,21 @@ const StudentExams = {
     if (optionsContainer) {
       const letters = ['A', 'B', 'C', 'D'];
       const qKey = q.id || `q_${this.currentQuestionIdx + 1}`;
-      const selectedOpt = this.answers[qKey];
+      const rawAns = this.answers[qKey];
+      const selectedList = Array.isArray(rawAns)
+        ? rawAns
+        : (rawAns !== undefined ? [rawAns] : []);
 
       optionsContainer.innerHTML = (q.options || []).map((optText, optIdx) => {
-        const isSelected = selectedOpt !== undefined && selectedOpt === optIdx;
+        const isSelected = selectedList.includes(optIdx);
         return `
           <div class="student-option-card ${isSelected ? 'selected' : ''}" 
-            onclick="StudentExams.selectOption('${qKey}', ${optIdx})">
-            <div class="student-option-circle">${letters[optIdx] || optIdx + 1}</div>
-            <div class="student-option-text">${optText}</div>
+            onclick="StudentExams.selectOption('${qKey}', ${optIdx}, ${isMulti})"
+            style="${isSelected ? 'border-color:var(--primary); background:rgba(79,70,229,0.08);' : ''}">
+            <div class="student-option-circle" style="${isSelected ? 'background:var(--primary); color:#fff;' : ''}">
+              ${isSelected ? (isMulti ? '✓' : letters[optIdx]) : letters[optIdx]}
+            </div>
+            <div class="student-option-text" style="${isSelected ? 'font-weight:700; color:var(--text-main);' : ''}">${optText}</div>
           </div>
         `;
       }).join('');
@@ -1047,8 +1107,31 @@ const StudentExams = {
     this.renderPalette();
   },
 
-  selectOption(qKey, optIdx) {
-    this.answers[qKey] = optIdx;
+  selectOption(qKey, optIdx, isMulti = false) {
+    if (isMulti) {
+      let current = [];
+      if (Array.isArray(this.answers[qKey])) {
+        current = [...this.answers[qKey]];
+      } else if (this.answers[qKey] !== undefined) {
+        current = [this.answers[qKey]];
+      }
+
+      const idx = current.indexOf(optIdx);
+      if (idx >= 0) {
+        current.splice(idx, 1);
+      } else {
+        current.push(optIdx);
+        current.sort((a, b) => a - b);
+      }
+
+      if (current.length === 0) {
+        delete this.answers[qKey];
+      } else {
+        this.answers[qKey] = current;
+      }
+    } else {
+      this.answers[qKey] = optIdx;
+    }
     this.renderCurrentQuestion();
   },
 
@@ -1081,7 +1164,8 @@ const StudentExams = {
 
     paletteGrid.innerHTML = questions.map((q, idx) => {
       const qKey = q.id || `q_${idx + 1}`;
-      const isAnswered = this.answers[qKey] !== undefined;
+      const ansVal = this.answers[qKey];
+      const isAnswered = ansVal !== undefined && (!Array.isArray(ansVal) || ansVal.length > 0);
       const isActive = idx === this.currentQuestionIdx;
 
       if (isAnswered) answeredCount++;
@@ -1101,7 +1185,10 @@ const StudentExams = {
   confirmSubmitExam() {
     if (!this.activeExam) return;
     const total = this.activeExam.questions.length;
-    const answeredCount = Object.keys(this.answers).length;
+    const answeredCount = Object.keys(this.answers).filter(k => {
+      const v = this.answers[k];
+      return v !== undefined && (!Array.isArray(v) || v.length > 0);
+    }).length;
 
     let msg = `You have answered ${answeredCount} of ${total} questions.`;
     if (answeredCount < total) {

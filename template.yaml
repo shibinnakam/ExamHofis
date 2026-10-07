@@ -25,6 +25,14 @@ Parameters:
     Type: String
     Default: ExamHofis_Teachers
     Description: Existing DynamoDB Teachers Table Name
+  ExamsTableName:
+    Type: String
+    Default: ExamHofis_Exams
+    Description: DynamoDB Exams Table Name
+  SubmissionsTableName:
+    Type: String
+    Default: ExamHofis_Submissions
+    Description: DynamoDB Exam Submissions Table Name
 
 Globals:
   Function:
@@ -39,6 +47,8 @@ Globals:
         DYNAMODB_TABLE_USERS: !Ref UsersTableName
         DYNAMODB_TABLE_STUDENTS: !Ref StudentsTableName
         DYNAMODB_TABLE_TEACHERS: !Ref TeachersTableName
+        DYNAMODB_TABLE_EXAMS: !Ref ExamsTableName
+        DYNAMODB_TABLE_SUBMISSIONS: !Ref SubmissionsTableName
         COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
         COGNITO_CLIENT_ID: !Ref CognitoClientId
 
@@ -58,6 +68,10 @@ Resources:
             TableName: !Ref StudentsTableName
         - DynamoDBCrudPolicy:
             TableName: !Ref TeachersTableName
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ExamsTableName
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SubmissionsTableName
         - Statement:
             - Effect: Allow
               Action:

@@ -1451,7 +1451,29 @@ app.post('/api/exams/:id/submit', authenticateToken, requireRole(['student', 'ad
       totalMarks += qMarks;
 
       const studentAns = answers ? answers[qKey] : undefined;
-      if (studentAns !== undefined && parseInt(studentAns, 10) === parseInt(q.correct_index, 10)) {
+
+      // Extract target correct answer indices
+      let targetCorrect = [];
+      if (Array.isArray(q.correct_indices) && q.correct_indices.length > 0) {
+        targetCorrect = q.correct_indices.map(v => parseInt(v, 10)).sort((a, b) => a - b);
+      } else if (q.correct_index !== undefined && q.correct_index !== null) {
+        targetCorrect = [parseInt(q.correct_index, 10)];
+      }
+
+      // Extract student selected indices
+      let studentSelected = [];
+      if (Array.isArray(studentAns)) {
+        studentSelected = studentAns.map(v => parseInt(v, 10)).sort((a, b) => a - b);
+      } else if (studentAns !== undefined && studentAns !== null) {
+        studentSelected = [parseInt(studentAns, 10)];
+      }
+
+      // Award marks if answers match
+      if (
+        targetCorrect.length > 0 &&
+        targetCorrect.length === studentSelected.length &&
+        targetCorrect.every((val, i) => val === studentSelected[i])
+      ) {
         score += qMarks;
       }
     });
