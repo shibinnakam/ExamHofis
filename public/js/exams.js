@@ -985,7 +985,14 @@ const AdminExams = {
     }
 
     try {
-      await API.scheduleExam(examId, { schedules: schedulesPayload });
+      const firstSlot = schedulesPayload[0] || {};
+      const payload = {
+        schedules: schedulesPayload,
+        scheduled_start: firstSlot.start,
+        scheduled_end: firstSlot.end,
+        duration_minutes: firstSlot.duration_minutes || 45
+      };
+      await API.scheduleExam(examId, payload);
 
       App.showToast(`Exam successfully scheduled with ${schedulesPayload.length} slot(s)!`, 'success');
       App.closeModal('exam-schedule-modal');
